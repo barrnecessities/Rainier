@@ -1,0 +1,34 @@
+title: Lockly Hue Mobile
+views:
+  - title: Home
+    path: home
+    icon: mdi:home
+    badges: []
+    cards:
+      - type: entities
+        title: Presence Automation
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.lockly_hue_presence_automation_enabled
+            name: Enable Lockly -> Hue automation
+          - entity: lock.lockly_front_door
+            name: Front door lock state
+          - entity: input_datetime.lockly_last_presence_run
+            name: Last automation run
+
+      - type: entities
+        title: Hue Lights (Manual Override)
+        entities:
+          - entity: light.entryway
+            name: Entryway
+          - entity: light.living_room
+            name: Living Room
+
+      - type: history-graph
+        title: Lock + Lights Activity (12h)
+        hours_to_show: 12
+        refresh_interval: 60
+        entities:
+          - entity: lock.lockly_front_door
+          - entity: light.entryway
+          - entity: light.living_room

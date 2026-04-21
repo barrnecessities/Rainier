@@ -1,0 +1,12 @@
+homeassistant:
+  packages: !include_dir_named packages
+
+lovelace:
+  mode: yaml
+  dashboards:
+    lockly-hue-mobile:
+      mode: yaml
+      title: Lockly Hue Mobile
+      icon: mdi:home-lightbulb
+      show_in_sidebar: true
+      filename: dashboards/lockly_hue_mobile.yaml

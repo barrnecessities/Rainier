@@ -1,0 +1,91 @@
+input_boolean:
+  lockly_hue_presence_automation_enabled:
+    name: Lockly Hue Presence Automation
+    icon: mdi:home-lightbulb
+    initial: true
+
+input_datetime:
+  lockly_last_presence_run:
+    name: Lockly Last Presence Run
+    has_date: true
+    has_time: true
+
+automation:
+  - id: lockly_hue_arrival_on_unlock
+    alias: Lockly Hue Arrival (Unlock -> Lights On)
+    description: Turn selected Hue lights on when the Lockly lock is unlocked.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: lock.lockly_front_door
+        to: "unlocked"
+        for:
+          seconds: 45
+    condition:
+      - condition: state
+        entity_id: input_boolean.lockly_hue_presence_automation_enabled
+        state: "on"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.entryway
+            - light.living_room
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.lockly_last_presence_run
+        data:
+          datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+      - service: logbook.log
+        data:
+          name: Lockly Hue Presence
+          message: Arrival automation ran after Lockly unlock.
+
+  - id: lockly_hue_departure_on_lock
+    alias: Lockly Hue Departure (Lock -> Lights Off)
+    description: Turn selected Hue lights off when the Lockly lock is locked.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: lock.lockly_front_door
+        to: "locked"
+        for:
+          seconds: 45
+    condition:
+      - condition: state
+        entity_id: input_boolean.lockly_hue_presence_automation_enabled
+        state: "on"
+    action:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - light.entryway
+            - light.living_room
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.lockly_last_presence_run
+        data:
+          datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+      - service: logbook.log
+        data:
+          name: Lockly Hue Presence
+          message: Departure automation ran after Lockly lock.
+
+  - id: lockly_hue_presence_failure_alert
+    alias: Lockly Hue Presence Health Alert
+    description: Notify if Lockly has not updated in a long time.
+    mode: single
+    trigger:
+      - platform: time_pattern
+        hours: "/1"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ (as_timestamp(now()) - as_timestamp(states.lock.lockly_front_door.last_changed, default=0)) > 21600 }}
+    action:
+      - service: persistent_notification.create
+        data:
+          title: Lockly Event Health Warning
+          message: >-
+            No Lockly lock state updates detected for 6+ hours.
+            Check Lockly integration connectivity before relying on presence automations.
