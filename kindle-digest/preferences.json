@@ -1,0 +1,17 @@
+{
+  "interests": [
+    { "topic": "technology and artificial intelligence", "weight": 1.5 },
+    { "topic": "economics and finance", "weight": 1.3 },
+    { "topic": "climate and energy", "weight": 1.2 },
+    { "topic": "science and research", "weight": 1.2 },
+    { "topic": "politics and policy", "weight": 0.9 },
+    { "topic": "business and startups", "weight": 1.0 }
+  ],
+  "minScore": 5,
+  "maxArticlesTotal": 20,
+  "excludeKeywords": ["celebrity", "gossip", "sports scores"],
+  "feedback": {
+    "enabled": true,
+    "historyDays": 14
+  }
+}

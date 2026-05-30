@@ -1,0 +1,69 @@
+name: Daily Kindle Digest
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 6:00 AM PT / 9:00 AM ET
+  workflow_dispatch:        # allow manual trigger for testing
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # for git push of daily history log
+      secrets: write    # for Twitter refresh token rotation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so scorer.ts can read past logs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: kindle-digest/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: kindle-digest
+
+      - name: Run digest
+        id: digest
+        run: |
+          OUTPUT=$(npx tsx src/index.ts 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          NEW_TOKEN=$(echo "$OUTPUT" | grep '^NEW_TWITTER_REFRESH_TOKEN=' | cut -d= -f2-)
+          echo "new_refresh_token=$NEW_TOKEN" >> $GITHUB_OUTPUT
+          exit $EXIT_CODE
+        working-directory: kindle-digest
+        env:
+          TWITTER_CLIENT_ID: ${{ secrets.TWITTER_CLIENT_ID }}
+          TWITTER_CLIENT_SECRET: ${{ secrets.TWITTER_CLIENT_SECRET }}
+          TWITTER_REFRESH_TOKEN: ${{ secrets.TWITTER_REFRESH_TOKEN }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          ECONOMIST_SESSION_COOKIE: ${{ secrets.ECONOMIST_SESSION_COOKIE }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          KINDLE_EMAIL: ${{ secrets.KINDLE_EMAIL }}
+
+      - name: Commit and push history log
+        run: |
+          git config user.email "kindle-digest[bot]@users.noreply.github.com"
+          git config user.name "kindle-digest[bot]"
+          git add kindle-digest/history/
+          git diff --cached --quiet || git commit -m "digest: history log $(date +%Y-%m-%d)"
+          git push origin HEAD
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rotate Twitter refresh token
+        if: steps.digest.outputs.new_refresh_token != ''
+        run: |
+          echo "${{ steps.digest.outputs.new_refresh_token }}" | \
+            gh secret set TWITTER_REFRESH_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
