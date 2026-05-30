@@ -1,0 +1,112 @@
+# Coordinated wake alarm — triggered by input_datetime.wake_alarm
+# The app writes to this entity; automations respond to it.
+
+input_datetime:
+  wake_alarm:
+    name: Wake Alarm
+    has_date: false
+    has_time: true
+    icon: mdi:alarm
+
+input_boolean:
+  wake_alarm_enabled:
+    name: Wake Alarm Enabled
+    icon: mdi:alarm-check
+
+automation:
+  # T-45 min: 8sleep pre-warm starts (via ha-eight-sleep integration)
+  - alias: "Wake Alarm — Pod pre-warm (T-45)"
+    id: wake_alarm_pod_prewarm
+    trigger:
+      - platform: template
+        value_template: >
+          {% set wake = today_at(states('input_datetime.wake_alarm')) %}
+          {% set now = now() %}
+          {{ (wake - timedelta(minutes=45)).strftime('%H:%M') == now.strftime('%H:%M') }}
+    condition:
+      - condition: state
+        entity_id: input_boolean.wake_alarm_enabled
+        state: "on"
+    action:
+      - service: climate.set_temperature
+        target:
+          entity_id: climate.eight_sleep_left_side
+        data:
+          temperature: 72  # warm-up target; adjust per preference
+
+  # T-30 min: Hue lights dim sunrise start (1%, 2200K warm white)
+  - alias: "Wake Alarm — Hue sunrise start (T-30)"
+    id: wake_alarm_hue_start
+    trigger:
+      - platform: template
+        value_template: >
+          {% set wake = today_at(states('input_datetime.wake_alarm')) %}
+          {% set now = now() %}
+          {{ (wake - timedelta(minutes=30)).strftime('%H:%M') == now.strftime('%H:%M') }}
+    condition:
+      - condition: state
+        entity_id: input_boolean.wake_alarm_enabled
+        state: "on"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.bedroom
+        data:
+          brightness_pct: 1
+          color_temp_kelvin: 2200
+          transition: 60
+
+  # T-0: Blinds open to 50%, Hue ramps to 40%
+  - alias: "Wake Alarm — Wake time"
+    id: wake_alarm_wake_time
+    trigger:
+      - platform: template
+        value_template: >
+          {% set wake = today_at(states('input_datetime.wake_alarm')) %}
+          {{ wake.strftime('%H:%M') == now().strftime('%H:%M') }}
+    condition:
+      - condition: state
+        entity_id: input_boolean.wake_alarm_enabled
+        state: "on"
+    action:
+      - parallel:
+          - service: cover.set_cover_position
+            target:
+              entity_id: cover.bedroom_blinds
+            data:
+              position: 50
+          - service: light.turn_on
+            target:
+              entity_id: light.bedroom
+            data:
+              brightness_pct: 40
+              color_temp_kelvin: 3500
+              transition: 300  # 5-minute ramp
+
+  # T+10 min: Blinds fully open, Hue at 80% daylight
+  - alias: "Wake Alarm — Post-wake brightness (T+10)"
+    id: wake_alarm_post_wake
+    trigger:
+      - platform: template
+        value_template: >
+          {% set wake = today_at(states('input_datetime.wake_alarm')) %}
+          {% set now = now() %}
+          {{ (wake + timedelta(minutes=10)).strftime('%H:%M') == now.strftime('%H:%M') }}
+    condition:
+      - condition: state
+        entity_id: input_boolean.wake_alarm_enabled
+        state: "on"
+    action:
+      - parallel:
+          - service: cover.set_cover_position
+            target:
+              entity_id: cover.bedroom_blinds
+            data:
+              position: 100
+          - service: light.turn_on
+            target:
+              entity_id: light.bedroom
+            data:
+              brightness_pct: 80
+              color_temp_kelvin: 5000
+              transition: 120

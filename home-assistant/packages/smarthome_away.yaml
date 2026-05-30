@@ -1,0 +1,78 @@
+# Presence-based automation: away mode and return
+# Builds on the existing lockly_hue_presence.yaml pattern.
+# Tracked devices: HA Companion app on phones (person entities).
+
+automation:
+  # All tracked people leave → away mode
+  - alias: "Away — All devices left home"
+    id: away_all_left
+    trigger:
+      - platform: state
+        entity_id: group.household_presence
+        to: "not_home"
+    condition:
+      # Debounce: only trigger if been away > 5 minutes (avoids brief GPS drift)
+      - condition: template
+        value_template: >
+          {{ (now() - states.group.household_presence.last_changed).total_seconds() > 300 }}
+    action:
+      - parallel:
+          # Lights off
+          - service: light.turn_off
+            target:
+              area_id: home
+          # Blinds to privacy position (not fully dark)
+          - service: cover.set_cover_position
+            target:
+              entity_id:
+                - cover.bedroom_blinds
+                - cover.living_room_blinds
+            data:
+              position: 15
+          # 8sleep: standby (eco)
+          - service: climate.set_hvac_mode
+            target:
+              entity_id: climate.eight_sleep_left_side
+            data:
+              hvac_mode: "off"
+
+  # Any tracked person arrives home → welcome lighting
+  - alias: "Away — Someone arrived home"
+    id: away_someone_arrived
+    trigger:
+      - platform: state
+        entity_id: group.household_presence
+        to: "home"
+    condition:
+      # Only trigger if we were previously away (not on HA startup)
+      - condition: template
+        value_template: >
+          {{ trigger.from_state.state == 'not_home' }}
+    action:
+      # Entryway/living room lights on (matches lockly_hue_presence pattern)
+      - service: light.turn_on
+        target:
+          entity_id: light.living_room
+        data:
+          brightness_pct: 50
+          color_temp_kelvin: 3000
+          transition: 2
+      # Open blinds to natural position during daytime
+      - condition: sun
+        after: sunrise
+        before: sunset
+      - service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.bedroom_blinds
+            - cover.living_room_blinds
+        data:
+          position: 50
+
+group:
+  household_presence:
+    name: Household Presence
+    entities:
+      - person.home_owner
+    # Add additional person entities here as needed, e.g.:
+    # - person.partner

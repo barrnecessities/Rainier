@@ -1,0 +1,59 @@
+# Fallback HA dashboard (mobile-optimized)
+# Use this if the Next.js app is unavailable.
+# Add to HA: Settings → Dashboards → + Add Dashboard → YAML mode
+
+title: Hearth
+views:
+  - title: Home
+    path: home
+    icon: mdi:home
+    theme: Backend-selected
+    badges: []
+    cards:
+      # Wake Alarm
+      - type: entities
+        title: Wake Alarm
+        entities:
+          - entity: input_datetime.wake_alarm
+            name: Wake Time
+          - entity: input_boolean.wake_alarm_enabled
+            name: Enabled
+
+      # Blinds
+      - type: entities
+        title: Blinds
+        entities:
+          - entity: cover.bedroom_blinds
+            name: Bedroom
+          - entity: cover.living_room_blinds
+            name: Living Room
+          - entity: input_boolean.blinds_auto_mode
+            name: Auto Mode
+
+      # Lights
+      - type: light
+        entity: light.bedroom
+        name: Bedroom
+
+      - type: light
+        entity: light.living_room
+        name: Living Room
+
+      # Weather
+      - type: weather-forecast
+        entity: weather.home
+        forecast_type: daily
+
+      # Presence
+      - type: entities
+        title: Presence
+        entities:
+          - entity: person.home_owner
+            name: Home Owner
+          - entity: group.household_presence
+            name: Household
+
+      # 8sleep Pod
+      - type: thermostat
+        entity: climate.eight_sleep_left_side
+        name: Pod 3
