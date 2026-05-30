@@ -1,0 +1,4 @@
+# gh-pages branch: ignore everything except the itinerary HTML
+*
+!cme-vacation-itinerary.html
+!.gitignore
