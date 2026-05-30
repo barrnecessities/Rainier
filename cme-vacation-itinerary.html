@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CME Physician Travel 2026 — Danielle &amp; Brandon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:#0d0d0f;color:#f0ece4;font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+img{display:block;max-width:100%}
+button{cursor:pointer;font:inherit;border:none;background:none}
+ul{list-style:none}
+
+/* ─── ROOT TOKENS ────────────────────────────────────────── */
+:root{
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --bg-page:#0d0d0f;
+  --bg-card:#141416;
+  --bg-section:#1a1a1e;
+  --border:rgba(255,255,255,0.08);
+  --text-primary:#f0ece4;
+  --text-secondary:rgba(240,236,228,0.68);
+  --text-muted:rgba(240,236,228,0.38);
+  --nav-h:56px;
+  --ease-card:cubic-bezier(0.4,0,0.2,1);
+  --dur-card:0.4s;
+}
+
+/* ─── NAV ────────────────────────────────────────────────── */
+#main-nav{
+  position:sticky;top:0;z-index:200;
+  height:var(--nav-h);
+  background:rgba(13,13,15,0.94);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  padding:0 16px;
+  overflow-x:auto;scrollbar-width:none;
+}
+#main-nav::-webkit-scrollbar{display:none}
+.nav-brand{
+  font-family:var(--font-display);
+  font-size:0.8rem;color:var(--text-muted);
+  white-space:nowrap;flex-shrink:0;letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.nav-tabs{display:flex;gap:4px;flex-shrink:0}
+.nav-tab{
+  padding:5px 13px;
+  border:1px solid transparent;border-radius:20px;
+  color:var(--text-muted);font-size:0.78rem;font-weight:500;
+  white-space:nowrap;letter-spacing:0.02em;
+  transition:color .2s,border-color .2s,background .2s;
+}
+.nav-tab:hover{color:var(--text-primary);border-color:var(--border)}
+.nav-tab.active{
+  color:var(--text-primary);
+  background:rgba(255,255,255,0.1);
+  border-color:rgba(255,255,255,0.2);
+}
+
+/* ─── HERO ───────────────────────────────────────────────── */
+#page-hero{
+  padding:60px 20px 48px;text-align:center;
+  background:linear-gradient(180deg,#1a0820 0%,#0d0d0f 100%);
+  border-bottom:1px solid var(--border);
+}
+#page-hero h1{
+  font-family:var(--font-display);
+  font-size:clamp(1.7rem,7vw,3rem);font-weight:700;
+  color:var(--text-primary);line-height:1.15;letter-spacing:-0.01em;
+  margin-bottom:10px;
+}
+.hero-sub{
+  font-family:var(--font-display);font-style:italic;
+  font-size:clamp(0.88rem,3.5vw,1.05rem);
+  color:var(--text-secondary);margin-bottom:20px;
+}
+.hero-byline{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border);border-radius:24px;
+  padding:7px 18px;font-size:0.75rem;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.hero-byline span{color:var(--text-secondary)}
+
+/* ─── DESTINATION CARD SHELL ─────────────────────────────── */
+#destinations{padding:0 0 40px}
+.dest-card{
+  border-left:3px solid var(--accent2,#888);
+  background:var(--bg-card);
+  margin-bottom:2px;
+  overflow:hidden;
+  transition:border-color .3s;
+}
+
+/* ─── CARD HEADER ────────────────────────────────────────── */
+.card-header{
+  position:relative;cursor:pointer;
+  user-select:none;-webkit-user-select:none;
+  min-height:90px;display:flex;align-items:stretch;
+}
+.card-header-bg{
+  position:absolute;inset:0;opacity:.45;
+  transition:opacity .3s;
+}
+.card-header:hover .card-header-bg,
+.dest-card.is-open .card-header-bg{opacity:.65}
+.card-header-content{
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:12px;
+  padding:16px 16px 16px 20px;width:100%;
+}
+.dest-flag{font-size:1.9rem;flex-shrink:0;line-height:1}
+.dest-title-block{flex:1;min-width:0}
+.dest-name{
+  font-family:var(--font-display);
+  font-size:clamp(1.05rem,5vw,1.45rem);font-weight:700;
+  color:var(--text-primary);line-height:1.2;
+}
+.dest-subtitle{
+  font-size:0.76rem;color:var(--text-secondary);
+  margin-top:3px;line-height:1.4;
+}
+.cme-badge{
+  flex-shrink:0;display:flex;flex-direction:column;
+  align-items:flex-end;gap:2px;
+}
+.badge-credits{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--accent2,#aaa);white-space:nowrap;
+}
+.badge-org{
+  font-size:0.68rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+}
+.expand-icon{
+  flex-shrink:0;font-size:0.7rem;color:var(--text-muted);
+  transition:transform var(--dur-card) var(--ease-card);
+  margin-left:6px;
+}
+.dest-card.is-open .expand-icon{transform:rotate(180deg)}
+
+/* ─── CARD BODY COLLAPSE ─────────────────────────────────── */
+.card-body{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height var(--dur-card) var(--ease-card),opacity .25s ease;
+}
+.dest-card.is-open .card-body{opacity:1}
+
+/* ─── INFO STRIP ─────────────────────────────────────────── */
+.info-strip{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border);
+}
+.info-pill{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:8px;
+  padding:6px 12px;display:flex;flex-direction:column;gap:1px;
+}
+.pill-label{
+  font-size:0.62rem;text-transform:uppercase;
+  letter-spacing:0.1em;color:var(--text-muted);font-weight:600;
+}
+.pill-value{font-size:0.8rem;color:var(--text-primary);font-weight:500}
+
+/* ─── VIBE SECTION ───────────────────────────────────────── */
+.vibe-section{
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.015);
+}
+.vibe-label{
+  font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--accent2,#aaa);font-weight:600;margin-bottom:10px;
+}
+.vibe-text{
+  font-family:var(--font-display);font-style:italic;
+  font-size:0.95rem;line-height:1.8;color:var(--text-secondary);
+}
+
+/* ─── CONTENT SECTION ────────────────────────────────────── */
+.content-section{
+  padding:20px 20px 12px;
+  border-bottom:1px solid var(--border);
+}
+.content-section:last-child{border-bottom:none;padding-bottom:24px}
+.section-heading{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--accent2,#aaa);letter-spacing:0.02em;
+  margin-bottom:14px;padding-bottom:7px;
+  border-bottom:1px solid var(--border);
+}
+
+/* ─── FLIGHT TABLE ───────────────────────────────────────── */
+.flight-table-wrap{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin-bottom:12px;border-radius:8px;
+  border:1px solid var(--border);
+}
+.flight-table{
+  width:100%;min-width:360px;border-collapse:collapse;
+  font-size:0.77rem;
+}
+.flight-table th{
+  background:rgba(255,255,255,0.06);color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.08em;font-size:0.63rem;
+  font-weight:600;padding:8px 10px;text-align:left;white-space:nowrap;
+}
+.flight-table td{
+  padding:8px 10px;border-top:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:top;line-height:1.45;
+}
+.flight-table tr:hover td{background:rgba(255,255,255,0.025)}
+.flight-notes{
+  font-size:0.77rem;color:var(--text-muted);line-height:1.65;
+  padding:0 2px 6px;
+}
+.flight-notes strong{color:var(--text-secondary)}
+
+/* ─── PACKING LIST ───────────────────────────────────────── */
+.packing-list{
+  display:flex;flex-wrap:wrap;gap:7px;padding-bottom:6px;
+}
+.packing-list li{
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:6px;padding:5px 11px;
+  font-size:0.77rem;color:var(--text-secondary);
+}
+.packing-list li::before{content:"· ";color:var(--accent2,#aaa);font-weight:700}
+
+/* ─── PHASE BLOCKS ───────────────────────────────────────── */
+.itinerary-section .section-heading{margin-bottom:16px}
+.phase-block{
+  margin-bottom:14px;border-radius:10px;
+  overflow:hidden;border:1px solid var(--border);
+}
+.phase-a{background:var(--phase-a,#1a1a2a)}
+.phase-b{background:var(--phase-b,#1a2a1a)}
+.phase-c{background:var(--phase-c,#2a1a1a)}
+.phase-header{padding:11px 14px 3px}
+.phase-label{
+  font-family:var(--font-display);font-size:0.88rem;font-weight:700;
+  color:var(--accent2,#aaa);letter-spacing:0.02em;
+}
+.phase-subtitle{
+  font-size:0.68rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+  padding:0 14px 10px;border-bottom:1px solid var(--border);
+  margin-top:2px;
+}
+.day-list{padding:6px 0}
+.day-item{
+  padding:10px 14px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.day-item:last-child{border-bottom:none}
+.day-header{
+  display:flex;align-items:baseline;gap:9px;
+  margin-bottom:6px;flex-wrap:wrap;
+}
+.day-number{
+  font-family:var(--font-display);font-size:0.8rem;font-weight:700;
+  color:var(--accent2,#aaa);white-space:nowrap;
+}
+.day-title{
+  font-size:0.88rem;font-weight:600;
+  color:var(--text-primary);flex:1;line-height:1.3;
+}
+.day-date{
+  font-size:0.7rem;color:var(--text-muted);white-space:nowrap;
+}
+.day-detail{display:flex;flex-direction:column;gap:4px}
+.day-detail li{
+  font-size:0.79rem;color:var(--text-secondary);
+  line-height:1.55;padding-left:15px;position:relative;
+}
+.day-detail li::before{
+  content:"→";position:absolute;left:0;
+  color:var(--accent2,#aaa);opacity:.65;font-size:0.72rem;
+}
+.cme-morning{
+  display:inline-block;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:4px;padding:2px 7px;font-size:0.7rem;
+  font-weight:600;letter-spacing:0.04em;
+  color:var(--accent2,#aaa);margin-bottom:4px;
+}
+
+/* ─── PROPERTY GRID ──────────────────────────────────────── */
+.property-grid{
+  display:grid;grid-template-columns:1fr;gap:10px;padding-bottom:6px;
+}
+@media(min-width:480px){
+  .property-grid{grid-template-columns:1fr 1fr}
+}
+.property-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);border-radius:10px;padding:14px;
+}
+.property-card--hotel{
+  border-color:rgba(255,255,255,0.18);
+  box-shadow:0 0 0 1px var(--accent2,rgba(255,255,255,.1)) inset;
+}
+.property-icon{font-size:1.3rem;margin-bottom:6px}
+.property-name{
+  font-family:var(--font-display);font-size:0.9rem;font-weight:700;
+  color:var(--text-primary);margin-bottom:5px;
+}
+.property-tag{
+  display:inline-block;font-size:0.65rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--accent2,#aaa);margin-bottom:6px;
+}
+.property-desc{
+  font-size:0.76rem;color:var(--text-secondary);line-height:1.6;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────────── */
+#page-footer{
+  padding:32px 20px;text-align:center;
+  border-top:1px solid var(--border);
+  font-size:0.72rem;color:var(--text-muted);line-height:1.7;
+}
+#page-footer strong{color:var(--text-secondary)}
+
+/* ─── DESTINATION COLOR THEMES ───────────────────────────── */
+#dest-crete{
+  --accent2:#E07B54;
+  --phase-a:#0e2030;--phase-b:#0e2018;--phase-c:#20180e;
+}
+#dest-paris{
+  --accent2:#C9A84C;
+  --phase-a:#1c100a;--phase-b:#1a1a08;--phase-c:#181010;
+}
+#dest-capetown{
+  --accent2:#D35400;
+  --phase-a:#121c20;--phase-b:#1e160a;--phase-c:#1e100a;
+}
+#dest-kyoto{
+  --accent2:#C0392B;
+  --phase-a:#1c0e12;--phase-b:#1e0a0a;--phase-c:#1a1208;
+}
+#dest-basel{
+  --accent2:#DC143C;
+  --phase-a:#0e1620;--phase-b:#180a10;--phase-c:#141820;
+}
+
+/* ─── RESPONSIVE TWEAKS ──────────────────────────────────── */
+@media(min-width:640px){
+  .card-header-content{padding:20px 24px}
+  .content-section,.vibe-section,.info-strip{padding-left:24px;padding-right:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-brand">CME 2026</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-dest="crete">🇬🇷 Crete</button>
+    <button class="nav-tab" data-dest="paris">🇫🇷 Paris</button>
+    <button class="nav-tab" data-dest="capetown">🇿🇦 Cape Town</button>
+    <button class="nav-tab" data-dest="kyoto">🇯🇵 Kyoto</button>
+    <button class="nav-tab" data-dest="basel">🇨🇭 Basel</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="page-hero">
+  <h1>Physician Travel &amp; CME 2026</h1>
+  <p class="hero-sub">Five world-class destinations. 60+ AMA credits. One extraordinary year.</p>
+  <div class="hero-byline">
+    <span>Dr. Danielle Hanssen</span>
+    &amp;
+    <span>Brandon James Barron</span>
+    &nbsp;·&nbsp; Departing SEA
+  </div>
+</header>
+
+<main id="destinations">
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESTINATION 1: CRETE, GREECE
+═══════════════════════════════════════════════════════════ -->
+<section class="dest-card" id="dest-crete" data-dest="crete">
+  <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="body-crete">
+    <div class="card-header-bg" style="background:linear-gradient(135deg,#1B4F72 0%,#E59866 100%)"></div>
+    <div class="card-header-content">
+      <span class="dest-flag">🇬🇷</span>
+      <div class="dest-title-block">
+        <h2 class="dest-name">Crete, Greece</h2>
+        <p class="dest-subtitle">InterContinental Crete · Sep 28 – Oct 1, 2026</p>
+      </div>
+      <div class="cme-badge">
+        <span class="badge-credits">16 AMA</span>
+        <span class="badge-org">MER.org</span>
+      </div>
+      <span class="expand-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="card-body" id="body-crete" aria-hidden="true">
+
+    <div class="info-strip">
+      <div class="info-pill"><span class="pill-label">Specialty</span><span class="pill-value">Internal Medicine · Primary Care</span></div>
+      <div class="info-pill"><span class="pill-label">CME Tracks</span><span class="pill-value">Derm · ID · Ortho · Pain Mgmt</span></div>
+      <div class="info-pill"><span class="pill-label">Credits</span><span class="pill-value">16 AMA PRA Cat. 1™</span></div>
+      <div class="info-pill"><span class="pill-label">10-Day Window</span><span class="pill-value">Sep 25 – Oct 4, 2026</span></div>
+      <div class="info-pill"><span class="pill-label">Host Property</span><span class="pill-value">InterContinental Crete</span></div>
+      <div class="info-pill"><span class="pill-label">Organizer</span><span class="pill-value">Medical Education Resources</span></div>
+    </div>
+
+    <div class="vibe-section">
+      <div class="vibe-label">The Vibe</div>
+      <p class="vibe-text">The Aegean is a particular shade of cobalt in early October — not the bleached aquamarine of high summer, but something deeper and more serious, like ink thinned to silk. The InterContinental's terrace hangs above Mirabello Bay on Crete's north-east shoulder, and at this hour — late afternoon, after lectures have ended — the light comes in at a low bronze angle that turns the limestone hills the color of warm bread. There are no crowds. The August stampede has dissolved; what remains is the island's actual self: wild thyme on the hillside, a fishing boat crossing the bay at half-throttle, the smell of olive oil and lemon drifting from the hotel kitchen. It is warm enough for swimming — the Aegean holds its heat well past the equinox — but the air has a crispness now, a readiness, that makes you want to walk the ruins at Knossos without sweating through your shirt.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">✈️ Flight Logistics from SEA</h3>
+      <div class="flight-table-wrap">
+        <table class="flight-table">
+          <thead><tr><th>Segment</th><th>Route</th><th>Carrier</th><th>Est. Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Leg 1</td><td>SEA → AMS or FRA</td><td>KLM / Lufthansa (SkyTeam/Star)</td><td>~9 – 10 hrs</td></tr>
+            <tr><td>Layover</td><td>Amsterdam or Frankfurt</td><td>—</td><td>2 – 3 hrs</td></tr>
+            <tr><td>Leg 2</td><td>AMS/FRA → ATH</td><td>KLM / Aegean Air</td><td>~3 hrs</td></tr>
+            <tr><td>Leg 3</td><td>ATH → HER (Heraklion)</td><td>Aegean Air / Sky Express</td><td>~55 min</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="flight-notes"><strong>Total door-to-door:</strong> ~24 – 27 hrs. Depart SEA evening Sep 25 → arrive HER afternoon Sep 26. One full recovery day (Sep 27) before CME opens Sep 28. <strong>Timezone:</strong> EEST (UTC+3) = +10 hrs from PDT. <strong>Alliance tip:</strong> Book KLM/Delta SkyTeam through SEA for the best connection options and lounge access at AMS Schiphol.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🎒 Packing Aesthetic</h3>
+      <ul class="packing-list">
+        <li>Cream linen blazer</li>
+        <li>Lightweight merino crewneck</li>
+        <li>Linen trousers (sand/taupe)</li>
+        <li>Premium swim shorts</li>
+        <li>Leather sandals + walking shoes</li>
+        <li>SPF 50 + after-sun</li>
+        <li>Compact tote for ruins days</li>
+        <li>Silk pocket square (Aegean blue)</li>
+        <li>Light evening layer for bay breezes</li>
+      </ul>
+    </div>
+
+    <div class="content-section itinerary-section">
+      <h3 class="section-heading">📅 10-Day Itinerary</h3>
+
+      <div class="phase-block phase-a">
+        <div class="phase-header">
+          <div class="phase-label">Phase A — Transit &amp; Arrival</div>
+        </div>
+        <div class="phase-subtitle">Days 1–3 &nbsp;·&nbsp; Sep 25–27</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 1</span><span class="day-title">Depart Seattle</span><span class="day-date">Sep 25 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Evening departure SEA → AMS/FRA overnight flight (Delta/KLM SkyTeam)</li>
+              <li>In-flight: review CME pre-reading materials, adjust sleep to European time</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 2</span><span class="day-title">Transit → Arrive Heraklion</span><span class="day-date">Sep 26 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>AMS/FRA layover → connect to ATH → short hop to HER (Heraklion)</li>
+              <li>Afternoon arrival, transfer to InterContinental Crete on Mirabello Bay</li>
+              <li>Check in, first swim in the Aegean, sunset drink on the terrace</li>
+              <li>Dinner at hotel or short drive to Elounda harbor — fresh octopus, local Vidiano wine</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 3</span><span class="day-title">Jet-Lag Recovery &amp; Heraklion Old Town</span><span class="day-date">Sep 27 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Morning: slow breakfast on the terrace, pool time, full hydration reset</li>
+              <li>Afternoon: drive 30 min to Heraklion — Venetian harbor, Lions' Fountain, Koules fortress</li>
+              <li>Heraklion Archaeological Museum (world's finest Minoan collection)</li>
+              <li>Evening: dinner at Peskesi, farm-to-table Cretan cuisine in a restored 1920s mansion</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-b">
+        <div class="phase-header">
+          <div class="phase-label">Phase B — CME Mornings + Aegean Afternoons</div>
+        </div>
+        <div class="phase-subtitle">Days 4–7 &nbsp;·&nbsp; Sep 28 – Oct 1 &nbsp;·&nbsp; CME 8:00 AM – 12:30 PM daily</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 4</span><span class="day-title">Knossos Palace &amp; Minoan History</span><span class="day-date">Sep 28 (Mon)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Dermatology Track · InterContinental Conference Center</span></li>
+              <li>Lunch: Thalassa waterfront restaurant — grilled lavraki (sea bass) with capers and olive oil</li>
+              <li>Afternoon: private guided tour of Knossos Palace (3,700-year-old Minoan labyrinth), 20 min from hotel</li>
+              <li>Evening cocktails at the IC rooftop bar watching the Mirabello Bay sunset</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 5</span><span class="day-title">Spinalonga Island &amp; Private Boat</span><span class="day-date">Sep 29 (Tue)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Infectious Disease Track</span></li>
+              <li>Afternoon: private boat hire from Elounda port — cruise to Spinalonga (the last leper colony in Europe, dramatically photogenic)</li>
+              <li>Swim stop at isolated turquoise coves only reachable by water</li>
+              <li>Dinner: Avli in Rethymno (1.5 hr drive or return same evening) — walled garden, candlelit tables, Cretan wine list</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 6</span><span class="day-title">Phaistos &amp; Matala Sea Caves</span><span class="day-date">Sep 30 (Wed)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Orthopedics Track</span></li>
+              <li>Afternoon: drive south coast — Phaistos Minoan palace (hilltop views across the Messara plain), then Matala beach with its famous Roman-era cliff-carved caves</li>
+              <li>Local taverna dinner at Matala harbor — whole-grilled fish caught the same morning</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 7</span><span class="day-title">CME Closing Day + Samaria Gorge</span><span class="day-date">Oct 1 (Thu)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Pain Management Track · Closing Session</span></li>
+              <li>CME Complete — 16 AMA PRA Category 1 Credits™ earned</li>
+              <li>Afternoon: scenic drive toward Rethymno — Old Town Venetian lighthouse, narrow alley exploration, artisan shops</li>
+              <li>Celebratory dinner: Thalassino Ageri (Heraklion) — voted top seafood in Crete, cliffside terrace</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-c">
+        <div class="phase-header">
+          <div class="phase-label">Phase C — West Crete Extension &amp; Return</div>
+        </div>
+        <div class="phase-subtitle">Days 8–10 &nbsp;·&nbsp; Oct 2–4</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 8</span><span class="day-title">Drive West: Chania Old Harbour</span><span class="day-date">Oct 2 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Check out IC Crete, drive west 1.5 hrs along coastal E75 to Chania</li>
+              <li>Check in: Casa Delfino or Domus Renier Boutique Hotel — both converted Venetian mansions in the Old Town</li>
+              <li>Explore the pastel-domed Ottoman lighthouse, Venetian arsenal harbor, leather workshops of Odos Skridlof</li>
+              <li>Evening: dinner at To Maridaki — award-winning creative Cretan cuisine, Old Harbour view</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 9</span><span class="day-title">Elafonisi Pink Sand Beach &amp; Balos Lagoon</span><span class="day-date">Oct 3 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Early morning: drive 1 hr south to Elafonisi — the famous pink-sand beach, naturally tinted by crushed shells; warm shallow lagoon, near-deserted in October</li>
+              <li>Afternoon option: boat or 4WD to Balos Lagoon — the dramatic three-peninsula turquoise bay (only accessible by boat or rugged track)</li>
+              <li>Return to Chania, sunset wine on the harbor promenade</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 10</span><span class="day-title">Return Travel to SEA</span><span class="day-date">Oct 4 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Morning: final coffee in the Old Harbour, optional visit to Chania Municipal Market</li>
+              <li>Drive to CHQ (Chania Airport) or return east to HER — connect ATH → AMS/FRA → SEA</li>
+              <li>Arrive Seattle Oct 5 (crossing dateline westbound adds no days eastbound)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🏨 Lodging &amp; Dining Portfolio</h3>
+      <div class="property-grid">
+        <div class="property-card property-card--hotel">
+          <div class="property-icon">🏨</div>
+          <div class="property-tag">Host Property · CME Venue</div>
+          <div class="property-name">InterContinental Crete</div>
+          <p class="property-desc">Brand-new cliff-perch resort on Mirabello Bay, Elounda. Infinity pools overlooking the Aegean, private beach with water sports, world-class spa, multiple dining terraces. The CME conference center is on-site — lectures end and the sea is 90 seconds away.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🍽️</div>
+          <div class="property-tag">Farm-to-Table · Heraklion</div>
+          <div class="property-name">Peskesi</div>
+          <p class="property-desc">Restored 1920s Cretan mansion in central Heraklion. The menu reads like a love letter to the island — snails with rosemary, slow-roasted goat, herb-forward salads from their own farm. Natural Cretan wine list. Book ahead.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🐟</div>
+          <div class="property-tag">Seafood · Heraklion Cliffside</div>
+          <div class="property-name">Thalassino Ageri</div>
+          <p class="property-desc">Perched above the Aegean west of Heraklion, consistently voted Crete's best seafood table. Daily catch-based menu — sea urchin, grilled red mullet, boiled greens in olive oil. The terrace at dusk is incomparable.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🌿</div>
+          <div class="property-tag">Garden Dining · Rethymno</div>
+          <div class="property-name">Avli Restaurant</div>
+          <p class="property-desc">A fairy-lit walled garden in the heart of Rethymno's old Venetian quarter. Excellent lamb dishes, housemade pasta with local cheeses, extensive Cretan and pan-Hellenic wine selection. The definition of romantic Mediterranean slow dining.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESTINATION 2: PARIS, FRANCE
+═══════════════════════════════════════════════════════════ -->
+<section class="dest-card" id="dest-paris" data-dest="paris">
+  <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="body-paris">
+    <div class="card-header-bg" style="background:linear-gradient(135deg,#2C1810 0%,#8B6914 50%,#D4AC0D 100%)"></div>
+    <div class="card-header-content">
+      <span class="dest-flag">🇫🇷</span>
+      <div class="dest-title-block">
+        <h2 class="dest-name">Paris, France</h2>
+        <p class="dest-subtitle">Paris Marriott Opera Ambassador · Oct 12–15, 2026</p>
+      </div>
+      <div class="cme-badge">
+        <span class="badge-credits">16 AMA</span>
+        <span class="badge-org">MER.org</span>
+      </div>
+      <span class="expand-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="card-body" id="body-paris" aria-hidden="true">
+
+    <div class="info-strip">
+      <div class="info-pill"><span class="pill-label">Specialty</span><span class="pill-value">Internal Medicine · Primary Care</span></div>
+      <div class="info-pill"><span class="pill-label">CME Tracks</span><span class="pill-value">Allergy · Cardiology · Neurology · Psych</span></div>
+      <div class="info-pill"><span class="pill-label">Credits</span><span class="pill-value">16 AMA PRA Cat. 1™</span></div>
+      <div class="info-pill"><span class="pill-label">10-Day Window</span><span class="pill-value">Oct 9 – Oct 18, 2026</span></div>
+      <div class="info-pill"><span class="pill-label">Host Property</span><span class="pill-value">Paris Marriott Opera Ambassador</span></div>
+      <div class="info-pill"><span class="pill-label">Organizer</span><span class="pill-value">Medical Education Resources</span></div>
+    </div>
+
+    <div class="vibe-section">
+      <div class="vibe-label">The Vibe</div>
+      <p class="vibe-text">Paris in mid-October is the city at its most honest and most beautiful. The tourists have retreated. The chestnuts along the Champs-Élysées have gone amber and rust. There is a particular quality of morning light in the 9th arrondissement — soft, yellowish, filtering through the zinc mansard rooftops — that makes even a walk to the boulangerie feel significant. The Marriott Opera puts you a four-minute stroll from the gilded excess of the Opéra Garnier, and another ten from the Seine. Afternoons smell like fallen leaves and espresso. The city hums with intellectual and creative energy at a frequency that is impossible to replicate. This is Paris earning its reputation as the world's most civilized city, and it is absolutely at its best when it does not feel it needs to perform for anyone.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">✈️ Flight Logistics from SEA</h3>
+      <div class="flight-table-wrap">
+        <table class="flight-table">
+          <thead><tr><th>Segment</th><th>Route</th><th>Carrier</th><th>Est. Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Direct Option</td><td>SEA → CDG</td><td>Air France / Delta (SkyTeam)</td><td>~10.5 hrs</td></tr>
+            <tr><td>Alt. Leg 1</td><td>SEA → LHR</td><td>British Airways (OneWorld)</td><td>~9.5 hrs</td></tr>
+            <tr><td>Alt. Leg 2</td><td>LHR → CDG</td><td>British Airways / Air France</td><td>~1.25 hrs</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="flight-notes"><strong>Best option:</strong> Air France direct SEA → CDG in Delta One business (SkyTeam miles). ~10.5 hrs, arrive CDG morning. <strong>Timezone:</strong> CEST (UTC+2) = +9 hrs from PDT. Depart SEA Oct 9 → arrive CDG Oct 10 morning, two recovery days before CME opens Oct 12.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🎒 Packing Aesthetic</h3>
+      <ul class="packing-list">
+        <li>Wool camel overcoat</li>
+        <li>Dark straight-leg trousers</li>
+        <li>Oxford-toe leather derby shoes</li>
+        <li>Cashmere turtleneck (navy/grey)</li>
+        <li>Slim leather crossbody bag</li>
+        <li>Compact umbrella</li>
+        <li>Silk scarf (optional)</li>
+        <li>Smart blazer for tasting-menu evenings</li>
+        <li>Comfortable leather walking shoes</li>
+      </ul>
+    </div>
+
+    <div class="content-section itinerary-section">
+      <h3 class="section-heading">📅 10-Day Itinerary</h3>
+
+      <div class="phase-block phase-a">
+        <div class="phase-header"><div class="phase-label">Phase A — Transit &amp; Paris Immersion</div></div>
+        <div class="phase-subtitle">Days 1–3 &nbsp;·&nbsp; Oct 9–11</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 1</span><span class="day-title">Depart Seattle</span><span class="day-date">Oct 9 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Afternoon/evening departure SEA → CDG on Air France direct</li>
+              <li>Overnight flight: sleep forward, arrive on Paris time</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 2</span><span class="day-title">Arrive Paris · 9th Arrondissement</span><span class="day-date">Oct 10 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Morning arrival CDG → RER B → Châtelet → taxi to Paris Marriott Opera Ambassador, Blvd Haussmann</li>
+              <li>Check in, freshen up; resist the nap — walk it off instead</li>
+              <li>Afternoon: stroll Canal Saint-Martin (10th) — iron footbridges, independent coffee shops, the most Parisian neighborhood tourists don't visit</li>
+              <li>Early dinner: Bistrot Paul Bert (11th) — the Platonic ideal of a Paris bistro: blackboard specials, entrecôte, honest Burgundy</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 3</span><span class="day-title">Le Marais &amp; Sainte-Chapelle</span><span class="day-date">Oct 11 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Morning: pastry at Du Pain et des Idées (Canal Saint-Martin) — the best croissant in Paris, verifiable fact</li>
+              <li>Le Marais: Place des Vosges (Paris's oldest square), Musée Carnavalet (free entry Sundays), Rue des Rosiers for falafel</li>
+              <li>Afternoon: Île de la Cité — Notre-Dame exterior (post-restoration), Sainte-Chapelle stained glass (book timed entry in advance)</li>
+              <li>Evening: pre-CME early night — Café de Flore (6th) for dinner, people-watching on the terrace in autumn light</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-b">
+        <div class="phase-header"><div class="phase-label">Phase B — CME Mornings + Parisian Afternoons</div></div>
+        <div class="phase-subtitle">Days 4–7 &nbsp;·&nbsp; Oct 12–15 &nbsp;·&nbsp; CME 8:00 AM – 12:30 PM daily</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 4</span><span class="day-title">Musée d'Orsay &amp; Saint-Germain</span><span class="day-date">Oct 12 (Mon)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Allergy &amp; Immunology Track</span></li>
+              <li>Afternoon: Musée d'Orsay — world's finest Impressionist collection (book timed entry); lingering in the Van Gogh and Monet rooms</li>
+              <li>Walk across Pont Royal to Jardin des Tuileries, autumn leaves at peak</li>
+              <li>Dinner: Frenchie (2nd arr.) — Gregory Marchand's celebrated neo-bistro, book well ahead</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 5</span><span class="day-title">Palais Royal &amp; Galerie Vivienne</span><span class="day-date">Oct 13 (Tue)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Cardiology Track</span></li>
+              <li>Afternoon: Palais Royal gardens — Daniel Buren columns, independent design boutiques under the arcades</li>
+              <li>Galerie Vivienne (19th-century covered passage) → Brentano's bookshop → espresso at Café Verlet</li>
+              <li>Dinner: Le Grand Véfour under the Palais Royal arcades — Napoleon-era dining room, two Michelin stars, theatrical French haute cuisine</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 6</span><span class="day-title">Versailles Half-Day</span><span class="day-date">Oct 14 (Wed)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Neurology Track</span></li>
+              <li>Afternoon: RER C → Versailles Château Rive Gauche (40 min). October weekday = manageable crowds. Focus: Hall of Mirrors, Marie-Antoinette's Petit Trianon, the Grande Canal — uncrowded gold at this season</li>
+              <li>Return Paris by 7pm. Dinner: Septime (11th arr.) — seasonal naturalist tasting menu, Paris's most sought-after reservation</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 7</span><span class="day-title">CME Closing Day + Champagne Afternoon</span><span class="day-date">Oct 15 (Thu)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Psychiatry Track · Closing Ceremony</span></li>
+              <li>CME Complete — 16 AMA PRA Category 1 Credits™ earned</li>
+              <li>Afternoon: Paris Ritz Bar — the Hemingway Bar (no jeans; worth it) for celebration cocktails amid hand-lacquered mahogany</li>
+              <li>Evening: book a private champagne cave visit at a Marais specialist; or ascend Montmartre for sunset over the city</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-c">
+        <div class="phase-header"><div class="phase-label">Phase C — TGV to Provence &amp; Return</div></div>
+        <div class="phase-subtitle">Days 8–10 &nbsp;·&nbsp; Oct 16–18</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 8</span><span class="day-title">TGV to Provence: Aix-en-Provence</span><span class="day-date">Oct 16 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Morning TGV from Paris Gare de Lyon → Aix-en-Provence TGV (3 hrs). October: lavender fields done but vineyards gold, truffle season beginning</li>
+              <li>Check in: Villa Gallici (Aix) — Relais &amp; Châteaux provençal manor in gardens</li>
+              <li>Cours Mirabeau plane-tree boulevard, Cézanne atelier, outdoor market at Place Richelme</li>
+              <li>Dinner: Pierre Reboul (Aix) — modernist Provençal, two Michelin stars, market-driven</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 9</span><span class="day-title">Cassis Calanques &amp; Wine Country</span><span class="day-date">Oct 17 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Morning: 20 min drive to Cassis — private boat hire through the white limestone Calanques (sea-carved fjords, emerald water, no road access)</li>
+              <li>Afternoon: Bandol wine appellation tour — AOC rosé tasting at Domaine Tempier or Château Pibarnon</li>
+              <li>Return Aix for final Provençal dinner; truffle on everything if the season has opened</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 10</span><span class="day-title">Return to Paris · Fly SEA</span><span class="day-date">Oct 18 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Morning TGV back to Paris CDG (direct TGV AIX → CDG airport, ~3.5 hrs)</li>
+              <li>Afternoon/evening departure CDG → SEA on Air France direct</li>
+              <li>Arrive Seattle Oct 18 (same day, crossing back west)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🏨 Lodging &amp; Dining Portfolio</h3>
+      <div class="property-grid">
+        <div class="property-card property-card--hotel">
+          <div class="property-icon">🏨</div>
+          <div class="property-tag">Host Property · CME Venue</div>
+          <div class="property-name">Paris Marriott Opera Ambassador</div>
+          <p class="property-desc">Grand Haussmann-era property on Boulevard Haussmann, steps from the Opéra Garnier. Walking distance to the Louvre, Tuileries, and Le Marais. CME lectures held on-site — step outside and you're in the 9th arrondissement, which is exactly where you want to be.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🍽️</div>
+          <div class="property-tag">Neo-Bistro · 2nd Arrondissement</div>
+          <div class="property-name">Frenchie</div>
+          <p class="property-desc">Gregory Marchand's flagship on Rue du Nil transformed Parisian bistro culture. Seasonal produce-led menus with surprising depth and zero pretension. Book 60 days out — always full. The wine list is exceptional and the room feels like the best dinner party you've ever attended.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">⭐</div>
+          <div class="property-tag">Michelin 2-Star · Palais Royal</div>
+          <div class="property-name">Le Grand Véfour</div>
+          <p class="property-desc">Napoleon dined here. Victor Hugo dined here. The painted glass ceiling and gilt mirrors are a UNESCO monument in everything but name. Two Michelin stars, classical French haute cuisine, and a location under the Palais Royal arcades that is unrepeatable anywhere on earth.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🌿</div>
+          <div class="property-tag">Tasting Menu · 11th Arrondissement</div>
+          <div class="property-name">Septime</div>
+          <p class="property-desc">Bertrand Grébaut's naturalist tasting menu in the 11th — Paris's hardest reservation and worth every effort. Seasonal, biodynamic, quietly visionary. Book two months before departure. The neighbourhood around Oberkampf is itself worth the walk home.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESTINATION 3: CAPE TOWN, SOUTH AFRICA
+═══════════════════════════════════════════════════════════ -->
+<section class="dest-card" id="dest-capetown" data-dest="capetown">
+  <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="body-capetown">
+    <div class="card-header-bg" style="background:linear-gradient(135deg,#1B2631 0%,#5D4037 55%,#D35400 100%)"></div>
+    <div class="card-header-content">
+      <span class="dest-flag">🇿🇦</span>
+      <div class="dest-title-block">
+        <h2 class="dest-name">Cape Town, South Africa</h2>
+        <p class="dest-subtitle">Mount Nelson Belmond · Oct 24–25, 2026</p>
+      </div>
+      <div class="cme-badge">
+        <span class="badge-credits">CME Wknd</span>
+        <span class="badge-org">Global Health</span>
+      </div>
+      <span class="expand-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="card-body" id="body-capetown" aria-hidden="true">
+
+    <div class="info-strip">
+      <div class="info-pill"><span class="pill-label">Specialty</span><span class="pill-value">Global Health · Preventative Medicine</span></div>
+      <div class="info-pill"><span class="pill-label">CME Format</span><span class="pill-value">Weekend Symposium</span></div>
+      <div class="info-pill"><span class="pill-label">10-Day Window</span><span class="pill-value">Oct 21 – Oct 30, 2026</span></div>
+      <div class="info-pill"><span class="pill-label">Host Property</span><span class="pill-value">Mount Nelson, A Belmond Hotel</span></div>
+      <div class="info-pill"><span class="pill-label">Season</span><span class="pill-value">Southern Hemisphere Spring · 18–24°C</span></div>
+    </div>
+
+    <div class="vibe-section">
+      <div class="vibe-label">The Vibe</div>
+      <p class="vibe-text">Cape Town in late October is spring — bold, improbable, and visually overwhelming. Table Mountain changes expression with the cloud: one hour draped in white tablecloth fog, the next brutally clear against a sky so blue it looks post-processed. The Mount Nelson's pink colonial walls and manicured gardens sit in the bowl of the mountain's shadow, and from the terrace you can see Robben Island floating in the bay. This is a city that contains multitudes: the world's greatest concentration of endemic flora (fynbos) perfuming the air along the Cape Peninsula; the Indian Ocean meeting the Atlantic at Cape Agulhas; wine estates at Franschhoek that would rank among Europe's finest. And then, three hours by prop plane north-east, the silence of the Lowveld and a safari at dawn that rearranges your sense of scale entirely.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">✈️ Flight Logistics from SEA</h3>
+      <div class="flight-table-wrap">
+        <table class="flight-table">
+          <thead><tr><th>Segment</th><th>Route</th><th>Carrier</th><th>Est. Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Option A Leg 1</td><td>SEA → AMS</td><td>KLM (SkyTeam)</td><td>~9.5 hrs</td></tr>
+            <tr><td>Option A Leg 2</td><td>AMS → CPT</td><td>KLM direct</td><td>~11.5 hrs</td></tr>
+            <tr><td>Option B Leg 1</td><td>SEA → DXB</td><td>Emirates (via JFK/IAD)</td><td>~14 + 14 hrs</td></tr>
+            <tr><td>Option B Leg 2</td><td>DXB → CPT</td><td>Emirates direct</td><td>~9 hrs</td></tr>
+            <tr><td>Safari Add-on</td><td>CPT → JNB → MQP</td><td>Airlink / FlySafair</td><td>~2 + 1 hrs</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="flight-notes"><strong>Best route:</strong> KLM SEA → AMS → CPT (~22 hrs total), arriving Oct 22 or 23. <strong>Timezone:</strong> SAST (UTC+2) = +9 hrs from PDT. Two full recovery days before Oct 24 CME weekend. <strong>Safari note:</strong> Book Mpumalanga (MQP) internal flight for the Phase C extension — Sabi Sands and Thornybush Game Reserves are a 30 min transfer from MQP.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🎒 Packing Aesthetic</h3>
+      <ul class="packing-list">
+        <li>Light merino layers</li>
+        <li>Packable down vest</li>
+        <li>Neutral chinos (safari-ready)</li>
+        <li>Safari khaki shirt</li>
+        <li>Smart casual for Belmond dinners</li>
+        <li>Swimwear (pool + beach)</li>
+        <li>Sturdy walking sandals</li>
+        <li>Wide-brim sun hat</li>
+        <li>Quality binoculars (safari)</li>
+      </ul>
+    </div>
+
+    <div class="content-section itinerary-section">
+      <h3 class="section-heading">📅 10-Day Itinerary</h3>
+
+      <div class="phase-block phase-a">
+        <div class="phase-header"><div class="phase-label">Phase A — Transit &amp; Cape Town Arrival</div></div>
+        <div class="phase-subtitle">Days 1–3 &nbsp;·&nbsp; Oct 21–23</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 1</span><span class="day-title">Depart Seattle</span><span class="day-date">Oct 21 (Wed)</span></div>
+            <ul class="day-detail"><li>Afternoon SEA → AMS overnight; longest-haul leg of the year</li><li>Use the flight for sleep — arrive AMS morning, connect CPT same day</li></ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 2</span><span class="day-title">Long Transit Day</span><span class="day-date">Oct 22 (Thu)</span></div>
+            <ul class="day-detail"><li>AMS → CPT on KLM (~11.5 hrs); arrive Cape Town International late evening</li><li>Transfer to Mount Nelson Belmond — the "Nellie" glowing pink against the mountain at night is a first-impression you keep</li></ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 3</span><span class="day-title">Pool Day &amp; V&amp;A Waterfront</span><span class="day-date">Oct 23 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Morning: recovery — the Nellie's garden pool, South African breakfast (rooibos, malva pudding)</li>
+              <li>Afternoon: V&amp;A Waterfront — Two Oceans Aquarium, craft gin at Distillery 031, sunset view of Robben Island</li>
+              <li>Dinner: The Test Kitchen at The Silo Hotel — book well in advance, SA's most celebrated table</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-b">
+        <div class="phase-header"><div class="phase-label">Phase B — CME Weekend + Cape Peninsula</div></div>
+        <div class="phase-subtitle">Days 4–7 &nbsp;·&nbsp; Oct 24–27 &nbsp;·&nbsp; CME 8:30 AM – 12:30 PM (Sat &amp; Sun)</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 4</span><span class="day-title">CME Day 1 + Table Mountain</span><span class="day-date">Oct 24 (Sat)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:30–12:30 · Global Health Symposium · Day 1</span></li>
+              <li>Afternoon: Table Mountain cable car (book online, sold out otherwise) — 360° views over both oceans</li>
+              <li>Sunset: Signal Hill for golden hour over the Atlantic</li>
+              <li>Dinner: La Colombe (Constantia valley) — Franco-Asian tasting menu, vines outside the window</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 5</span><span class="day-title">CME Day 2 + Boulders Penguins &amp; Cape Point</span><span class="day-date">Oct 25 (Sun)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:30–12:30 · Global Health Symposium · Day 2</span></li>
+              <li>CME Symposium Complete</li>
+              <li>Afternoon: Drive the Cape Peninsula — Chapman's Peak coastal road (one of the world's great drives), Boulders Beach African Penguin Colony, Cape Point (the rocky bluff where two oceans meet)</li>
+              <li>Return via Noordhoek for sundowner overlooking the vast Atlantic beach</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 6</span><span class="day-title">Stellenbosch Wine Valley</span><span class="day-date">Oct 26 (Mon)</span></div>
+            <ul class="day-detail">
+              <li>Morning: 45 min drive to Stellenbosch — South Africa's premier wine town, Cape Dutch architecture</li>
+              <li>Tastings: Rust en Vrede (reds), Waterford Estate (outdoor tastings), Jordan Wine Estate (Chardonnay)</li>
+              <li>Lunch at Terroir (Kleine Zalze estate) — one of SA's finest vineyard restaurants</li>
+              <li>Afternoon: drive to Franschhoek — the "French Quarter," chef-driven restaurant scene, heritage Huguenot wine estates</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 7</span><span class="day-title">Babylonstoren Farm &amp; Cape Winelands</span><span class="day-date">Oct 27 (Tue)</span></div>
+            <ul class="day-detail">
+              <li>Morning: Babylonstoren — a 200-hectare working farm estate with one of the world's most extraordinary kitchen gardens, spa, and cellar tours</li>
+              <li>Lunch: Babel restaurant at Babylonstoren — farm produce driven to plates 100 meters from source</li>
+              <li>Afternoon: return to Cape Town; sunset gin-and-tonic at the Nellie's terrace bar</li>
+              <li>Final Mount Nelson dinner: Loggia Restaurant — the grand colonial dining room, South African tasting menu</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-c">
+        <div class="phase-header"><div class="phase-label">Phase C — Luxury Safari Extension</div></div>
+        <div class="phase-subtitle">Days 8–10 &nbsp;·&nbsp; Oct 28–30 &nbsp;·&nbsp; Greater Kruger Region</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 8</span><span class="day-title">Fly to Mpumalanga · Safari Check-In</span><span class="day-date">Oct 28 (Wed)</span></div>
+            <ul class="day-detail">
+              <li>Morning: CPT → JNB (2 hrs) → MQP/Hoedspruit (1 hr) — prop plane over the escarpment</li>
+              <li>Check in: Thornybush Game Reserve or Sabi Sands lodge — exclusive traversal rights, Big Five, no fences with Kruger National Park</li>
+              <li>Afternoon game drive: lodge vehicles, expert tracker + guide, golden-hour sightings</li>
+              <li>Bush dinner under the Milky Way — no light pollution, Southern Hemisphere sky at full power</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 9</span><span class="day-title">Full Safari Day</span><span class="day-date">Oct 29 (Thu)</span></div>
+            <ul class="day-detail">
+              <li>5:30 AM bush walk or early game drive — predawn Big Five tracking</li>
+              <li>Midday: lodge pool, wildlife documentary time, spa treatment</li>
+              <li>Late afternoon game drive: golden hour with elephant herds at the watering hole</li>
+              <li>Sundowner stop in the bush — bush bar, ice-cold Amarula</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 10</span><span class="day-title">Final Game Drive · Return to SEA</span><span class="day-date">Oct 30 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Early morning final drive → breakfast → lodge checkout</li>
+              <li>Transfer MQP → JNB → CPT or direct JNB → AMS → SEA</li>
+              <li>Arrive Seattle Oct 31 or Nov 1</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🏨 Lodging &amp; Dining Portfolio</h3>
+      <div class="property-grid">
+        <div class="property-card property-card--hotel">
+          <div class="property-icon">🏨</div>
+          <div class="property-tag">Host Property · Cape Town</div>
+          <div class="property-name">Mount Nelson, A Belmond Hotel</div>
+          <p class="property-desc">"The Nellie" — Cape Town's most storied address since 1899. Pink colonial grandeur on the slope of Table Mountain, immaculate gardens, two pools, legendary afternoon tea. Winston Churchill, Nelson Mandela, and virtually every visiting dignitary has passed through. Six acres of private grounds in the city center.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🍽️</div>
+          <div class="property-tag">World-Class · Woodstock</div>
+          <div class="property-name">The Test Kitchen</div>
+          <p class="property-desc">Luke Dale Roberts's flagship is consistently Africa's #1 restaurant. Dark Dining Room meets an immersive multi-course journey. Pushed into a converted warehouse in Woodstock, it is technically astonishing and grounded in South African flavor logic. Bookings open months ahead.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🍷</div>
+          <div class="property-tag">Tasting Menu · Constantia Valley</div>
+          <div class="property-name">La Colombe</div>
+          <p class="property-desc">Nestled into the Constantia wine valley outside Cape Town, La Colombe marries French technique with Asian nuance and South African produce. The view over the vines from the terrace, glass of Constantia Blanc in hand, is one of the great restaurant experiences on the continent.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🦁</div>
+          <div class="property-tag">Safari Lodge · Greater Kruger</div>
+          <div class="property-name">Thornybush Game Reserve</div>
+          <p class="property-desc">Private concession in the Greater Kruger ecosystem, bordering the national park with open traversal rights. All-inclusive luxury lodge format: game drives twice daily, guided bush walks, expert naturalist team, no Big Five fence. The gold standard for first-time safari luxury.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESTINATION 4: KYOTO, JAPAN
+═══════════════════════════════════════════════════════════ -->
+<section class="dest-card" id="dest-kyoto" data-dest="kyoto">
+  <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="body-kyoto">
+    <div class="card-header-bg" style="background:linear-gradient(135deg,#1a0a0a 0%,#7B1A1A 50%,#C0392B 100%)"></div>
+    <div class="card-header-content">
+      <span class="dest-flag">🇯🇵</span>
+      <div class="dest-title-block">
+        <h2 class="dest-name">Kyoto, Japan</h2>
+        <p class="dest-subtitle">Hotel SOWAKA Higashiyama · Nov 15–16, 2026</p>
+      </div>
+      <div class="cme-badge">
+        <span class="badge-credits">CME Conf</span>
+        <span class="badge-org">Longevity</span>
+      </div>
+      <span class="expand-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="card-body" id="body-kyoto" aria-hidden="true">
+
+    <div class="info-strip">
+      <div class="info-pill"><span class="pill-label">Specialty</span><span class="pill-value">Clinical Medicine · Longevity Science</span></div>
+      <div class="info-pill"><span class="pill-label">CME Format</span><span class="pill-value">International Conference · 2 Days</span></div>
+      <div class="info-pill"><span class="pill-label">10-Day Window</span><span class="pill-value">Nov 12 – Nov 21, 2026</span></div>
+      <div class="info-pill"><span class="pill-label">Host Property</span><span class="pill-value">Hotel SOWAKA, Higashiyama</span></div>
+      <div class="info-pill"><span class="pill-label">Season</span><span class="pill-value">Peak Koyo (Autumn Leaves) · 8–15°C</span></div>
+    </div>
+
+    <div class="vibe-section">
+      <div class="vibe-label">The Vibe</div>
+      <p class="vibe-text">Mid-November is arguably the most beautiful two weeks in all of Japan. The koyo — the annual transformation of the maples into crimson, amber, and gold — peaks across Kyoto's 1,600 temples and shrine gardens between approximately November 15 and 25. Hotel SOWAKA occupies a cluster of restored machiya townhouses on the cobblestones of Higashiyama, the old merchant quarter where geiko still walk at dusk. The morning light on the Philosopher's Path, a canal-side walking route lined with maples that have now gone completely, impossibly red, is a sight that rewires your visual memory. Japan's rigorous aesthetic discipline — the garden raked at 5 AM, the kaiseki course composed like a painting, the temple bell resonating through the cold mountain air — is the counterweight to every meeting room and fluorescent light of the year before it.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">✈️ Flight Logistics from SEA</h3>
+      <div class="flight-table-wrap">
+        <table class="flight-table">
+          <thead><tr><th>Segment</th><th>Route</th><th>Carrier</th><th>Est. Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Option A</td><td>SEA → NRT (Tokyo Narita)</td><td>ANA / JAL / United</td><td>~10 hrs direct</td></tr>
+            <tr><td>Option B</td><td>SEA → KIX (Osaka Kansai)</td><td>ANA / JAL</td><td>~10.5 hrs direct</td></tr>
+            <tr><td>Shinkansen</td><td>NRT → Kyoto (Nozomi)</td><td>JR Pass</td><td>~2 hrs 45 min</td></tr>
+            <tr><td>Shinkansen</td><td>KIX → Kyoto (Haruka + Shinkansen)</td><td>JR Pass</td><td>~1 hr 15 min</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="flight-notes"><strong>Best option:</strong> Fly SEA → NRT direct on ANA (Star Alliance, ~10 hrs), spend Days 1–3 in Tokyo, then Shinkansen to Kyoto. <strong>Timezone:</strong> JST (UTC+9) = +17 hrs from PST. Depart SEA Nov 12 → arrive Tokyo Nov 13 afternoon. <strong>JR Pass:</strong> Purchase a 7-day or 14-day JR Pass before departure for unlimited Shinkansen travel.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🎒 Packing Aesthetic</h3>
+      <ul class="packing-list">
+        <li>Merino midlayers (neutral palette)</li>
+        <li>Packable rain shell</li>
+        <li>Thermal base layer</li>
+        <li>Slip-on shoes for temple visits</li>
+        <li>Smart casual for SOWAKA evenings</li>
+        <li>Compact daypack</li>
+        <li>Portable umbrella</li>
+        <li>Quiet, understated outfits (temple respect)</li>
+      </ul>
+    </div>
+
+    <div class="content-section itinerary-section">
+      <h3 class="section-heading">📅 10-Day Itinerary</h3>
+
+      <div class="phase-block phase-a">
+        <div class="phase-header"><div class="phase-label">Phase A — Tokyo Buffer + Cultural Calibration</div></div>
+        <div class="phase-subtitle">Days 1–3 &nbsp;·&nbsp; Nov 12–14</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 1</span><span class="day-title">Depart Seattle</span><span class="day-date">Nov 12 (Thu)</span></div>
+            <ul class="day-detail"><li>Evening departure SEA → NRT on ANA direct (~10 hrs); cross International Date Line</li><li>Arrive Nov 13 afternoon Japan time — the day "disappears" crossing west</li></ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 2</span><span class="day-title">Tokyo Arrival · Shinjuku &amp; Shibuya</span><span class="day-date">Nov 13 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Arrive NRT; Narita Express to Shinjuku → check in (Hyatt Regency Tokyo or Andaz Shinjuku)</li>
+              <li>Late afternoon: Shinjuku Gyoen National Garden — koyo at the first stage in Tokyo's parks</li>
+              <li>Evening: Golden Gai (six alleys of 200 tiny bars, 6 seats each) for pre-dinner drinks; Omoide Yokocho for yakitori</li>
+              <li>Dinner: Tsuta (first ramen restaurant to receive a Michelin star) or high-end omakase sushi at Sukiyabashi Jiro Honten</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 3</span><span class="day-title">Tsukiji, TeamLab &amp; Ginza</span><span class="day-date">Nov 14 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>5:30 AM: Tsukiji Outer Market — best tuna breakfast on earth, buy nothing, eat everything</li>
+              <li>Afternoon: teamLab Borderless (Azabudai Hills, newly reopened) — the digital art immersive experience that makes every other art installation seem timid</li>
+              <li>Evening: Ginza 6 building rooftop bar → Shinkansen to Kyoto (Nozomi, 2h45m) → check in Hotel SOWAKA Higashiyama</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-b">
+        <div class="phase-header"><div class="phase-label">Phase B — CME Mornings + Kyoto Peak Koyo</div></div>
+        <div class="phase-subtitle">Days 4–7 &nbsp;·&nbsp; Nov 15–18 &nbsp;·&nbsp; CME 9:00 AM – 1:00 PM (Nov 15–16)</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 4</span><span class="day-title">Fushimi Inari &amp; Tofuku-ji Gardens</span><span class="day-date">Nov 15 (Sun)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 9:00–13:00 · Clinical Medicine &amp; Longevity Conference · Day 1 · Hotel SOWAKA</span></li>
+              <li>Afternoon: Fushimi Inari (the 10,000 vermilion torii gates) — after 2 PM crowds thin significantly</li>
+              <li>Tofuku-ji temple garden — considered Kyoto's finest koyo display, maple valley at peak</li>
+              <li>Dinner at Gion Nanba — intimate eight-seat tasting menu in the Gion lantern district</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 5</span><span class="day-title">Arashiyama Bamboo &amp; Tenryu-ji</span><span class="day-date">Nov 16 (Mon)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 9:00–13:00 · Longevity Science Conference · Day 2 · Closing Session</span></li>
+              <li>CME Conference Complete</li>
+              <li>Afternoon: Arashiyama district — bamboo grove (early afternoon light is optimal), Tenryu-ji temple Zen garden (moss, water, maple reflection), monkey park hillside climb</li>
+              <li>Riverside dinner: Arashiyama Yoshimura — soba noodles with view over Ōi River, autumn leaves framing the Togetsukyo bridge</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 6</span><span class="day-title">Philosopher's Path &amp; Nanzen-ji</span><span class="day-date">Nov 17 (Tue)</span></div>
+            <ul class="day-detail">
+              <li>Morning: Philosopher's Path at dawn — the 2km canal-side walk named after Nishida Kitaro, lined with 400+ cherry trees (now maple-crimson in November)</li>
+              <li>Nanzen-ji — the soaring sanmon gate, aqueduct walkway, sub-temples with private moss gardens</li>
+              <li>Afternoon: tea ceremony at SOWAKA's private tea room — one hour of enforced present-moment awareness</li>
+              <li>Dinner: Nakamura — operating since 1716, the oldest kaiseki restaurant in Kyoto, near Nishiki Market</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 7</span><span class="day-title">Nara Day Trip</span><span class="day-date">Nov 18 (Wed)</span></div>
+            <ul class="day-detail">
+              <li>Morning: Kintetsu Limited Express → Nara (50 min). Tōdai-ji's Great Buddha Hall (world's largest wooden building), Kasuga-taisha shrine lanterns, 1,200 semi-wild deer roaming the park</li>
+              <li>Afternoon: Isuien Garden — Meiji-era two-part garden with borrowed scenery of Mt. Wakakusa</li>
+              <li>Return Kyoto evening: Kinkaku-ji Golden Pavilion in late afternoon light (third visit charm, always worth it)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-c">
+        <div class="phase-header"><div class="phase-label">Phase C — Onsen Ryokan &amp; Return</div></div>
+        <div class="phase-subtitle">Days 8–10 &nbsp;·&nbsp; Nov 19–21 &nbsp;·&nbsp; Kinosaki Onsen</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 8</span><span class="day-title">Shinkansen to Kinosaki Onsen</span><span class="day-date">Nov 19 (Thu)</span></div>
+            <ul class="day-detail">
+              <li>Limited Express Kounotori from Kyoto to Kinosaki Onsen (~2 hrs 15 min) — Japan's premier onsen town, 1,300 years old</li>
+              <li>Check in: Nishimuraya Honkan — the finest ryokan in Kinosaki, wooden structure over a willow-lined canal; yukata provided, zori sandals for town bathing</li>
+              <li>Evening: "sotoyu meguri" — townspeople tradition of visiting all seven public bathhouses in yukata, clog-stepping on stone paths under red lanterns</li>
+              <li>Multi-course kaiseki dinner in-room on low table: seasonal winter vegetables, local Tajima Wagyu, sea creatures from the Japan Sea</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 9</span><span class="day-title">Private Onsen Morning &amp; Coastal Walk</span><span class="day-date">Nov 20 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Dawn: private in-room rotenburo (outdoor onsen bath) — mist, silence, the sound of water, cold mountain air on your face</li>
+              <li>Morning kaiseki breakfast — elaborate, precise, restorative</li>
+              <li>Afternoon: Genbudo Cave (lava columns by the Maruyama River), coastal cycling along Kinosaki Beach</li>
+              <li>Final evening ryokan kaiseki dinner — the most ceremonially perfect meal of the trip</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 10</span><span class="day-title">Return to Osaka · Fly SEA</span><span class="day-date">Nov 21 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Limited Express back to Osaka (2 hrs 45 min) → Kansai International Airport (KIX)</li>
+              <li>Depart KIX → SEA on ANA/JAL (~10.5 hrs); arrive Seattle Nov 21 (same day, crossing date line eastbound)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🏨 Lodging &amp; Dining Portfolio</h3>
+      <div class="property-grid">
+        <div class="property-card property-card--hotel">
+          <div class="property-icon">🏯</div>
+          <div class="property-tag">Host Property · Higashiyama</div>
+          <div class="property-name">Luxury Hotel SOWAKA</div>
+          <p class="property-desc">A meticulous restoration of three Kyoto machiya (townhouse) structures on the cobblestoned Higashiyama sando. Gion district at the doorstep, the 30-meter private traditional garden at the back. Each room is an exercise in cedar, bamboo, and washi paper restraint. The CME conference is held in the SOWAKA meeting facilities — Kyoto outside your window between sessions.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🍱</div>
+          <div class="property-tag">Historic Kaiseki · Since 1716</div>
+          <div class="property-name">Nakamura</div>
+          <p class="property-desc">Three centuries of kaiseki mastery near Nishiki Market. The current generation (11th) continues the tradition of seasonal, hyperprecise multi-course Japanese haute cuisine: lacquered bowls, local yuba tofu, duck sukiyaki, seasonal sweets. One of the world's most civilized restaurant experiences. Pre-book from Seattle.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">⭐</div>
+          <div class="property-tag">3 Michelin Stars · Higashiyama</div>
+          <div class="property-name">Kikunoi Honten</div>
+          <p class="property-desc">Murata Yoshihiro's three-star kaiseki masterpiece, set in a walled garden approached through stepping stones. The seasonal menu changes monthly; in November, matsutake mushroom, river fish, and warming root vegetables dominate. One of five three-Michelin-star kaiseki restaurants in all of Japan.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">♨️</div>
+          <div class="property-tag">Ryokan · Kinosaki Onsen</div>
+          <div class="property-name">Nishimuraya Honkan</div>
+          <p class="property-desc">The apex of traditional Japanese inn culture, operating since 1868 on a canal in Kinosaki. Private rotenburo (outdoor hot spring bath), in-room kaiseki service, yukata and geta provided. The town's seven public bathhouses — each with different mineral compositions — are a five-minute walk. This is the closest thing to a full system reset that exists.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DESTINATION 5: BASEL, SWITZERLAND
+═══════════════════════════════════════════════════════════ -->
+<section class="dest-card" id="dest-basel" data-dest="basel">
+  <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="body-basel">
+    <div class="card-header-bg" style="background:linear-gradient(135deg,#1C2833 0%,#922B21 55%,#DC143C 100%)"></div>
+    <div class="card-header-content">
+      <span class="dest-flag">🇨🇭</span>
+      <div class="dest-title-block">
+        <h2 class="dest-name">Basel, Switzerland</h2>
+        <p class="dest-subtitle">Basel Marriott Hotel · Dec 7–10, 2026</p>
+      </div>
+      <div class="cme-badge">
+        <span class="badge-credits">CME 4-Day</span>
+        <span class="badge-org">Winter Update</span>
+      </div>
+      <span class="expand-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="card-body" id="body-basel" aria-hidden="true">
+
+    <div class="info-strip">
+      <div class="info-pill"><span class="pill-label">Specialty</span><span class="pill-value">Internal Medicine · Geriatrics</span></div>
+      <div class="info-pill"><span class="pill-label">CME Format</span><span class="pill-value">Winter Clinical Update · 4 Days</span></div>
+      <div class="info-pill"><span class="pill-label">10-Day Window</span><span class="pill-value">Dec 4 – Dec 13, 2026</span></div>
+      <div class="info-pill"><span class="pill-label">Host Property</span><span class="pill-value">Basel Marriott Hotel</span></div>
+      <div class="info-pill"><span class="pill-label">Season</span><span class="pill-value">Early Winter · 0–6°C · Christmas Markets</span></div>
+    </div>
+
+    <div class="vibe-section">
+      <div class="vibe-label">The Vibe</div>
+      <p class="vibe-text">Basel in December is a city that has been preparing for this moment for months. The Christmas market on Barfüsserplatz and Münsterplatz erupts in thousands of warm lights reflected in the Rhine, artisanal wooden stalls selling hand-carved ornaments, the mineral tang of Glühwein rising through cold air. The Münster cathedral — Romanesque from its 12th-century foundations — stands above the river with a quiet gravity that no Christmas decoration can diminish. Forty-five minutes by train into France, the medieval streets of Colmar are draped in twinkling light and evergreen garland, snow occasionally settling on the half-timbered houses of the old quarter. This is the European winter that people mean when they say they want to feel like they're inside a painting — and Basel, a city of museums, pharmaceutical wealth, and understated Swiss exactitude, earns the comparison without strain.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">✈️ Flight Logistics from SEA</h3>
+      <div class="flight-table-wrap">
+        <table class="flight-table">
+          <thead><tr><th>Segment</th><th>Route</th><th>Carrier</th><th>Est. Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Option A Leg 1</td><td>SEA → ZRH (Zürich)</td><td>Swiss International (Star Alliance)</td><td>~11 hrs direct</td></tr>
+            <tr><td>Option A Leg 2</td><td>ZRH → Basel SBB</td><td>SBB Swiss Federal Railways</td><td>~1 hr 5 min</td></tr>
+            <tr><td>Option B Leg 1</td><td>SEA → FRA (Frankfurt)</td><td>Lufthansa (Star Alliance)</td><td>~10 hrs</td></tr>
+            <tr><td>Option B Leg 2</td><td>FRA → BSL (Basel EuroAirport)</td><td>Lufthansa / easyJet</td><td>~1 hr</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="flight-notes"><strong>Best option:</strong> Swiss Air direct SEA → ZRH (Star Alliance United miles), arrive ZRH, train 1 hr to Basel HBF (main station, walking distance to Marriott). Depart Dec 4 → arrive Dec 5. <strong>Timezone:</strong> CET (UTC+1) = +9 hrs from PST. Two days before CME opens Dec 7.</p>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🎒 Packing Aesthetic</h3>
+      <ul class="packing-list">
+        <li>Heavyweight wool overcoat</li>
+        <li>Cashmere scarf + leather gloves</li>
+        <li>Chelsea boots (waterproof sole)</li>
+        <li>Thermal base layer</li>
+        <li>Smart sweater for CME evenings</li>
+        <li>Down-fill layer under coat</li>
+        <li>Compact travel umbrella</li>
+        <li>Warm hat (ear coverage)</li>
+        <li>Après-ski layer for Verbier option</li>
+      </ul>
+    </div>
+
+    <div class="content-section itinerary-section">
+      <h3 class="section-heading">📅 10-Day Itinerary</h3>
+
+      <div class="phase-block phase-a">
+        <div class="phase-header"><div class="phase-label">Phase A — Swiss Alps Pre-Conference</div></div>
+        <div class="phase-subtitle">Days 1–3 &nbsp;·&nbsp; Dec 4–6</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 1</span><span class="day-title">Depart Seattle</span><span class="day-date">Dec 4 (Fri)</span></div>
+            <ul class="day-detail"><li>Evening departure SEA → ZRH on Swiss International; overnight flight</li><li>Arrive Zürich morning Dec 5</li></ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 2</span><span class="day-title">Arrive Zürich · Train to Basel</span><span class="day-date">Dec 5 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Morning arrival ZRH; SBB train to Basel HBF (1 hr 5 min)</li>
+              <li>Check in: Basel Marriott Hotel — central position, 5-min walk to Christmas markets and Rhine</li>
+              <li>Afternoon: first encounter with Basel Weihnachtsmarkt (Barfüsserplatz) — said to be Switzerland's most beautiful Christmas market</li>
+              <li>Dinner: Zum Goldenen Sternen (Basel's oldest inn, 1412 founding) — Rhine terrace view, Swiss-German classics, exceptional Alsatian wines</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 3</span><span class="day-title">Basel Exploration + Fondation Beyeler</span><span class="day-date">Dec 6 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Morning: Münster cathedral — Romanesque portal, cloister, Rhine terrace lookout; Basel's civic soul</li>
+              <li>Afternoon: Fondation Beyeler (Riehen, 20 min tram) — Renzo Piano building, world-class modern and contemporary art: Monet, Cézanne, Giacometti, Basquiat</li>
+              <li>Evening: Christmas market Glühwein, roasted chestnuts, artisan cheese from the Münsterplatz market</li>
+              <li>Dinner: Stucki Restaurant — Tanja Grandits, 18 GaultMillau points, her botanical avant-garde cuisine is unlike anything else in Switzerland</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-b">
+        <div class="phase-header"><div class="phase-label">Phase B — CME Mornings + Winter Day Trips</div></div>
+        <div class="phase-subtitle">Days 4–7 &nbsp;·&nbsp; Dec 7–10 &nbsp;·&nbsp; CME 8:00 AM – 12:30 PM daily</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 4</span><span class="day-title">Kunstmuseum Basel</span><span class="day-date">Dec 7 (Mon)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Winter Internal Medicine Update · Day 1</span></li>
+              <li>Afternoon: Kunstmuseum Basel — the oldest public art collection in the world (1661), spanning Holbein the Younger to Picasso to Cy Twombly</li>
+              <li>Evening: Rhine promenade walk under Christmas lights; nightcap at Campari Bar in the Kunstmuseum</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 5</span><span class="day-title">TGV to Strasbourg, France</span><span class="day-date">Dec 8 (Tue)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Geriatrics Clinical Update · Day 2</span></li>
+              <li>Afternoon: TGV Basel → Strasbourg (45 min, €15). Strasbourg Christmas Market — the oldest in France (1570), covering the entire Grande Île UNESCO district</li>
+              <li>Cathédrale Notre-Dame de Strasbourg (rose window, astronomical clock), Petite France quarter</li>
+              <li>Return Basel by 8pm; dinner: Brasserie au Violon (inside a converted 1835 prison, genuinely dramatic setting)</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 6</span><span class="day-title">Colmar — Most Beautiful Christmas Village</span><span class="day-date">Dec 9 (Wed)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Winter Medicine Update · Day 3</span></li>
+              <li>Afternoon: train Basel → Colmar (45 min). Alsace's showpiece — medieval half-timbered houses in Petite Venise, six separate Christmas markets each themed to a different century</li>
+              <li>Vin d'Alsace tastings at local caves; gingerbread, bredele biscuits, vin chaud</li>
+              <li>Return Basel for evening; Confiserie Schiesser for pastry and hot chocolate before dinner</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 7</span><span class="day-title">CME Final Day + Rhine Dinner</span><span class="day-date">Dec 10 (Thu)</span></div>
+            <ul class="day-detail">
+              <li><span class="cme-morning">☀ CME 8:00–12:30 · Winter Internal Medicine &amp; Geriatrics · Closing</span></li>
+              <li>CME Complete — Winter Clinical Update credits earned</li>
+              <li>Afternoon: Basel City Hall (Rathaus) — vivid red-frescoed facade, open inner courtyard; St. Alban quarter (Basel's "little Venice")</li>
+              <li>Celebratory dinner: Stucki tasting menu (return visit justified) or evening at the Basel Theater bar</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-block phase-c">
+        <div class="phase-header"><div class="phase-label">Phase C — Zürich, Lucerne &amp; Return</div></div>
+        <div class="phase-subtitle">Days 8–10 &nbsp;·&nbsp; Dec 11–13</div>
+        <div class="day-list">
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 8</span><span class="day-title">Day Trip to Lucerne</span><span class="day-date">Dec 11 (Fri)</span></div>
+            <ul class="day-detail">
+              <li>Train Basel → Lucerne (1 hr 15 min). Chapel Bridge (Kapellbrücke, 1333), Lion Monument, Lake Lucerne promenade — perfectly preserved medieval city center</li>
+              <li>Afternoon: Mount Pilatus or Rigi by cogwheel railway if clear weather and snow conditions allow</li>
+              <li>Return Basel evening; Münsterplatz market for final Glühwein toast</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 9</span><span class="day-title">Zürich Half-Day</span><span class="day-date">Dec 12 (Sat)</span></div>
+            <ul class="day-detail">
+              <li>Train Basel → Zürich HBF (55 min). Bahnhofstrasse — the world's most expensive shopping street in full December regalia</li>
+              <li>Old Town: Grossmünster (twin towers, Reformation history), Niederdorf cobblestones</li>
+              <li>Lindenhügel hill viewpoint over the lake and Alps in winter light</li>
+              <li>Final dinner: Zürich fondue at Café Boy or Kronenhalle (Giacometti originals on the wall, Swiss classics on the menu)</li>
+            </ul>
+          </div>
+          <div class="day-item">
+            <div class="day-header"><span class="day-number">Day 10</span><span class="day-title">Return to Seattle</span><span class="day-date">Dec 13 (Sun)</span></div>
+            <ul class="day-detail">
+              <li>Train Zürich → ZRH airport (10 min) or Basel → BSL EuroAirport (tram)</li>
+              <li>Depart ZRH → SEA on Swiss International direct; arrive Seattle Dec 13</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h3 class="section-heading">🏨 Lodging &amp; Dining Portfolio</h3>
+      <div class="property-grid">
+        <div class="property-card property-card--hotel">
+          <div class="property-icon">🏨</div>
+          <div class="property-tag">Host Property · CME Venue</div>
+          <div class="property-name">Basel Marriott Hotel</div>
+          <p class="property-desc">Centrally positioned in Basel with Rhine views, a five-minute walk from the Christmas market at Barfüsserplatz and the Kunstmuseum. CME lectures are held on-site. The location is ideal for the ambitious day-trip schedule — Basel's train station connects Switzerland, France, and Germany within an hour in any direction.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🌿</div>
+          <div class="property-tag">Botanical Tasting · 18 GaultMillau</div>
+          <div class="property-name">Restaurant Stucki</div>
+          <p class="property-desc">Chef Tanja Grandits is Switzerland's most inventive and decorated chef. Her botanical avant-garde tasting menus — built around color, herb, spice, and season — have no meaningful peers in the country. The 18 GaultMillau points speak to consistent, rigorous excellence. Book before you book the flights.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">🏰</div>
+          <div class="property-tag">Historic Inn · Since 1412</div>
+          <div class="property-name">Zum Goldenen Sternen</div>
+          <p class="property-desc">Basel's oldest inn — originally founded in 1412, making it older than the Swiss Confederation itself. The Rhine terrace is iconic in summer, but in December the indoor rooms glow with candlelight and wood paneling. Swiss-German classics: Zürich-style veal, rösti, Riesling from the Alsace valley next door.</p>
+        </div>
+        <div class="property-card">
+          <div class="property-icon">☕</div>
+          <div class="property-tag">Patisserie · Since 1870</div>
+          <div class="property-name">Confiserie Schiesser</div>
+          <p class="property-desc">Basel's most beloved café and pastry institution, on the Marktplatz since 1870. The Läckerli (Basel's signature hard gingerbread with almonds and orange peel) is made here from the original recipe. Morning coffee and pastry before CME is a non-negotiable ritual once discovered.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer id="page-footer">
+  <p><strong>Dr. Danielle Hanssen &amp; Brandon James Barron</strong> · CME Travel Planning 2026</p>
+  <p>All CME credits are AMA PRA Category 1™. Verify current availability, credit hours, and registration directly with each conference organizer.<br>
+  Airline schedules, hotel availability, and restaurant reservations subject to change — confirm all bookings independently.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var state = { openDest: null };
+
+  function openCard(destId) {
+    var card = document.getElementById('dest-' + destId);
+    var body = card.querySelector('.card-body');
+    var header = card.querySelector('.card-header');
+
+    // Measure before opening
+    var h = body.scrollHeight;
+    body.style.maxHeight = h + 'px';
+    card.classList.add('is-open');
+    body.setAttribute('aria-hidden', 'false');
+    header.setAttribute('aria-expanded', 'true');
+
+    // After transition, remove fixed height so inner content can flex
+    function onEnd(e) {
+      if (e.propertyName === 'max-height') {
+        body.style.maxHeight = 'none';
+        body.removeEventListener('transitionend', onEnd);
+      }
+    }
+    body.addEventListener('transitionend', onEnd);
+
+    state.openDest = destId;
+
+    // Scroll card into view below sticky nav
+    var navH = document.getElementById('main-nav').offsetHeight;
+    var top = card.getBoundingClientRect().top + window.pageYOffset - navH - 8;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }
+
+  function closeCard(destId) {
+    var card = document.getElementById('dest-' + destId);
+    var body = card.querySelector('.card-body');
+    var header = card.querySelector('.card-header');
+
+    // Set explicit height for transition FROM
+    body.style.maxHeight = body.scrollHeight + 'px';
+    // Force reflow
+    body.offsetHeight; // jshint ignore:line
+    body.style.maxHeight = '0';
+
+    card.classList.remove('is-open');
+    body.setAttribute('aria-hidden', 'true');
+    header.setAttribute('aria-expanded', 'false');
+
+    if (state.openDest === destId) state.openDest = null;
+  }
+
+  function toggleCard(destId) {
+    var isOpen = document.getElementById('dest-' + destId).classList.contains('is-open');
+
+    // Close any currently open card
+    if (state.openDest && state.openDest !== destId) {
+      closeCard(state.openDest);
+    }
+
+    if (isOpen) {
+      closeCard(destId);
+    } else {
+      openCard(destId);
+    }
+  }
+
+  function setActiveTab(destId) {
+    document.querySelectorAll('.nav-tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.dest === destId);
+    });
+    var active = document.querySelector('.nav-tab[data-dest="' + destId + '"]');
+    if (active) {
+      active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }
+
+  // Nav tab clicks
+  document.querySelectorAll('.nav-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var destId = tab.dataset.dest;
+      setActiveTab(destId);
+      toggleCard(destId);
+    });
+  });
+
+  // Card header clicks + keyboard
+  document.querySelectorAll('.card-header').forEach(function(header) {
+    var destId = header.closest('.dest-card').dataset.dest;
+    header.addEventListener('click', function() {
+      setActiveTab(destId);
+      toggleCard(destId);
+    });
+    header.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        header.click();
+      }
+    });
+  });
+
+  // IntersectionObserver: sync nav tab to visible card
+  if ('IntersectionObserver' in window) {
+    var navH = document.getElementById('main-nav').offsetHeight;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
+          var destId = entry.target.closest('.dest-card').dataset.dest;
+          setActiveTab(destId);
+        }
+      });
+    }, { threshold: 0.4, rootMargin: '-' + navH + 'px 0px 0px 0px' });
+
+    document.querySelectorAll('.card-header').forEach(function(h) {
+      observer.observe(h);
+    });
+  }
+
+  // Open Crete by default on load
+  document.addEventListener('DOMContentLoaded', function() {
+    openCard('crete');
+    setActiveTab('crete');
+  });
+
+  // Also run immediately if DOM already ready
+  if (document.readyState !== 'loading') {
+    openCard('crete');
+    setActiveTab('crete');
+  }
+
+})();
+</script>
+</body>
+</html>
