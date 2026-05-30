@@ -29,9 +29,13 @@ function PresenceBadge({ state }: { state: string }) {
 }
 
 export default function PresenceCard() {
-  const presenceResults = PEOPLE.map((p) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSWR<HaState>(`/api/ha/states/${p.entity}`, fetcher, { refreshInterval: 30_000 }),
+  const { data: presenceData } = useSWR<HaState[]>(
+    PEOPLE.map((p) => p.entity).join(','),
+    () =>
+      Promise.all(
+        PEOPLE.map((p) => fetch(`/api/ha/states/${p.entity}`).then((r) => r.json())),
+      ),
+    { refreshInterval: 30_000 },
   );
 
   const { data: podData } = useSWR<HaState>(
@@ -53,7 +57,7 @@ export default function PresenceCard() {
       {/* Presence */}
       <div className="space-y-2 mb-4">
         {PEOPLE.map((person, i) => {
-          const { data } = presenceResults[i];
+          const data = presenceData?.[i];
           return (
             <div key={person.entity} className="flex items-center justify-between">
               <span className="text-sm text-txt-primary">{person.label}</span>
