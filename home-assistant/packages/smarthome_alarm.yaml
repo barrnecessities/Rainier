@@ -34,7 +34,7 @@ automation:
         data:
           temperature: 72
 
-  # T-30 min: Sunrise begins — 10%, 2200K warm orange
+  # T-30 min: Sunrise begins — 10%, 2200K + pod 74°F
   - alias: "Wake Alarm — Hue sunrise start (T-30)"
     id: wake_alarm_hue_start
     trigger:
@@ -48,15 +48,21 @@ automation:
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
-      - service: light.turn_on
-        target:
-          entity_id: light.bedroom
-        data:
-          brightness_pct: 10
-          color_temp_kelvin: 2200
-          transition: 60
+      - parallel:
+          - service: light.turn_on
+            target:
+              entity_id: light.bedroom
+            data:
+              brightness_pct: 10
+              color_temp_kelvin: 2200
+              transition: 60
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 74
 
-  # T-20 min: Sunrise step 2 — 25%, 2700K warm white
+  # T-20 min: Sunrise step 2 — 25%, 2700K + pod 76°F
   - alias: "Wake Alarm — Hue sunrise step 2 (T-20)"
     id: wake_alarm_hue_step2
     trigger:
@@ -70,15 +76,21 @@ automation:
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
-      - service: light.turn_on
-        target:
-          entity_id: light.bedroom
-        data:
-          brightness_pct: 25
-          color_temp_kelvin: 2700
-          transition: 120
+      - parallel:
+          - service: light.turn_on
+            target:
+              entity_id: light.bedroom
+            data:
+              brightness_pct: 25
+              color_temp_kelvin: 2700
+              transition: 120
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 76
 
-  # T-10 min: Sunrise step 3 — 45%, 3200K soft white
+  # T-10 min: Sunrise step 3 — 45%, 3200K + pod 78°F
   - alias: "Wake Alarm — Hue sunrise step 3 (T-10)"
     id: wake_alarm_hue_step3
     trigger:
@@ -92,15 +104,21 @@ automation:
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
-      - service: light.turn_on
-        target:
-          entity_id: light.bedroom
-        data:
-          brightness_pct: 45
-          color_temp_kelvin: 3200
-          transition: 120
+      - parallel:
+          - service: light.turn_on
+            target:
+              entity_id: light.bedroom
+            data:
+              brightness_pct: 45
+              color_temp_kelvin: 3200
+              transition: 120
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 78
 
-  # T-0: Wake time — blinds open to 50%, lights at 65% cool white
+  # T-0: Wake time — blinds open 50%, lights 65%, pod 80°F
   - alias: "Wake Alarm — Wake time"
     id: wake_alarm_wake_time
     trigger:
@@ -126,8 +144,13 @@ automation:
               brightness_pct: 65
               color_temp_kelvin: 4000
               transition: 180
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 80
 
-  # T+10 min: Blinds fully open, lights at full daylight
+  # T+10 min: Blinds fully open, lights full daylight, pod 82°F
   - alias: "Wake Alarm — Post-wake brightness (T+10)"
     id: wake_alarm_post_wake
     trigger:
@@ -154,3 +177,8 @@ automation:
               brightness_pct: 85
               color_temp_kelvin: 5000
               transition: 120
+          - service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 82
