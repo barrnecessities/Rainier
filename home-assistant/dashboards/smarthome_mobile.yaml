@@ -55,5 +55,5 @@ views:
 
       # 8sleep Pod
       - type: thermostat
-        entity: climate.eight_sleep_left_side
+        entity: climate.brandon_s_eight_sleep_side_climate
         name: Pod 3

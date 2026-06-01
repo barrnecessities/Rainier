@@ -30,7 +30,7 @@ automation:
     action:
       - service: climate.set_temperature
         target:
-          entity_id: climate.eight_sleep_left_side
+          entity_id: climate.brandon_s_eight_sleep_side_climate
         data:
           temperature: 72  # warm-up target; adjust per preference
 

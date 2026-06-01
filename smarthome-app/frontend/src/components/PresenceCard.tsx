@@ -39,14 +39,14 @@ export default function PresenceCard() {
   );
 
   const { data: podData } = useSWR<HaState>(
-    '/api/eight/status',
+    '/api/ha/states/climate.brandon_s_eight_sleep_side_climate',
     fetcher,
     { refreshInterval: 60_000 },
   );
 
   const podTemp = podData?.attributes?.current_temperature as number | undefined;
-  const podTarget = podData?.attributes?.target_temperature as number | undefined;
-  const podState = podData?.state ?? 'unknown';
+  const podTarget = podData?.attributes?.temperature as number | undefined;
+  const podState = podData?.attributes?.hvac_action as string ?? podData?.state ?? 'unknown';
 
   return (
     <div className="card">
