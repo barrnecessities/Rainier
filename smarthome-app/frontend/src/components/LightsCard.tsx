@@ -7,10 +7,10 @@ import { Lightbulb } from 'lucide-react';
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const SCENES = [
-  { id: 'scene.nighttime', label: 'Night', brightness: 5, kelvin: 2200 },
-  { id: 'scene.reading', label: 'Read', brightness: 60, kelvin: 3000 },
-  { id: 'scene.morning', label: 'Morning', brightness: 40, kelvin: 4000 },
-  { id: 'scene.bright', label: 'Day', brightness: 100, kelvin: 5500 },
+  { id: 'scene.entire_pad_nighttime', label: 'Night' },
+  { id: 'scene.entire_pad_sleepy', label: 'Sleepy' },
+  { id: 'scene.entire_pad_read', label: 'Read' },
+  { id: 'scene.entire_pad_arise', label: 'Arise' },
 ];
 
 interface HaLightState {
@@ -62,13 +62,7 @@ export default function LightsCard() {
 
   async function activateScene(scene: typeof SCENES[0]) {
     setActiveScene(scene.id);
-    setLocalBrightness(scene.brightness);
-    await callService('light', 'turn_on', {
-      entity_id: LIGHTS_GROUP,
-      brightness_pct: scene.brightness,
-      color_temp_kelvin: scene.kelvin,
-      transition: 2,
-    });
+    await callService('scene', 'turn_on', { entity_id: scene.id });
   }
 
   async function applyBrightness(pct: number) {
