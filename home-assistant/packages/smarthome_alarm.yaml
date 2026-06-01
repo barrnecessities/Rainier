@@ -72,7 +72,7 @@ automation:
       - parallel:
           - service: cover.set_cover_position
             target:
-              entity_id: cover.bedroom_blinds
+              entity_id: cover.topdownbottomup_0001_combined
             data:
               position: 50
           - service: light.turn_on
@@ -100,7 +100,7 @@ automation:
       - parallel:
           - service: cover.set_cover_position
             target:
-              entity_id: cover.bedroom_blinds
+              entity_id: cover.topdownbottomup_0001_combined
             data:
               position: 100
           - service: light.turn_on

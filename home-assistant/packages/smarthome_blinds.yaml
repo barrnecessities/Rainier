@@ -22,9 +22,7 @@ automation:
     action:
       - service: cover.set_cover_position
         target:
-          entity_id:
-            - cover.bedroom_blinds
-            - cover.living_room_blinds
+          entity_id: cover.topdownbottomup_0001_combined
         data:
           position: 30
 
@@ -79,8 +77,7 @@ automation:
       - service: cover.set_cover_position
         target:
           entity_id:
-            - cover.bedroom_blinds
-            - cover.living_room_blinds
+            cover.topdownbottomup_0001_combined
         data:
           position: 70
 
@@ -99,8 +96,7 @@ automation:
       - service: cover.set_cover_position
         target:
           entity_id:
-            - cover.bedroom_blinds
-            - cover.living_room_blinds
+            cover.topdownbottomup_0001_combined
         data:
           position: 0
 

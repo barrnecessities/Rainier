@@ -12,8 +12,7 @@ interface CoverState {
 }
 
 const COVERS = [
-  { entity: 'cover.bedroom_blinds', label: 'Bedroom' },
-  { entity: 'cover.living_room_blinds', label: 'Living Room' },
+  { entity: 'cover.topdownbottomup_0001_combined', label: 'Living Room' },
 ];
 
 function PositionSlider({
