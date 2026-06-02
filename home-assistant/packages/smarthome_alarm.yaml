@@ -118,7 +118,7 @@ automation:
             data:
               temperature: 78
 
-  # T-0: Wake time — blinds open 50%, lights 65%, pod 80°F
+  # T-0: Wake time — blinds open 50%, lights 65%, pod 80°F, music starts
   - alias: "Wake Alarm — Wake time"
     id: wake_alarm_wake_time
     trigger:
@@ -149,6 +149,23 @@ automation:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
               temperature: 80
+          - sequence:
+              - service: media_player.select_source
+                target:
+                  entity_id: media_player.spotify_brandon_barron
+                data:
+                  source: Bedroom
+              - service: media_player.play_media
+                target:
+                  entity_id: media_player.spotify_brandon_barron
+                data:
+                  media_content_id: "spotify:playlist:2PscIFWQyXsQAdPZ0Y9GS2"
+                  media_content_type: music
+              - service: media_player.volume_set
+                target:
+                  entity_id: media_player.bedroom
+                data:
+                  volume_level: 0.2
 
   # T+10 min: Blinds fully open, lights full daylight, pod 82°F
   - alias: "Wake Alarm — Post-wake brightness (T+10)"
