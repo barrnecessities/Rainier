@@ -36,9 +36,36 @@ home key, which prints over serial. Then put that key in the hdpv_ble integratio
 - ❌ **"Add bridge / Add remote"** in app Accessories — not the shade-add path.
 - ❌ **TYP_ID = 42** (emulator default) — app filtered it out, didn't appear in scan.
 - ❌ **TYP_ID = 62** (code's commented alt) — also filtered out.
+- ❌ **TYP_ID = 6** (real shade's actual type byte, read via nRF) — still not shown.
 - ❌ **Phone region change (US → UK)** — no effect.
 - ❌ **Bluetooth permission / proximity / reset** — all confirmed fine; emulator
   advertises correctly ("Device myPVcover ready.").
+- ❌ **Apple HomeKit (gateway-less)** — confirmed: PowerView Gen 3 **requires the
+  $195 Gen 3 Gateway** for HomeKit / Alexa / any smart-home control. Without a
+  gateway, ONLY the app can control shades (direct BLE). So HomeKit is not a free path.
+
+## Why the emulator is likely blocked
+
+After 3 type IDs + region + BT checks, `myPVcover` never appears in the 3 Day Blinds
+app's "Manage shades" scan, even though it advertises correctly. The app DOES have an
+add-shade scan (it asks "is shade in ship mode?"), but it finds nothing. Most probable
+cause: the **dealer-branded 3 Day Blinds app v1.3.1 has stricter/locked shade
+provisioning** than the generic PowerView app the emulator author tested against.
+The real shade's advertisement also carries extra bytes (`54 FC` at pos 2-3, `E0` at
+end) the emulator doesn't reproduce — but those likely reflect a *provisioned* shade,
+not a *ship-mode* one, so matching them is not obviously correct.
+
+## Decision point (2026-06-14)
+
+Free DIY emulator path is stuck. Realistic options:
+1. **Buy PowerView Gen 3 Gateway (~$195)** → official `hunterdouglas_powerview` HA
+   integration. Guaranteed, easiest, also unlocks HomeKit + Alexa. Costs money.
+2. **Extract key via Android** → install 3 Day Blinds app on an Android phone, log into
+   the home, pull `home_key` from app data (backup/logcat). Free-ish, technical,
+   requires an Android device. Then use hdpv_ble (gateway-less).
+3. **One more emulator attempt** → reproduce the full manufacturer data
+   (`54 FC … E0`) in the sketch. Free, but uncertain; may still be blocked by the
+   locked app.
 
 ## Progress log
 
