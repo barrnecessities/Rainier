@@ -150,22 +150,29 @@ automation:
             data:
               temperature: 80
           - sequence:
+              - service: media_player.volume_set
+                target:
+                  entity_id: media_player.bedroom
+                data:
+                  volume_level: 0.2
               - service: media_player.select_source
                 target:
                   entity_id: media_player.spotify_brandon_barron
                 data:
                   source: Bedroom
+              - delay:
+                  seconds: 2
               - service: media_player.play_media
                 target:
                   entity_id: media_player.spotify_brandon_barron
                 data:
                   media_content_id: "spotify:playlist:2PscIFWQyXsQAdPZ0Y9GS2"
                   media_content_type: music
-              - service: media_player.volume_set
+              - service: media_player.media_shuffle_set
                 target:
-                  entity_id: media_player.bedroom
+                  entity_id: media_player.spotify_brandon_barron
                 data:
-                  volume_level: 0.2
+                  shuffle: true
 
   # T+10 min: Blinds fully open, lights full daylight, pod 82°F
   - alias: "Wake Alarm — Post-wake brightness (T+10)"
