@@ -55,17 +55,28 @@ The real shade's advertisement also carries extra bytes (`54 FC` at pos 2-3, `E0
 end) the emulator doesn't reproduce — but those likely reflect a *provisioned* shade,
 not a *ship-mode* one, so matching them is not obviously correct.
 
-## Decision point (2026-06-14)
+## Emulator path CONCLUSIVELY blocked (2026-06-14)
 
-Free DIY emulator path is stuck. Realistic options:
-1. **Buy PowerView Gen 3 Gateway (~$195)** → official `hunterdouglas_powerview` HA
-   integration. Guaranteed, easiest, also unlocks HomeKit + Alexa. Costs money.
-2. **Extract key via Android** → install 3 Day Blinds app on an Android phone, log into
-   the home, pull `home_key` from app data (backup/logcat). Free-ish, technical,
-   requires an Android device. Then use hdpv_ble (gateway-less).
-3. **One more emulator attempt** → reproduce the full manufacturer data
-   (`54 FC … E0`) in the sketch. Free, but uncertain; may still be blocked by the
-   locked app.
+- Tried exact-match packet `19 08 54 FC 06 00 00 00 00 00 E0` (copied real shade
+  hny#2488) → still not discovered.
+- **Root cause found:** the 3 Day Blinds app has **no manual "Add shade" / scan
+  button**. "Manage shades" only lists existing shades; "Shade not showing here?" is a
+  passive help dialog (wake shade / contact support). The app **auto-discovers only
+  ship-mode (factory) shades**. We can only replicate a *provisioned* shade's
+  advertisement, which the app ignores by design. Capturing a true ship-mode signature
+  would require factory-resetting a real blind (unpairs it) — not acceptable.
+- Verdict: **abandon the ESP32 emulator path.** ESP32 + sketch all worked perfectly;
+  the locked dealer app is the blocker.
+
+## Remaining options
+
+1. **Extract key via Android** (free, needs an Android phone): install 3 Day Blinds /
+   PowerView app on Android, log into the same home/account (key syncs from cloud since
+   it's a BLE/no-gateway home), then pull `home_key` from app data
+   (`adb backup` / shared_prefs / logcat). Then use `hdpv_ble` gateway-less.
+2. **Buy PowerView Gen 3 Gateway (~$195)** (paid, guaranteed): official
+   `hunterdouglas_powerview` HA integration, plug-and-play, also unlocks HomeKit + Alexa.
+3. **Pause blinds**, pivot to other wins (Alexa alarm, iPad dashboard, Mysa, Snooz).
 
 ## Progress log
 
