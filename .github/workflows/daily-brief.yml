@@ -1,0 +1,44 @@
+name: Daily Marketing Brief
+
+on:
+  schedule:
+    # 11:00 UTC = 7:00am ET (EDT). Adjust as you like; cron is always UTC.
+    - cron: "0 11 * * *"
+  workflow_dispatch: {} # manual "Run workflow" button
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: marketing-brief
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - run: npm install --no-audit --no-fund
+
+      - name: Build & send brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRIEF_MODEL: ${{ vars.BRIEF_MODEL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          KINDLE_EMAIL: ${{ secrets.KINDLE_EMAIL }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: node src/index.js
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marketing-brief
+          path: marketing-brief/out/
+          if-no-files-found: ignore
+          retention-days: 14
