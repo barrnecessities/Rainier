@@ -1,0 +1,48 @@
+name: Daily AI Marketing Brief
+
+on:
+  schedule:
+    # 13:00 UTC daily. Adjust to taste (cron is in UTC).
+    # NOTE: scheduled workflows only run from the repo's DEFAULT branch,
+    # so this won't fire until merged into the default branch.
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: marketing-ai-brief
+
+jobs:
+  build-brief:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python generate_brief.py
+
+      - name: Commit brief
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add briefs/
+          if git diff --cached --quiet; then
+            echo "No new brief to commit."
+          else
+            git commit -m "Daily marketing brief $(date -u +%Y-%m-%d)"
+            git push
+          fi
