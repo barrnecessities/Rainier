@@ -1,0 +1,25 @@
+# Seed file for the daily brief. Edit this to steer the research.
+# The script reads it on every run.
+
+# Platforms / products to track each day.
+platforms:
+  - Salesforce Agentforce
+  - Adobe GenStudio
+  - Adobe Experience Platform Agents
+  - Hightouch AI Decisioning
+
+# Marketing + AI leaders/founders to prioritize. Add X handles or full names.
+# Examples (replace/extend with the people you actually follow):
+leaders:
+  # - "@handle"
+  # - "Jane Doe (Founder, Acme)"
+
+# Broad themes that define the brief's scope.
+themes:
+  - agentic marketing
+  - AI marketing agency operations
+  - GTM automation
+  - martech / customer data platforms
+
+# Noise to skip (companies, topics, buzzwords you don't want).
+exclude: []
