@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgencyOS · Brief Generation Agent</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --ink: #111827;
+    --ink-2: #374151;
+    --ink-3: #6b7280;
+    --line: #e5e7eb;
+    --line-2: #d1d5db;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --accent-line: #c7d2fe;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --tag-user: #0e7490;   --tag-user-bg: #ecfeff;
+    --tag-client: #7c3aed; --tag-client-bg: #f5f3ff;
+    --tag-aos: #b45309;    --tag-aos-bg: #fffbeb;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(17,24,39,.05), 0 1px 6px rgba(17,24,39,.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- App frame ---------- */
+  .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 0 20px;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -.01em; }
+  .logo-mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), #7c6cf0);
+    color: #fff; display: grid; place-items: center;
+    font-size: 12px; font-weight: 800;
+  }
+  .logo small { font-weight: 500; color: var(--ink-3); font-size: 12px; margin-left: 2px; }
+  .crumb { color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 7px; }
+  .crumb b { color: var(--ink-2); font-weight: 600; }
+  .crumb .sep { color: var(--line-2); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .run-badge {
+    font-size: 12px; color: var(--ink-3);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px;
+    background: var(--bg);
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 999px; background: #d1d5db;
+    color: #4b5563; display: grid; place-items: center; font-size: 11px; font-weight: 700;
+  }
+
+  .body { display: grid; grid-template-columns: 232px 1fr; min-height: 0; }
+
+  /* ---------- Left rail / stepper ---------- */
+  .rail {
+    background: var(--surface); border-right: 1px solid var(--line);
+    padding: 18px 12px; overflow-y: auto;
+  }
+  .rail-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-3); font-weight: 700; padding: 0 10px 8px;
+  }
+  .step {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; position: relative;
+  }
+  .step:hover { background: var(--bg); }
+  .step.active { background: var(--accent-soft); border-color: var(--accent-line); }
+  .step .dot {
+    width: 20px; height: 20px; border-radius: 999px; flex: none; margin-top: 1px;
+    display: grid; place-items: center; font-size: 10.5px; font-weight: 700;
+    border: 1.5px solid var(--line-2); color: var(--ink-3); background: var(--surface);
+  }
+  .step.done .dot { background: var(--green); border-color: var(--green); color: #fff; }
+  .step.active .dot { border-color: var(--accent); color: var(--accent); }
+  .step.blocked .dot { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+  .step .txt b { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+  .step .txt span { font-size: 11.5px; color: var(--ink-3); }
+  .step-line { width: 1.5px; height: 10px; background: var(--line-2); margin: 0 0 0 20px; }
+  .rail-note {
+    margin: 18px 10px 0; padding: 10px 12px; border-radius: 8px;
+    background: var(--bg); border: 1px dashed var(--line-2);
+    font-size: 11.5px; color: var(--ink-3);
+  }
+  .rail-note b { color: var(--ink-2); }
+
+  /* ---------- Main pane ---------- */
+  .main { overflow-y: auto; padding: 26px 32px 60px; }
+  .main-inner { max-width: 880px; margin: 0 auto; }
+  .screen { display: none; }
+  .screen.visible { display: block; animation: fade .18s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .screen-head { margin-bottom: 20px; }
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+    font-weight: 700; color: var(--accent); margin-bottom: 4px;
+  }
+  h1 { font-size: 21px; font-weight: 700; letter-spacing: -.015em; margin: 0 0 4px; }
+  .sub { color: var(--ink-3); font-size: 13.5px; max-width: 640px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+
+  /* ---------- Pills / tags ---------- */
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+  }
+  .pill.user   { color: var(--tag-user);   background: var(--tag-user-bg);   border: 1px solid #a5f3fc; }
+  .pill.client { color: var(--tag-client); background: var(--tag-client-bg); border: 1px solid #ddd6fe; }
+  .pill.aos    { color: var(--tag-aos);    background: var(--tag-aos-bg);    border: 1px solid #fde68a; }
+  .pill.intel  { color: var(--ink-3); background: var(--bg); border: 1px solid var(--line); text-transform: none; letter-spacing: 0; font-weight: 600; }
+  .src-chain { display: inline-flex; align-items: center; gap: 4px; }
+  .src-chain .arrow { color: var(--line-2); font-size: 11px; }
+
+  /* ---------- Screen 1: Intake ---------- */
+  .type-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 26px; }
+  .type-card {
+    padding: 14px; cursor: pointer; position: relative;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); box-shadow: var(--shadow);
+    transition: border-color .12s ease;
+  }
+  .type-card:hover { border-color: var(--line-2); }
+  .type-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
+  .type-card .t-icon {
+    width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center;
+    font-size: 15px; margin-bottom: 10px; background: var(--bg); border: 1px solid var(--line);
+  }
+  .type-card.selected .t-icon { background: var(--accent-soft); border-color: var(--accent-line); }
+  .type-card b { display: block; font-size: 13px; letter-spacing: -.01em; margin-bottom: 2px; }
+  .type-card p { margin: 0; font-size: 11.5px; color: var(--ink-3); line-height: 1.4; }
+  .type-card .v1 {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid var(--accent-line); border-radius: 5px; padding: 1px 6px;
+  }
+  .type-card .soon {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .05em;
+    color: var(--ink-3); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 5px; padding: 1px 6px;
+  }
+  .type-card.placeholder { opacity: .72; }
+
+  .field-label { font-size: 12px; font-weight: 700; color: var(--ink-2); margin: 0 0 8px; display:flex; align-items:center; gap:8px; }
+  .field-label .hint { font-weight: 500; color: var(--ink-3); }
+  .posture-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2);
+  }
+  .chip:hover { border-color: var(--ink-3); }
+  .chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip .chip-sub { display: block; font-size: 10.5px; font-weight: 500; opacity: .75; }
+  .chip.type-specific { border-style: dashed; }
+  .chip.type-specific.selected { border-style: solid; }
+
+  .version-row { display: flex; gap: 10px; margin-bottom: 26px; }
+  .version-opt {
+    flex: 1; padding: 12px 14px; border-radius: var(--radius); cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface);
+  }
+  .version-opt.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .version-opt b { font-size: 13px; display: block; }
+  .version-opt span { font-size: 11.5px; color: var(--ink-3); }
+
+  .ask-box { padding: 16px; margin-bottom: 26px; }
+  .ask-box textarea {
+    width: 100%; border: none; resize: vertical; min-height: 74px;
+    font: inherit; color: var(--ink-2); outline: none; background: transparent;
+  }
+  .upload-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .upload-file {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+    padding: 8px 12px; font-size: 12.5px; color: var(--ink-2); box-shadow: var(--shadow);
+  }
+  .upload-file .f-ico { font-size: 14px; }
+  .upload-file .f-kind { color: var(--ink-3); font-size: 11px; }
+  .upload-add {
+    border: 1.5px dashed var(--line-2); border-radius: 8px; padding: 8px 14px;
+    color: var(--ink-3); font-size: 12.5px; cursor: pointer; background: transparent;
+  }
+  .upload-add:hover { border-color: var(--accent); color: var(--accent); }
+
+  .cta-row { display: flex; align-items: center; gap: 14px; margin-top: 30px; }
+  .btn {
+    font: inherit; font-weight: 600; font-size: 13.5px; cursor: pointer;
+    border-radius: 8px; padding: 10px 18px; border: 1px solid transparent;
+  }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #4338ca; }
+  .btn.primary:disabled { background: var(--line-2); cursor: not-allowed; }
+  .btn.ghost { background: var(--surface); border-color: var(--line-2); color: var(--ink-2); }
+  .cta-note { font-size: 12px; color: var(--ink-3); }
+
+  /* ---------- Screen 2: Context / pillars ---------- */
+  .pillar { margin-bottom: 12px; overflow: hidden; }
+  .pillar-head {
+    display: flex; align-items: center; gap: 10px; padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .pillar-head .p-name { font-weight: 700; font-size: 13.5px; letter-spacing: -.01em; }
+  .pillar-head .p-q { color: var(--ink-3); font-size: 12.5px; flex: 1; margin-left: 2px; }
+  .pillar-body { padding: 13px 16px; font-size: 13px; color: var(--ink-2); background: var(--surface); }
+  .pillar-body .filled {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; white-space: pre-line;
+  }
+  .pillar-foot {
+    display: flex; align-items: center; gap: 8px; padding: 9px 16px;
+    border-top: 1px solid var(--line); background: #fbfcfd; font-size: 11.5px; color: var(--ink-3);
+  }
+  .pillar.omitted { border-style: dashed; box-shadow: none; background: transparent; }
+  .pillar.omitted .pillar-head { border-bottom: none; opacity: .8; }
+  .cond-mark { color: var(--ink-3); font-size: 12px; border: 1px solid var(--line-2); border-radius: 999px; width: 16px; height: 16px; display: inline-grid; place-items: center; line-height: 1; }
+  .omit-note {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--ink-3); font-style: italic;
+  }
+  .signal-badge { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .signal-badge.ok { color: var(--green); background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .signal-badge.none { color: var(--ink-3); background: var(--bg); border: 1px solid var(--line); }
+
+  /* ---------- Screen 3: Narrative ---------- */
+  .narrative-doc { padding: 30px 36px; font-size: 14.5px; line-height: 1.75; color: var(--ink-2); }
+  .narrative-doc p { margin: 0 0 16px; }
+  .narrative-doc p:last-child { margin-bottom: 0; }
+  .nhl { border-radius: 4px; padding: 1px 4px; font-weight: 500; cursor: default; position: relative; }
+  .nhl[data-pillar]::after {
+    content: attr(data-pillar);
+    position: absolute; bottom: calc(100% + 4px); left: 0;
+    font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    background: var(--ink); color: #fff; padding: 2px 7px; border-radius: 5px;
+    opacity: 0; pointer-events: none; transition: opacity .12s ease; white-space: nowrap;
+  }
+  .nhl:hover::after { opacity: 1; }
+  .nhl.customer     { background: #ecfeff; box-shadow: inset 0 -2px 0 #67e8f9; }
+  .nhl.company      { background: #f5f3ff; box-shadow: inset 0 -2px 0 #c4b5fd; }
+  .nhl.opportunity  { background: #f0fdf4; box-shadow: inset 0 -2px 0 #86efac; }
+  .nhl.assignment   { background: #eef2ff; box-shadow: inset 0 -2px 0 #a5b4fc; }
+  .nhl.mandatories  { background: #fef2f2; box-shadow: inset 0 -2px 0 #fca5a5; }
+  .nhl.considerations { background: #fffbeb; box-shadow: inset 0 -2px 0 #fcd34d; }
+  .narrative-legend {
+    display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px;
+    font-size: 11.5px; color: var(--ink-3);
+  }
+  .narrative-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .narrative-legend .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .principle-banner {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: var(--radius); padding: 12px 15px; margin-bottom: 16px;
+    font-size: 12.5px; color: #3730a3;
+  }
+  .principle-banner b { font-weight: 700; }
+
+  /* ---------- Screen 4: Modules ---------- */
+  .module { margin-bottom: 10px; overflow: hidden; }
+  .module-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer;
+    user-select: none;
+  }
+  .module-head:hover { background: #fbfcfd; }
+  .module-num {
+    width: 22px; height: 22px; flex: none; border-radius: 6px;
+    background: var(--bg); border: 1px solid var(--line);
+    display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--ink-3);
+  }
+  .module-head b { font-size: 13.5px; letter-spacing: -.01em; flex: 1; }
+  .module-pillars { font-size: 11px; color: var(--ink-3); }
+  .caret { color: var(--ink-3); font-size: 11px; transition: transform .15s ease; }
+  .module.open .caret { transform: rotate(90deg); }
+  .module-body { display: none; border-top: 1px solid var(--line); padding: 14px 16px 16px; }
+  .module.open .module-body { display: block; }
+  .module-content { font-size: 13.5px; color: var(--ink-2); white-space: pre-line; margin-bottom: 12px; }
+  .module-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .module-meta .meta-label { font-size: 11px; color: var(--ink-3); font-weight: 600; margin-right: 2px; }
+  .module.deepened { border-left: 3px solid var(--accent); }
+  .deepen-badge {
+    font-size: 10.5px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .compress-badge {
+    font-size: 10.5px; font-weight: 600; color: var(--ink-3);
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+
+  /* ---------- Screen 5: QA ---------- */
+  .qa-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .qa-stat { padding: 14px 16px; }
+  .qa-stat .n { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+  .qa-stat .n.green { color: var(--green); }
+  .qa-stat .n.amber { color: var(--amber); }
+  .qa-stat .lbl { font-size: 11.5px; color: var(--ink-3); font-weight: 600; }
+  .qa-group { margin-bottom: 14px; overflow: hidden; }
+  .qa-group-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    border-bottom: 1px solid var(--line); background: #fbfcfd;
+  }
+  .qa-group-head b { font-size: 13.5px; }
+  .qa-group-head span { font-size: 12px; color: var(--ink-3); }
+  .qa-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .qa-item:last-child { border-bottom: none; }
+  .qa-ico { width: 18px; height: 18px; flex: none; border-radius: 999px; display: grid; place-items: center; font-size: 10px; font-weight: 800; margin-top: 1px; }
+  .qa-ico.pass { background: var(--green-soft); color: var(--green); border: 1px solid #bbf7d0; }
+  .qa-ico.warn { background: var(--amber-soft); color: var(--amber); border: 1px solid #fde68a; }
+  .qa-item .qa-txt { color: var(--ink-2); }
+  .qa-item.warn-item { background: var(--amber-soft); }
+  .qa-item .qa-detail { display: block; font-size: 12px; color: var(--amber); margin-top: 3px; font-weight: 600; }
+  .retry-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--amber-soft); border: 1px solid #fde68a; border-radius: var(--radius);
+    padding: 12px 15px; margin: 16px 0; font-size: 12.5px; color: #92400e;
+  }
+  .emit-row { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+  .emit-row .btn.primary { padding: 12px 24px; font-size: 14px; }
+
+  /* ---------- data seam marker ---------- */
+  .seam { display:none; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ Top bar ============ -->
+  <header class="topbar">
+    <div class="logo"><div class="logo-mark">A</div>AgencyOS <small>Brief Agent</small></div>
+    <div class="crumb"><span class="sep">/</span> <b>PayPal</b> <span class="sep">·</span> CBMC Day-6 Opt-In <span class="sep">·</span> Campaign Brief</div>
+    <div class="topbar-right">
+      <span class="run-badge">Run #0042 · Draft</span>
+      <div class="avatar">BB</div>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- ============ Left rail: pipeline stepper ============ -->
+    <nav class="rail">
+      <div class="rail-label">Pipeline</div>
+      <div class="step done" data-screen="intake">
+        <div class="dot">✓</div>
+        <div class="txt"><b>Intake</b><span>Type · Posture · Ask</span></div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step done" data-screen="context">
+        <div class="dot">✓</div>
+        <div class="txt"><b>Context</b><span>8 pillars assembled</span></div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step done" data-screen="narrative">
+        <div class="dot">✓</div>
+        <div class="txt"><b>Narrative</b><span>One central story</span></div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step done" data-screen="modules">
+        <div class="dot">✓</div>
+        <div class="txt"><b>Modules</b><span>11 of 11 derived</span></div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step blocked active" data-screen="qa">
+        <div class="dot">!</div>
+        <div class="txt"><b>QA Gate</b><span>1 check needs input</span></div>
+      </div>
+      <div class="rail-note">
+        <b>Narrative-first.</b> One story is written across all 8 pillars, then projected into this brief type's fixed module set. Posture reweights emphasis; it never changes the module list.
+      </div>
+    </nav>
+
+    <!-- ============ Main pane ============ -->
+    <main class="main"><div class="main-inner">
+
+      <!-- ========== SCREEN 1 · INTAKE ========== -->
+      <section class="screen" id="screen-intake">
+        <div class="screen-head">
+          <div class="eyebrow">Step 1 · Intake</div>
+          <h1>Start a new brief</h1>
+          <div class="sub">Declare the brief type and posture, state the ask, and attach any client reference material. Everything else the agent assembles from the client profile and the AOS intelligence layer.</div>
+        </div>
+
+        <p class="field-label">Brief type</p>
+        <div class="type-grid" id="type-grid"></div>
+
+        <p class="field-label">Posture <span class="hint">— one lens per run; reweights emphasis, tone &amp; depth</span></p>
+        <div class="posture-row" id="posture-row"></div>
+
+        <p class="field-label">Version</p>
+        <div class="version-row">
+          <div class="version-opt selected"><b>Multi-channel</b><span>Cross-channel campaign; flighting &amp; allocation emphasized</span></div>
+          <div class="version-opt"><b>Single-channel</b><span>One-channel execution; channel craft emphasized</span></div>
+        </div>
+
+        <p class="field-label">The ask <span class="hint">— per-brief user input (USER channel)</span></p>
+        <div class="card ask-box">
+          <textarea readonly>Drive Cash-to-Points opt-in among non-enrolled Cashback Mastercard holders at Day 6 of onboarding. Named goal: 12% opt-in rate within 30 days of send. Budget envelope $250K. Go-live 06/30. Position tiers as a discovery, not a feature upsell.</textarea>
+        </div>
+
+        <p class="field-label">Client reference uploads <span class="hint">— CLIENT channel · Phase 1: documents only, no live integration</span></p>
+        <div class="upload-row">
+          <div class="upload-file"><span class="f-ico">📄</span> Brand_Voice_Guidelines_2026.pdf <span class="f-kind">Brand</span></div>
+          <div class="upload-file"><span class="f-ico">📊</span> CBMC_Segments_Q2_Export.xlsx <span class="f-kind">CRM extract</span></div>
+          <div class="upload-file"><span class="f-ico">📄</span> Approved_Legal_Disclosures.docx <span class="f-kind">Mandatories</span></div>
+          <div class="upload-file"><span class="f-ico">📈</span> EMOB_Prior_Performance.csv <span class="f-kind">Historical</span></div>
+          <button class="upload-add">+ Add reference</button>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn primary" onclick="go('context')">Assemble context →</button>
+          <span class="cta-note">The agent will build the 8-pillar context object before writing anything.</span>
+        </div>
+      </section>
+
+      <!-- ========== SCREEN 2 · CONTEXT ========== -->
+      <section class="screen" id="screen-context">
+        <div class="screen-head">
+          <div class="eyebrow">Step 2 · Context</div>
+          <h1>8-pillar context object</h1>
+          <div class="sub">Each pillar is asked as a question and answered from the source channels in priority order. Conditional pillars (○) are populated only when real signal exists — never thin filler.</div>
+        </div>
+        <div id="pillar-list"></div>
+        <div class="cta-row">
+          <button class="btn ghost" onclick="go('intake')">← Intake</button>
+          <button class="btn primary" onclick="go('narrative')">Write narrative →</button>
+        </div>
+      </section>
+
+      <!-- ========== SCREEN 3 · NARRATIVE ========== -->
+      <section class="screen" id="screen-narrative">
+        <div class="screen-head">
+          <div class="eyebrow">Step 3 · Narrative</div>
+          <h1>The central narrative</h1>
+          <div class="sub">Written once, across all populated pillars, before any module exists. Hover a highlight to see which pillar it draws from.</div>
+        </div>
+        <div class="principle-banner">
+          <span>🧭</span>
+          <div><b>Why this step exists:</b> modules generated independently produce technically strong sections but disconnected, low-value briefs. Every module on the next screen is a projection of this one story.</div>
+        </div>
+        <div class="card narrative-doc" id="narrative-doc"></div>
+        <div class="narrative-legend" id="narrative-legend"></div>
+        <div class="cta-row">
+          <button class="btn ghost" onclick="go('context')">← Context</button>
+          <button class="btn primary" onclick="go('modules')">Project into modules →</button>
+        </div>
+      </section>
+
+      <!-- ========== SCREEN 4 · MODULES ========== -->
+      <section class="screen" id="screen-modules">
+        <div class="screen-head">
+          <div class="eyebrow">Step 4 · Modules</div>
+          <h1>Campaign Brief · 11 modules</h1>
+          <div class="sub">The fixed module set for the Campaign type, derived from the central narrative. The <b>Media / Performance</b> posture deepens Channels, Budget &amp; Measurement and compresses creative-territory detail — the module list itself never changes.</div>
+        </div>
+        <div id="module-list"></div>
+        <div class="cta-row">
+          <button class="btn ghost" onclick="go('narrative')">← Narrative</button>
+          <button class="btn primary" onclick="go('qa')">Run QA gate →</button>
+        </div>
+      </section>
+
+      <!-- ========== SCREEN 5 · QA ========== -->
+      <section class="screen" id="screen-qa">
+        <div class="screen-head">
+          <div class="eyebrow">Step 5 · QA Gate</div>
+          <h1>Blocking quality gate</h1>
+          <div class="sub">Quality · Posture · Consistency. Every check must pass before the brief is emitted. On failure the agent auto-revises and re-runs; after 2 failed attempts it escalates to a human Worker.</div>
+        </div>
+
+        <div class="qa-summary">
+          <div class="card qa-stat"><div class="n green">13</div><div class="lbl">Checks passing</div></div>
+          <div class="card qa-stat"><div class="n amber">1</div><div class="lbl">Needs input — client to provide</div></div>
+          <div class="card qa-stat"><div class="n">1<span style="font-size:14px;color:var(--ink-3)"> / 2</span></div><div class="lbl">Auto-revision attempts used</div></div>
+        </div>
+
+        <div id="qa-groups"></div>
+
+        <div class="retry-note">
+          <span>⚠️</span>
+          <div><b>Gate blocked.</b> Legal disclosure language for PayPal+ Rewards mentions is unconfirmed — flagged <i>“client to provide.”</i> The agent revised once (attempt 1 of 2). One more failed pass escalates to a human Worker with the failed check attached.</div>
+        </div>
+
+        <div class="emit-row">
+          <button class="btn primary" disabled>Emit brief</button>
+          <button class="btn ghost">Request input from client</button>
+          <span class="cta-note">Emit unlocks only on a fully passing scan.</span>
+        </div>
+      </section>
+
+    </div></main>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   AOS_DATA — the data seam.
+   Everything rendered below is driven by this single object. In the
+   data-connected version, this object is replaced by API responses
+   (context service, narrative service, QA service); the render
+   functions stay the same.
+   ===================================================================== */
+const AOS_DATA = {
+  briefTypes: [
+    { key: "project",   icon: "🗂️", name: "Project / Engagement", desc: "Frames the whole client relationship", badge: "soon" },
+    { key: "strategy",  icon: "🧭", name: "Strategy", desc: "Brand building — what to do and why", badge: "soon" },
+    { key: "campaign",  icon: "🎯", name: "Campaign", desc: "One campaign to run", badge: "v1", selected: true },
+    { key: "lifecycle", icon: "🔁", name: "Lifecycle / CRM", desc: "An ongoing program, not a one-off", badge: "soon" },
+    { key: "asset",     icon: "🎬", name: "Asset / Production", desc: "Make the assets to spec", badge: "v2" }
+  ],
+
+  postures: [
+    { name: "Creative", sub: "Makers — the idea", },
+    { name: "Business", sub: "Client marketing leads" },
+    { name: "Technical / MarTech", sub: "Ops & data engineering" },
+    { name: "Strategist", sub: "Planners — the logic chain" },
+    { name: "Media / Performance", sub: "Campaign-specific lens", typeSpecific: true, selected: true }
+  ],
+
+  /* Campaign pillars — questions per §7.3 of the architecture doc */
+  pillars: [
+    { name: "Customer", cond: false, sources: ["CLIENT","AOS","USER"],
+      q: "Who is the target, and what moves them?",
+      a: "Non-enrolled CBMC cardholders at Day 6 of onboarding (~184K, per CBMC_Segments_Q2_Export). Card activated but rewards behavior unformed — receptive window, habit-forming, open to discovering card utility. AOS 3rd-party overlay: high digital-wallet adoption, deal-seeker skew." },
+    { name: "Company", cond: false, sources: ["CLIENT","USER"],
+      q: "What business situation and brand context frames the campaign?",
+      a: "PayPal CBMC line; cashback-to-points conversion is the entry point to the tiered rewards ecosystem (Base → Gold → Black). Brand voice: aspirational but accessible, card-forward, monochromatic with Deep Blue tier callouts. Prior EMOB Day-6 sends established the template." },
+    { name: "Competitive", cond: true, omitted: true,
+      sources: ["AOS","USER"],
+      q: "Is there a competitor or category move to answer?",
+      a: null,
+      omitReason: "No competitive trigger in the ask and no category-move signal in AOS external tracking. Omitted — no thin filler." },
+    { name: "Culture", cond: true, omitted: false, sources: ["AOS"],
+      q: "Is there a cultural moment to ride?",
+      a: "Seasonal signal (AOS·Ex): summer-spend uptick in category feeds; Day-6 send window lands inside the pre-holiday-travel booking surge relevant to Gold-tier hotel benefits. Included on real signal." },
+    { name: "Opportunity", cond: false, sources: ["USER"],
+      q: "Why does this campaign need to exist now?",
+      a: "Named goal: 12% Cash-to-Points opt-in within 30 days of send. Day 6 is the prime receptivity window; every cohort that passes un-enrolled is unrecoverable at the same cost. Tier progression (Base → Gold within 90 days) is the downstream value thesis." },
+    { name: "Assignment", cond: false, sources: ["USER"],
+      q: "What is this campaign — on what budget and timeline?",
+      a: "Objective: convert (opt-in). Version: multi-channel. Budget envelope $250K. Channels in scope: email (primary), in-app content card, push. Go-live 06/30 · creative due to SYF 06/06 · legal submission 06/01." },
+    { name: "Mandatories", cond: false, sources: ["CLIENT","AOS","USER"],
+      q: "What must every execution obey?",
+      a: "No cash value assigned to points — approved language only: “Get 3 points for every $1 of cash back you convert.” No “New!” label (FTC 6-month rule). No superlatives. Required footer disclaimer per Approved_Legal_Disclosures.docx. PP+ Rewards mentions require PP Rewards Legal review — ⚠ pending confirmation." },
+    { name: "Considerations", cond: false, sources: ["CLIENT","AOS","USER"],
+      q: "What measurement, learnings, and risks shape it?",
+      a: "Attribution: enrollment event within 30-day window, email-first touch. Prior-run learning (AOS·Le): tier-visual emails beat copy-led by +18% CTOR in Day-6 sends. Risk: SYF review cycle is the critical-path dependency; approval window 06/06–06/11." }
+  ],
+
+  /* Narrative — one story; spans map to pillar highlights */
+  narrative: [
+    [
+      { t: "One hundred eighty-four thousand new Cashback Mastercard holders are six days into the card — activated, receptive, and forming habits that will define the account's lifetime value.", p: "customer" },
+      { t: " Right now, none of them are enrolled in Cash-to-Points, which means none of them can see the tiered rewards ecosystem that is " },
+      { t: "PayPal's real retention engine: Base to Gold to Black.", p: "company" }
+    ],
+    [
+      { t: "The window is the point. " },
+      { t: "Day 6 is the moment a cardholder is most open to discovering what the card can do, and every cohort that passes un-enrolled is unrecoverable at the same cost. The named goal is a 12% opt-in rate within 30 days of send", p: "opportunity" },
+      { t: " — and the way to get there is to make tiers feel like a discovery, not a feature upsell." }
+    ],
+    [
+      { t: "This is a " },
+      { t: "multi-channel convert campaign on a $250K envelope: email leads, in-app content card and push reinforce, live on 06/30", p: "assignment" },
+      { t: ". Every execution stays inside hard rails: " },
+      { t: "approved conversion language only, no cash value assigned to points, no “New!” label, and the PP+ Rewards legal review that is still pending", p: "mandatories" },
+      { t: ". " },
+      { t: "Prior Day-6 sends tell us tier-forward visuals beat copy-led treatments by 18% on click-to-open — so the creative leads with the tier ladder, and measurement watches enrollment within the 30-day attribution window with SYF review as the critical path.", p: "considerations" }
+    ]
+  ],
+  narrativeLegend: [
+    { cls: "customer", label: "Customer", color: "#67e8f9" },
+    { cls: "company", label: "Company", color: "#c4b5fd" },
+    { cls: "opportunity", label: "Opportunity", color: "#86efac" },
+    { cls: "assignment", label: "Assignment", color: "#a5b4fc" },
+    { cls: "mandatories", label: "Mandatories", color: "#fca5a5" },
+    { cls: "considerations", label: "Considerations", color: "#fcd34d" }
+  ],
+
+  /* Campaign's 11 fixed modules per §7.3; deepened = posture emphasis */
+  modules: [
+    { n: 1, name: "Background & Context", pillars: "Company · Competitive○", intel: ["Cl","Fn","De","Ex"],
+      content: "PayPal CBMC, Day-6 EMOB window. Cash-to-Points conversion is the entry point to the tiered rewards ecosystem. Prior Day-6 sends established the card-forward template; summer-spend seasonal signal supports Gold-tier travel benefits framing. Competitive pillar omitted this run — no signal." },
+    { n: 2, name: "Business Goal & Campaign Objective", pillars: "Opportunity · Assignment", intel: ["Cl","Fn"],
+      content: "Convert: drive Cash-to-Points opt-in among non-enrolled Day-6 CBMC holders. Named goal: 12% opt-in within 30 days of send, on a $250K envelope treated as a goal constraint." },
+    { n: 3, name: "Success Metrics & KPIs", pillars: "Assignment · Considerations", intel: ["Cl","Fn","De","Le"], deepened: true,
+      content: "Primary: Cash-to-Points opt-in rate (target 12% / 30 days). Secondary: email true open, CTOR (benchmark +18% for tier-visual treatments per prior runs), post-enrollment conversion rate, Base→Gold progression within 90 days. Realistic-target check applied from learned intelligence." },
+    { n: 4, name: "Target Audience", pillars: "Customer", intel: ["Cl","Fn","Ex"],
+      content: "~184K non-enrolled CBMC cardholders at Day 6. Activated, rewards behavior unformed. 3rd-party overlay: high digital-wallet adoption, deal-seeker skew. Exclusions: already-opted-in, business accounts, out-of-window." },
+    { n: 5, name: "Single-Minded Proposition", pillars: "Company · Customer", intel: ["Cl","Fn"], compressed: true,
+      content: "The cash back you already earn is the starting line to status." },
+    { n: 6, name: "Messaging Direction", pillars: "Company · Mandatories", intel: ["Cl","Fn","Le"], compressed: true,
+      content: "Tiers as discovery, not upsell. Aspirational but accessible. Approved conversion language only. Tier ladder visualized Base → Gold → Black. (Compressed under Media/Performance posture — full creative territory lives with the Creative-posture rendering.)" },
+    { n: 7, name: "Channels & Scope", pillars: "Assignment", intel: ["Cl","Fn","De","Le","Ex"], deepened: true,
+      content: "Email primary (Day-6 send), in-app content card D6–D13, push reminder D10 to non-openers. Multi-channel version: sequencing logic — email opens the story, in-app sustains, push recovers. Platform inventory and prior channel performance sourced from client export + platform feeds; channel benchmarks from Deloitte category set." },
+    { n: 8, name: "Budget", pillars: "Assignment · Considerations", intel: ["Cl","Fn","De","Le","Ex"], deepened: true,
+      content: "$250K envelope. Working allocation: 60% email production + deployment, 25% in-app/push, 15% measurement & test reserve. Cost-per-output sanity check vs. learned benchmarks: within range. Rate signals current as of run date." },
+    { n: 9, name: "Timeline & Flighting", pillars: "Assignment", intel: ["Cl","Fn","Ex"], deepened: true,
+      content: "Legal submission 06/01 → SYF submission 06/06 → SYF feedback 06/11 → QA/handoff 06/15 → go-live 06/30. Flighting: continuous Day-6 trigger post-launch; push window D10; in-app card expires D13. Critical path: SYF review cycle." },
+    { n: 10, name: "Mandatories & Guardrails", pillars: "Mandatories", intel: ["Cl","Fn","Ex"],
+      content: "Approved language only: “Get 3 points for every $1 of cash back you convert.” No cash value on points. No “New!” label (FTC 6-month rule). No superlatives. Required footer disclaimer attached. ⚠ PP+ Rewards legal review pending — client to provide." },
+    { n: 11, name: "Measurement & Learning Plan", pillars: "Considerations", intel: ["Cl","Fn","De","Le","Ex"], deepened: true,
+      content: "Attribution: enrollment within 30-day window, email-first touch. Test: tier-visual vs. control copy-led cell (10% holdout). Learning question: does tier-forward framing lift opt-in beyond the +18% CTOR effect into enrollment? Results feed the learned layer for future Day-6 runs." }
+  ],
+
+  qa: [
+    { group: "Quality", desc: "Complete, accurate, grounded", items: [
+      { txt: "All 11 modules present and populated; genuine gaps flagged “client to provide.”", pass: true },
+      { txt: "Every claim, figure, target and date traces to a named input — nothing fabricated.", pass: true },
+      { txt: "Named goal is specific, measurable, time-bound; KPIs ladder up to it.", pass: true },
+      { txt: "Conditional pillars: Competitive correctly omitted (no signal); Culture included on real signal.", pass: true },
+      { txt: "Mandatories complete and unambiguous.", pass: false,
+        detail: "PP+ Rewards disclosure language unconfirmed — requires PP Rewards Legal review. Flagged: client to provide." }
+    ]},
+    { group: "Posture", desc: "Reads as Media / Performance", items: [
+      { txt: "Channels, Budget, Timeline and Measurement deepened; creative territory compressed.", pass: true },
+      { txt: "No off-posture drift — brief stays performance-forward throughout.", pass: true },
+      { txt: "Vocabulary matches the media/performance reader; no unexplained jargon.", pass: true },
+      { txt: "Module weighting reflects the multi-channel version.", pass: true }
+    ]},
+    { group: "Consistency", desc: "One coherent brief", items: [
+      { txt: "8-pillar through-line identical across all modules; no section contradicts another.", pass: true },
+      { txt: "Single-minded proposition preserved wherever it recurs.", pass: true },
+      { txt: "Numbers reconcile: $250K, 12%/30-day goal, 184K audience, dates match everywhere.", pass: true },
+      { txt: "Segment labels and terminology uniform across modules.", pass: true },
+      { txt: "No module asserts what another rules out; all dependencies and gates resolve.", pass: true }
+    ]}
+  ]
+};
+
+/* ============ renderers ============ */
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+function srcPill(src) {
+  const cls = { USER: "user", CLIENT: "client", AOS: "aos" }[src];
+  return `<span class="pill ${cls}">${src}</span>`;
+}
+function srcChain(sources) {
+  return `<span class="src-chain">${sources.map(srcPill).join('<span class="arrow">→</span>')}</span>`;
+}
+const INTEL_NAMES = { Cl: "Client", Fn: "Functional", De: "Deloitte", Le: "Learned", Ex: "External" };
+
+function renderIntake() {
+  const grid = $("#type-grid");
+  AOS_DATA.briefTypes.forEach(t => {
+    const isCampaign = t.key === "campaign";
+    const card = el("div", "type-card" + (t.selected ? " selected" : "") + (isCampaign ? "" : " placeholder"));
+    const badge = t.badge === "v1" ? `<span class="v1">V1</span>` :
+                  t.badge === "v2" ? `<span class="soon">V2</span>` : `<span class="soon">LATER</span>`;
+    card.innerHTML = `${badge}<div class="t-icon">${t.icon}</div><b>${t.name}</b><p>${t.desc}</p>`;
+    grid.appendChild(card);
+  });
+  const row = $("#posture-row");
+  AOS_DATA.postures.forEach(p => {
+    const chip = el("div", "chip" + (p.selected ? " selected" : "") + (p.typeSpecific ? " type-specific" : ""),
+      `${p.name}<span class="chip-sub">${p.sub}</span>`);
+    row.appendChild(chip);
+  });
+}
+
+function renderPillars() {
+  const list = $("#pillar-list");
+  AOS_DATA.pillars.forEach(p => {
+    const card = el("div", "card pillar" + (p.omitted ? " omitted" : ""));
+    const cond = p.cond ? `<span class="cond-mark" title="Conditional pillar">○</span>` : "";
+    let body = "";
+    if (p.omitted) {
+      body = `<div class="pillar-body"><span class="omit-note">○ conditional — omitted. ${p.omitReason}</span></div>`;
+    } else {
+      body = `<div class="pillar-body"><div class="filled">${p.a}</div></div>
+        <div class="pillar-foot">Sources, in priority order: ${srcChain(p.sources)}
+          <span style="margin-left:auto"><span class="signal-badge ok">populated</span></span></div>`;
+    }
+    card.innerHTML = `
+      <div class="pillar-head">
+        <span class="p-name">${p.name}</span>${cond}
+        <span class="p-q">${p.q}</span>
+        ${p.omitted ? '<span class="signal-badge none">no signal</span>' : ""}
+      </div>${body}`;
+    list.appendChild(card);
+  });
+}
+
+function renderNarrative() {
+  const doc = $("#narrative-doc");
+  AOS_DATA.narrative.forEach(par => {
+    const p = el("p");
+    par.forEach(span => {
+      if (span.p) {
+        const s = el("span", `nhl ${span.p}`, span.t);
+        s.dataset.pillar = span.p;
+        p.appendChild(s);
+      } else {
+        p.appendChild(document.createTextNode(span.t));
+      }
+    });
+    doc.appendChild(p);
+  });
+  const legend = $("#narrative-legend");
+  AOS_DATA.narrativeLegend.forEach(l => {
+    legend.appendChild(el("span", "lg", `<span class="sw" style="background:${l.color}"></span>${l.label}`));
+  });
+}
+
+function renderModules() {
+  const list = $("#module-list");
+  AOS_DATA.modules.forEach(m => {
+    const card = el("div", "card module" + (m.deepened ? " deepened" : "") + (m.n <= 3 ? " open" : ""));
+    const badge = m.deepened ? `<span class="deepen-badge">▲ deepened by posture</span>`
+               : m.compressed ? `<span class="compress-badge">▽ compressed</span>` : "";
+    const intel = m.intel.map(i => `<span class="pill intel" title="${INTEL_NAMES[i]}">${i} · ${INTEL_NAMES[i]}</span>`).join("");
+    card.innerHTML = `
+      <div class="module-head">
+        <div class="module-num">${m.n}</div>
+        <b>${m.name}</b>
+        <span class="module-pillars">${m.pillars}</span>
+        ${badge}
+        <span class="caret">▶</span>
+      </div>
+      <div class="module-body">
+        <div class="module-content">${m.content}</div>
+        <div class="module-meta"><span class="meta-label">AOS intelligence:</span>${intel}</div>
+      </div>`;
+    card.querySelector(".module-head").addEventListener("click", () => card.classList.toggle("open"));
+    list.appendChild(card);
+  });
+}
+
+function renderQA() {
+  const wrap = $("#qa-groups");
+  AOS_DATA.qa.forEach(g => {
+    const card = el("div", "card qa-group");
+    const items = g.items.map(it => `
+      <div class="qa-item${it.pass ? "" : " warn-item"}">
+        <div class="qa-ico ${it.pass ? "pass" : "warn"}">${it.pass ? "✓" : "!"}</div>
+        <div class="qa-txt">${it.txt}${it.detail ? `<span class="qa-detail">${it.detail}</span>` : ""}</div>
+      </div>`).join("");
+    card.innerHTML = `<div class="qa-group-head"><b>${g.group}</b><span>${g.desc}</span></div>${items}`;
+    wrap.appendChild(card);
+  });
+}
+
+/* ============ navigation ============ */
+function go(name) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("visible"));
+  $("#screen-" + name).classList.add("visible");
+  document.querySelectorAll(".step").forEach(s => s.classList.toggle("active", s.dataset.screen === name));
+  $(".main").scrollTop = 0;
+}
+document.querySelectorAll(".step").forEach(s => s.addEventListener("click", () => go(s.dataset.screen)));
+
+renderIntake();
+renderPillars();
+renderNarrative();
+renderModules();
+renderQA();
+go("intake");
+</script>
+</body>
+</html>
