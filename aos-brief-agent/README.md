@@ -1,6 +1,25 @@
-# AOS Brief Generation Agent — Visual Design Mockup
+# AOS Brief Generation Agent
 
-A static, self-contained visual design for the AgencyOS Brief Generation Agent UI. Open `mockup.html` directly in any browser — no server, build step, or dependencies.
+Self-contained prototypes for the AgencyOS Brief Generation Agent. Open any `.html` file directly in a browser — no server, build step, or dependencies.
+
+## Files
+
+| File | What it is |
+|---|---|
+| `demo.html` | **Working demo** — 2 brief types (Campaign, Asset/Production) × selectable postures with live re-rendering, a pizza-tracker pipeline view, a Configure panel for adding new postures/brief types, and exports (logic doc, data-sourcing map, config JSON). Dummy data behind a single `CONFIG` seam. |
+| `requirements.md` | **Detailed requirements** — pipeline invariants, FR-1 to FR-9, demo-vs-production scope, acceptance criteria, open questions. |
+| `mockup.html` | v1 static visual design of the five pipeline screens. |
+| `design-framework-v2.md` | Slide-ready flow framework for design handoff (posture scale up top, type-first sequencing, live data pull layer). |
+
+## Demo quick start
+
+1. Open `demo.html`, pick a brief type + posture, hit **Generate brief** and watch the tracker walk the pipeline.
+2. After the brief releases, switch posture or brief type — the brief re-renders through the new lens instantly.
+3. **⚙ Configure** adds new postures/brief types (persisted to localStorage); **⇩ Export** downloads the logic/requirements doc, the internal/external/partner data-sourcing map, or the raw config JSON.
+
+---
+
+## Visual design mockup (v1)
 
 ## What it shows
 

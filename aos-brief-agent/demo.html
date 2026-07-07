@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgencyOS · Brief Agent — Working Demo</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --surface: #fff; --ink: #111827; --ink-2: #374151; --ink-3: #6b7280;
+    --line: #e5e7eb; --line-2: #d1d5db;
+    --accent: #4f46e5; --accent-soft: #eef2ff; --accent-line: #c7d2fe;
+    --green: #16a34a; --green-soft: #f0fdf4;
+    --amber: #d97706; --amber-soft: #fffbeb;
+    --tag-user: #0e7490; --tag-user-bg: #ecfeff;
+    --tag-client: #7c3aed; --tag-client-bg: #f5f3ff;
+    --tag-aos: #b45309; --tag-aos-bg: #fffbeb;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(17,24,39,.05), 0 1px 6px rgba(17,24,39,.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 0 20px; height: 54px; position: sticky; top: 0; z-index: 40;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .logo-mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), #7c6cf0);
+    color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  }
+  .logo small { font-weight: 500; color: var(--ink-3); font-size: 12px; }
+  .demo-badge {
+    font-size: 10.5px; font-weight: 800; letter-spacing: .06em; color: var(--amber);
+    background: var(--amber-soft); border: 1px solid #fde68a; border-radius: 5px; padding: 2px 7px;
+  }
+  .topbar-right { margin-left: auto; display: flex; gap: 8px; }
+  .btn {
+    font: inherit; font-weight: 600; font-size: 13px; cursor: pointer;
+    border-radius: 8px; padding: 8px 14px; border: 1px solid transparent;
+  }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #4338ca; }
+  .btn.primary:disabled { background: var(--line-2); cursor: not-allowed; }
+  .btn.ghost { background: var(--surface); border-color: var(--line-2); color: var(--ink-2); }
+  .btn.ghost:hover { border-color: var(--ink-3); }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ---- control bar ---- */
+  .controls {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 14px 20px; display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-end;
+    position: sticky; top: 54px; z-index: 30;
+  }
+  .ctl-group { display: grid; gap: 6px; }
+  .ctl-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--ink-3); }
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg-btn {
+    font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2);
+  }
+  .seg-btn:hover { border-color: var(--ink-3); }
+  .seg-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .seg-btn.type-specific { border-style: dashed; }
+  .seg-btn.type-specific.selected { border-style: solid; }
+  .seg-btn .custom-star { color: var(--amber); }
+  .ctl-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+  /* ---- pizza tracker ---- */
+  .tracker-wrap {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 16px 20px 18px; position: sticky; top: 129px; z-index: 20;
+  }
+  .tracker { display: flex; align-items: flex-start; max-width: 980px; margin: 0 auto; }
+  .t-stage { flex: 1; display: grid; justify-items: center; gap: 6px; text-align: center; position: relative; }
+  .t-bubble {
+    width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+    background: var(--surface); border: 2px solid var(--line-2); color: var(--ink-3);
+    font-size: 14px; font-weight: 700; transition: all .25s ease; z-index: 2;
+  }
+  .t-stage .t-name { font-size: 11.5px; font-weight: 700; color: var(--ink-3); }
+  .t-stage .t-sub { font-size: 10.5px; color: var(--ink-3); max-width: 120px; min-height: 13px; }
+  .t-stage.done .t-bubble { background: var(--green); border-color: var(--green); color: #fff; }
+  .t-stage.done .t-name { color: var(--ink-2); }
+  .t-stage.active .t-bubble {
+    border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
+    box-shadow: 0 0 0 5px var(--accent-soft); animation: pulse 1.1s ease infinite;
+  }
+  .t-stage.active .t-name { color: var(--accent); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 4px var(--accent-soft); } 50% { box-shadow: 0 0 0 8px var(--accent-soft); } }
+  .t-conn { flex: 1; height: 2.5px; background: var(--line-2); margin-top: 16px; min-width: 18px; border-radius: 2px; transition: background .25s ease; }
+  .t-conn.done { background: var(--green); }
+
+  /* ---- main ---- */
+  .main { padding: 26px 20px 80px; }
+  .main-inner { max-width: 920px; margin: 0 auto; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  /* idle hero */
+  .hero { text-align: center; padding: 60px 20px; }
+  .hero h1 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 8px; }
+  .hero p { color: var(--ink-3); max-width: 560px; margin: 0 auto 22px; }
+
+  /* stage log */
+  .stage-card { padding: 20px 24px; margin-bottom: 14px; }
+  .stage-card h3 { margin: 0 0 10px; font-size: 15px; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
+  .log-line { font-size: 13px; color: var(--ink-2); padding: 5px 0; display: flex; gap: 8px; align-items: baseline; opacity: 0; animation: logIn .3s ease forwards; }
+  @keyframes logIn { to { opacity: 1; } }
+  .log-line .tick { color: var(--green); font-weight: 700; }
+
+  /* pills */
+  .pill {
+    display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+  }
+  .pill.user   { color: var(--tag-user);   background: var(--tag-user-bg);   border: 1px solid #a5f3fc; }
+  .pill.client { color: var(--tag-client); background: var(--tag-client-bg); border: 1px solid #ddd6fe; }
+  .pill.aos    { color: var(--tag-aos);    background: var(--tag-aos-bg);    border: 1px solid #fde68a; }
+  .pill.intel  { color: var(--ink-3); background: var(--bg); border: 1px solid var(--line); text-transform: none; letter-spacing: 0; font-weight: 600; }
+
+  /* brief output */
+  .brief-header { padding: 22px 26px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .brief-header h2 { margin: 0; font-size: 19px; letter-spacing: -.015em; flex: 1; }
+  .posture-chip {
+    font-size: 11.5px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 999px; padding: 4px 12px;
+  }
+  .qa-chip {
+    font-size: 11.5px; font-weight: 700; color: var(--green);
+    background: var(--green-soft); border: 1px solid #bbf7d0; border-radius: 999px; padding: 4px 12px;
+  }
+  .section-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+    font-weight: 700; color: var(--accent); margin: 22px 0 10px;
+  }
+  .narrative { padding: 24px 28px; font-size: 14.5px; line-height: 1.75; color: var(--ink-2); }
+  .narrative p { margin: 0 0 14px; } .narrative p:last-child { margin: 0; }
+  .lens-note {
+    display: flex; gap: 9px; background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 8px; padding: 10px 13px; font-size: 12.5px; color: #3730a3; margin-bottom: 16px;
+  }
+  .module { margin-bottom: 10px; overflow: hidden; }
+  .module-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; user-select: none; }
+  .module-head:hover { background: #fbfcfd; }
+  .module-num {
+    width: 22px; height: 22px; flex: none; border-radius: 6px; background: var(--bg);
+    border: 1px solid var(--line); display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; color: var(--ink-3);
+  }
+  .module-head b { font-size: 13.5px; flex: 1; }
+  .caret { color: var(--ink-3); font-size: 11px; transition: transform .15s; }
+  .module.open .caret { transform: rotate(90deg); }
+  .module-body { display: none; border-top: 1px solid var(--line); padding: 14px 16px; }
+  .module.open .module-body { display: block; }
+  .module-content { font-size: 13.5px; color: var(--ink-2); white-space: pre-line; }
+  .module.deepened { border-left: 3px solid var(--accent); }
+  .deepen-badge { font-size: 10.5px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); padding: 2px 8px; border-radius: 999px; }
+  .compress-badge { font-size: 10.5px; font-weight: 600; color: var(--ink-3); background: var(--bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; }
+  .variant-note { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); border: 1px dashed var(--accent-line); font-size: 12.5px; color: #3730a3; white-space: pre-line; }
+  .module-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+  /* modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(17,24,39,.45); z-index: 100;
+    display: none; align-items: flex-start; justify-content: center; padding: 50px 16px; overflow-y: auto;
+  }
+  .overlay.visible { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; max-width: 640px; width: 100%; padding: 26px 28px; box-shadow: 0 20px 50px rgba(17,24,39,.25); }
+  .modal h2 { margin: 0 0 6px; font-size: 18px; letter-spacing: -.015em; }
+  .modal .sub { color: var(--ink-3); font-size: 13px; margin-bottom: 18px; }
+  .modal h4 { margin: 20px 0 8px; font-size: 13.5px; }
+  .modal label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 10px; }
+  .modal input, .modal textarea, .modal select {
+    font: inherit; font-size: 13px; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; color: var(--ink);
+  }
+  .modal .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-close { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-3); }
+  .help-step { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .help-step:last-child { border-bottom: none; }
+  .help-step .hs-n {
+    width: 24px; height: 24px; flex: none; border-radius: 999px; background: var(--accent-soft);
+    color: var(--accent); font-weight: 800; font-size: 12px; display: grid; place-items: center;
+  }
+  .help-step b { display: block; }
+  .help-step span { color: var(--ink-3); font-size: 12.5px; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 999px;
+    opacity: 0; transition: opacity .25s; z-index: 200; pointer-events: none;
+  }
+  .toast.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"><div class="logo-mark">A</div>AgencyOS <small>Brief Agent</small></div>
+  <span class="demo-badge">WORKING DEMO · DUMMY DATA</span>
+  <div class="topbar-right">
+    <button class="btn ghost sm" onclick="openModal('help')">? Help</button>
+    <button class="btn ghost sm" onclick="openModal('config')">⚙ Configure</button>
+    <button class="btn ghost sm" onclick="openModal('export')">⇩ Export</button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="ctl-group">
+    <div class="ctl-label">Brief type</div>
+    <div class="seg" id="type-seg"></div>
+  </div>
+  <div class="ctl-group">
+    <div class="ctl-label">Posture (the lens)</div>
+    <div class="seg" id="posture-seg"></div>
+  </div>
+  <div class="ctl-actions">
+    <button class="btn primary" id="generate-btn" onclick="generate()">Generate brief</button>
+  </div>
+</div>
+
+<div class="tracker-wrap"><div class="tracker" id="tracker"></div></div>
+
+<main class="main"><div class="main-inner" id="output"></div></main>
+
+<!-- modals -->
+<div class="overlay" id="overlay-help"><div class="modal">
+  <button class="modal-close" onclick="closeModals()">✕</button>
+  <h2>How this demo works</h2>
+  <div class="sub">The tracker at the top is the pipeline — like a pizza tracker, each bubble lights up as the agent moves through a stage. Same core every run; only type and posture change what comes out.</div>
+  <div class="help-step"><div class="hs-n">1</div><div><b>Pick a brief type</b><span>Each type asks the 8 context pillars differently and has its own fixed module set.</span></div></div>
+  <div class="help-step"><div class="hs-n">2</div><div><b>Pick a posture</b><span>One lens per run. It reweights emphasis, tone and depth — it never changes the module list. Try switching posture after generating: the brief re-renders instantly.</span></div></div>
+  <div class="help-step"><div class="hs-n">3</div><div><b>Generate</b><span>Watch the tracker: Intake → Data Pull → Context → Narrative → Modules → QA → Brief. The narrative is written once; modules are projections of it.</span></div></div>
+  <div class="help-step"><div class="hs-n">4</div><div><b>Configure</b><span>Add your own posture or brief type — new entries appear in the pickers and work immediately with placeholder content.</span></div></div>
+  <div class="help-step"><div class="hs-n">5</div><div><b>Export</b><span>Download the logic/requirements doc, the data-sourcing map (internal / external / partner), or the raw config JSON for engineering.</span></div></div>
+</div></div>
+
+<div class="overlay" id="overlay-config"><div class="modal">
+  <button class="modal-close" onclick="closeModals()">✕</button>
+  <h2>Configure</h2>
+  <div class="sub">Additions are saved in your browser (localStorage) and appear in the pickers immediately. Content for new entries is generated as structured placeholders.</div>
+  <h4>Add a posture</h4>
+  <div class="row">
+    <label>Name <input id="cfg-p-name" placeholder="e.g. Legal / Compliance"></label>
+    <label>Reader <input id="cfg-p-reader" placeholder="e.g. Legal reviewers"></label>
+  </div>
+  <label>Modules to deepen (comma-separated, matched by name fragment)
+    <input id="cfg-p-deepen" placeholder="e.g. Mandatories, Measurement"></label>
+  <button class="btn primary sm" onclick="addPosture()">Add posture</button>
+  <h4>Add a brief type</h4>
+  <div class="row">
+    <label>Name <input id="cfg-t-name" placeholder="e.g. Lifecycle / CRM"></label>
+    <label>One-line description <input id="cfg-t-desc" placeholder="e.g. An ongoing program"></label>
+  </div>
+  <label>Module names (comma-separated)
+    <textarea id="cfg-t-modules" rows="2" placeholder="Program objective, Audience & segments, Triggers & eligibility, ..."></textarea></label>
+  <button class="btn primary sm" onclick="addBriefType()">Add brief type</button>
+  <h4>Reset</h4>
+  <button class="btn ghost sm" onclick="resetConfig()">Remove custom additions</button>
+</div></div>
+
+<div class="overlay" id="overlay-export"><div class="modal">
+  <button class="modal-close" onclick="closeModals()">✕</button>
+  <h2>Export</h2>
+  <div class="sub">Everything exports from the live config — including any postures or brief types you added.</div>
+  <div class="help-step"><div class="hs-n">⇩</div><div><b>Logic &amp; requirements (.md)</b><span>The pipeline logic, brief types, postures, module maps and QA rules as a shareable markdown doc.</span>
+    <button class="btn ghost sm" style="margin-top:6px" onclick="exportLogic()">Download</button></div></div>
+  <div class="help-step"><div class="hs-n">⇩</div><div><b>Data sourcing map (.md)</b><span>Per brief type: what to source internally, externally (3rd-party), and from partners — ready to circulate for data-collection asks.</span>
+    <button class="btn ghost sm" style="margin-top:6px" onclick="exportSourcing()">Download</button></div></div>
+  <div class="help-step"><div class="hs-n">⇩</div><div><b>Config (.json)</b><span>The raw machine-readable config — the contract for engineering to wire real data behind.</span>
+    <button class="btn ghost sm" style="margin-top:6px" onclick="exportConfig()">Download</button></div></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   CONFIG — the single data seam. All rendering reads from this object.
+   In the data-connected build, briefTypes[].modules[].base / variants
+   and pillar answers are replaced by service responses; the render and
+   pipeline code below stays identical. Custom additions from the
+   Configure panel merge into this object and persist to localStorage.
+   ===================================================================== */
+const BASE_CONFIG = {
+  stages: [
+    { key: "intake",    name: "Intake",    icon: "1", sub: "Type · posture · ask" },
+    { key: "datapull",  name: "Data Pull", icon: "2", sub: "USER · CLIENT · AOS" },
+    { key: "context",   name: "Context",   icon: "3", sub: "8 pillars" },
+    { key: "narrative", name: "Narrative", icon: "4", sub: "One story" },
+    { key: "modules",   name: "Modules",   icon: "5", sub: "Fixed set, reweighted" },
+    { key: "qa",        name: "QA Gate",   icon: "6", sub: "Quality · Posture · Consistency" },
+    { key: "brief",     name: "Brief",     icon: "★", sub: "Released" }
+  ],
+
+  postures: [
+    { id: "creative",   name: "Creative",            reader: "Makers — creatives, designers, copywriters",
+      lens: "Rendered through the CREATIVE lens: the idea leads. Emotional territory, tone and the single-minded proposition are foregrounded; operational and budget detail is compressed to what a maker needs." },
+    { id: "business",   name: "Business",            reader: "Client marketing & brand leads",
+      lens: "Rendered through the BUSINESS lens: the commercial case leads. Named goal, ROI logic, budget and KPIs are foregrounded." },
+    { id: "technical",  name: "Technical / MarTech", reader: "MarTech, ops & data engineering",
+      lens: "Rendered through the TECHNICAL lens: feasibility leads. Systems, triggers, data fields, integrations and orchestration are foregrounded." },
+    { id: "strategist", name: "Strategist",          reader: "Planners & strategy leads",
+      lens: "Rendered through the STRATEGIST lens: the logic chain leads. Situation → insight → strategy → measurement." },
+    { id: "media_performance", name: "Media / Performance", reader: "Media planners & performance marketers",
+      typeSpecificTo: "campaign",
+      lens: "Rendered through the MEDIA / PERFORMANCE lens: channels, flighting, allocation and measurable performance lead; creative territory is compressed to direction-only." },
+    { id: "production_trafficking", name: "Production / Trafficking", reader: "Producers, traffickers, studio ops",
+      typeSpecificTo: "asset",
+      lens: "Rendered through the PRODUCTION / TRAFFICKING lens: deliverables, specs, versioning, rights and delivery lead; strategic framing is compressed to context-only." }
+  ],
+
+  briefTypes: [
+  {
+    id: "campaign", name: "Campaign", desc: "One campaign to run", badge: "V1",
+    project: "PayPal · CBMC Day-6 Cash-to-Points Opt-In",
+    ask: "Drive Cash-to-Points opt-in among non-enrolled Cashback Mastercard holders at Day 6 of onboarding. Named goal: 12% opt-in within 30 days. Budget $250K. Go-live 06/30.",
+    postureWeights: {
+      creative:            { deepen: ["Single-Minded Proposition","Messaging Direction","Target Audience"], compress: ["Budget","Timeline & Flighting","Measurement & Learning Plan"] },
+      business:            { deepen: ["Business Goal & Campaign Objective","Success Metrics & KPIs","Budget"], compress: ["Messaging Direction"] },
+      technical:           { deepen: ["Channels & Scope","Measurement & Learning Plan","Timeline & Flighting"], compress: ["Single-Minded Proposition"] },
+      strategist:          { deepen: ["Background & Context","Target Audience","Measurement & Learning Plan"], compress: [] },
+      media_performance:   { deepen: ["Success Metrics & KPIs","Channels & Scope","Budget","Timeline & Flighting","Measurement & Learning Plan"], compress: ["Single-Minded Proposition","Messaging Direction"] }
+    },
+    dataPullLog: [
+      ["USER", "Ask parsed: convert objective, 12%/30-day named goal, $250K envelope, 06/30 go-live"],
+      ["CLIENT", "4 documents parsed: brand voice, CBMC segment export, legal disclosures, prior EMOB performance"],
+      ["AOS", "Fn: campaign-brief & KPI frameworks loaded · De: channel/category benchmarks · Le: prior Day-6 patterns (+18% CTOR tier-visual) · Ex: platform feeds, seasonal signals"]
+    ],
+    pillars: [
+      ["Customer", "Non-enrolled CBMC cardholders at Day 6 (~184K). Receptive window, habit-forming."],
+      ["Company", "PayPal CBMC; cash-to-points is the entry to the tier ecosystem (Base → Gold → Black)."],
+      ["Competitive ○", "Omitted — no signal. No thin filler."],
+      ["Culture ○", "Included: summer-spend seasonal signal supports Gold-tier travel framing."],
+      ["Opportunity", "12% opt-in in 30 days; un-enrolled cohorts unrecoverable at same cost."],
+      ["Assignment", "Convert · multi-channel · $250K · email + in-app + push · live 06/30."],
+      ["Mandatories", "Approved conversion language only; no cash value on points; no “New!” label; footer disclaimer."],
+      ["Considerations", "30-day attribution; tier-visual beats copy-led +18% CTOR; SYF review is critical path."]
+    ],
+    narrative: {
+      base: [
+        "One hundred eighty-four thousand new Cashback Mastercard holders are six days into the card — activated, receptive, and forming habits that will define lifetime value. None of them are enrolled in Cash-to-Points, which means none can see the tier ecosystem that is PayPal's real retention engine.",
+        "Day 6 is the window. The named goal is a 12% opt-in rate within 30 days of send — and the way there is to make tiers feel like a discovery, not a feature upsell.",
+        "This is a multi-channel convert campaign on a $250K envelope: email leads, in-app and push reinforce, live 06/30. Every execution stays inside hard rails — approved conversion language, no cash value on points, the pending PP+ legal review. Prior sends say tier-forward visuals beat copy-led by 18% on click-to-open, so the creative leads with the ladder and measurement watches enrollment inside the 30-day window."
+      ]
+    },
+    modules: [
+      { name: "Background & Context", pillars: "Company · Competitive○", intel: ["Cl","Fn","De","Ex"],
+        base: "PayPal CBMC, Day-6 EMOB window. Cash-to-Points conversion is the entry to the tiered rewards ecosystem. Prior Day-6 sends established the card-forward template; seasonal signal supports Gold-tier travel framing. Competitive pillar omitted — no signal." },
+      { name: "Business Goal & Campaign Objective", pillars: "Opportunity · Assignment", intel: ["Cl","Fn"],
+        base: "Convert: drive Cash-to-Points opt-in among non-enrolled Day-6 CBMC holders. Named goal: 12% opt-in within 30 days, on a $250K envelope treated as a goal constraint.",
+        variants: { business: "Commercial framing: every point of opt-in ≈ 1,840 enrolled accounts; enrolled accounts index +22% on 90-day spend vs. non-enrolled (learned benchmark). The 12% goal implies ~22K enrollments — payback on the $250K envelope within one quarter at current spend-lift rates." } },
+      { name: "Success Metrics & KPIs", pillars: "Assignment · Considerations", intel: ["Cl","Fn","De","Le"],
+        base: "Primary: Cash-to-Points opt-in rate (12% / 30 days). Secondary: true open, CTOR, post-enrollment conversion, Base→Gold progression within 90 days.",
+        variants: { media_performance: "Performance deep-dive: opt-in CPA target ≤ $11.40 (envelope ÷ implied enrollments). Channel-level: email CTOR benchmark 14.2% (tier-visual +18% vs. control), push open 6–8%, in-app card CTR 3.5%. Weekly pacing checkpoints at D7/D14/D21 against the 12% curve.",
+                    business: "Board-reportable rollup: opt-in rate, enrolled-account spend lift, projected incremental revenue vs. envelope." } },
+      { name: "Target Audience", pillars: "Customer", intel: ["Cl","Fn","Ex"],
+        base: "~184K non-enrolled CBMC cardholders at Day 6. Activated, rewards behavior unformed. Overlay: high wallet adoption, deal-seeker skew. Exclusions: opted-in, business accounts, out-of-window.",
+        variants: { creative: "Who they really are: six days in, the card is still novel — they're checking the app, poking at features, deciding what this card is *for*. They haven't been told there's a status game to play. The creative job is to make them feel like they found the secret door, not like they got a coupon." } },
+      { name: "Single-Minded Proposition", pillars: "Company · Customer", intel: ["Cl","Fn"],
+        base: "The cash back you already earn is the starting line to status.",
+        variants: { creative: "The cash back you already earn is the starting line to status.\n\nTerritory: discovery, not offer. The feeling of finding out your economy ticket came with lounge access. Visual anchor: the tier ladder as an ascent — Base → Gold → Black — with the card as the key, not the prize." } },
+      { name: "Messaging Direction", pillars: "Company · Mandatories", intel: ["Cl","Fn","Le"],
+        base: "Tiers as discovery, not upsell. Aspirational but accessible. Approved conversion language only. Ladder visualized Base → Gold → Black.",
+        variants: { creative: "Voice: confident, warm, zero fine-print energy in the headline zone. L1: “Your rewards just got a whole new level.” L2 grounds the 3-points-per-$1 mechanic. Never lead with the mechanic — lead with the level. All claims stay inside approved language." } },
+      { name: "Channels & Scope", pillars: "Assignment", intel: ["Cl","Fn","De","Le","Ex"],
+        base: "Email primary (Day-6 trigger), in-app content card D6–D13, push reminder D10 to non-openers.",
+        variants: { media_performance: "Sequencing logic: email opens the story (D6), in-app sustains (D6–D13), push recovers non-openers (D10). Suppression: enrollees drop from all subsequent touches within 24h. Inventory check vs. platform feeds: in-app card slot confirmed available for the window; push frequency cap 2/week respected.",
+                    technical: "Trigger spec: Day-6 event off account-open timestamp; suppression sync ≤24h via enrollment event; push token check before D10 send; in-app card expiry D13 hard-coded." } },
+      { name: "Budget", pillars: "Assignment · Considerations", intel: ["Cl","Fn","De","Le","Ex"],
+        base: "$250K envelope. Working allocation: 60% email production+deployment, 25% in-app/push, 15% measurement & test reserve.",
+        variants: { media_performance: "Allocation detail: $150K email (production $90K, deployment/ESP $60K), $62.5K in-app+push (build $40K, orchestration $22.5K), $37.5K measurement+test reserve. Cost-per-output within learned benchmarks; reserve releases at D14 checkpoint if pacing ≥ 80% of curve." } },
+      { name: "Timeline & Flighting", pillars: "Assignment", intel: ["Cl","Fn","Ex"],
+        base: "Legal 06/01 → SYF 06/06 → feedback 06/11 → QA/handoff 06/15 → go-live 06/30. Continuous Day-6 trigger post-launch.",
+        variants: { media_performance: "Flighting: continuous trigger, no calendar flights. Push window fixed at D10; in-app expires D13. Critical path: SYF review (06/06–06/11) — one slip compresses QA. Escalation pre-agreed if feedback exceeds window." } },
+      { name: "Mandatories & Guardrails", pillars: "Mandatories", intel: ["Cl","Fn","Ex"],
+        base: "Approved language only: “Get 3 points for every $1 of cash back you convert.” No cash value on points. No “New!” label (FTC 6-month rule). No superlatives. Required footer disclaimer. PP+ Rewards mentions require PP Rewards Legal review." },
+      { name: "Measurement & Learning Plan", pillars: "Considerations", intel: ["Cl","Fn","De","Le","Ex"],
+        base: "Attribution: enrollment within 30-day window, email-first touch. Test: tier-visual vs. copy-led control (10% holdout). Results feed the learned layer.",
+        variants: { media_performance: "Test design: 10% holdout, tier-visual vs. copy-led control, powered for ±1.5pp detection at the 184K base. Readout D30; learning question — does tier-forward framing lift *enrollment*, not just CTOR? Verified via enrollment event, not click.",
+                    strategist: "The learning ladder: this run answers whether discovery-framing beats offer-framing at the enrollment level. If yes, it reframes every downstream lifecycle touch — the insight compounds beyond this campaign." } }
+    ],
+    dataSourcing: [
+      { area: "Audience & segments", internal: "CRM segment exports, account-open events, enrollment events", external: "3rd-party audience overlays (wallet adoption, deal-seeker indices)", partner: "Issuing partner (SYF) eligibility & exclusion lists" },
+      { area: "Performance benchmarks", internal: "Prior EMOB send performance (opens, CTOR, enrollment)", external: "Category email/push benchmarks (Deloitte + syndicated)", partner: "ESP deliverability & engagement reporting" },
+      { area: "Legal & mandatories", internal: "Approved disclosure library, brand guidelines", external: "FTC advertising rules feed", partner: "Issuing partner legal review (SYF), PP Rewards Legal" },
+      { area: "Channel inventory & rates", internal: "In-app card slot calendar, push frequency policy", external: "Platform feeds, seasonal rate signals", partner: "Media/ESP partner rate cards" }
+    ]
+  },
+  {
+    id: "asset", name: "Asset / Production", desc: "Make the assets to spec", badge: "V2",
+    project: "PayPal · EMOB Day-31 Email Series Production",
+    ask: "Produce the 12-email Day-31+ EMOB series across PPC, PPCC and CBMC. Figma delivery, creative due to SYF 06/15, launch 07/15. Six distinct email modules, versioned per product.",
+    postureWeights: {
+      creative:               { deepen: ["Objective & Role of the Asset","Single Message & Proposition","Copy & Content Requirements"], compress: ["Routing & Approvals","Deadlines, Trafficking & Delivery"] },
+      business:               { deepen: ["Objective & Role of the Asset","Deliverables List & Matrix"], compress: ["Format & Technical Specs"] },
+      technical:              { deepen: ["Format & Technical Specs","Variants & Versioning Logic","Deadlines, Trafficking & Delivery"], compress: ["Single Message & Proposition"] },
+      strategist:             { deepen: ["Objective & Role of the Asset","Audience & Targeting"], compress: ["Routing & Approvals"] },
+      production_trafficking: { deepen: ["Deliverables List & Matrix","Format & Technical Specs","Variants & Versioning Logic","Routing & Approvals","Deadlines, Trafficking & Delivery"], compress: ["Single Message & Proposition"] }
+    },
+    dataPullLog: [
+      ["USER", "Ask parsed: 12 emails, 3 products, Figma format, SYF due 06/15, launch 07/15"],
+      ["CLIENT", "5 documents parsed: brand voice, approved messaging + G24 disclosure, product truths per line, DAM asset inventory, sign-off matrix"],
+      ["AOS", "Fn: production spec templates, email copy conventions, a11y checklist · De: localization frameworks · Le: variant counts that right-sized prior series · Ex: platform spec feeds, rights databases"]
+    ],
+    pillars: [
+      ["Customer", "Existing cardholders 31+ days in, per product line (PPC digital-line, PPCC card, CBMC cashback)."],
+      ["Company", "Brand voice + approved messaging govern all copy; G24 disclosure triggers on “No Interest” language."],
+      ["Competitive ○", "Omitted — production layer, no competitive angle."],
+      ["Culture ○", "Omitted — assets not culturally timed."],
+      ["Opportunity", "Lifecycle engagement lift: educate, activate benefits, drive wallet provisioning."],
+      ["Assignment", "12 emails from 6 modules × product-eligibility matrix. Figma. Desktop + mobile."],
+      ["Mandatories", "Approved val-prop language per product; G24 disclosure where triggered; standard disclosures; WCAG AA."],
+      ["Considerations", "Subject lines/pre-headers still owed by CRM team; send-day TBDs must resolve before launch; SYF handoff 06/15 hard gate."]
+    ],
+    narrative: {
+      base: [
+        "Twelve emails, three card products, one production window. The Day-31+ EMOB series takes cardholders past onboarding into habit: subscriptions reminders, Mastercard benefits education, value-prop reinforcement, cashback-to-points, wallet provisioning.",
+        "The complexity is the matrix, not the message. Six email modules fan out across product eligibility — some go to all three lines, some exclude PPC — and every product carries its own approved value-prop language, with the G24 disclosure firing wherever “No Interest” appears.",
+        "Everything lands in Figma, creative due to SYF 06/15 for a 07/15 launch. Two open dependencies gate release: subject lines and pre-headers from the CRM team, and confirmed send days for the flexible-timing modules."
+      ]
+    },
+    modules: [
+      { name: "Objective & Role of the Asset", pillars: "Opportunity · Company", intel: ["Cl","Fn","Le"],
+        base: "Deepen engagement post-onboarding: educate on benefits, reinforce value props, drive wallet provisioning and points conversion across PPC/PPCC/CBMC.",
+        variants: { creative: "The role in the reader's life: these are the emails that turn a card in a drawer into a card in a pocket. Each module earns one habit — not twelve messages, six small behavior shifts." } },
+      { name: "Audience & Targeting", pillars: "Customer", intel: ["Cl","Fn","Ex"],
+        base: "Cardholders 31+ days post-open, segmented by product line. Module-level eligibility: Subscriptions (all 3), Mastercard Benefits (PPCC/CBMC only), BXO/World (all 3), Cashback-to-Points (CBMC only), Wallet Provisioning D65 (PPCC/CBMC), General Cashback D45–60 (CBMC)." },
+      { name: "Single Message & Proposition", pillars: "Company · Customer", intel: ["Cl","Fn"],
+        base: "Per module, one job each: e.g. Mastercard Benefits — “your card does more than you think” (purchase protection, ID theft resolution, travel).",
+        variants: { creative: "Module-by-module single-minded jobs:\n· Subscriptions — “put your bills on autopilot.”\n· MC Benefits — “your card does more than you think.”\n· BXO/World — “shop and pay over time, everywhere.”\n· Cash-to-Points — “your cash back has a next level.”\n· Wallet — “your card, one tap away.”\n· Cashback — “earning is the habit worth keeping.”" } },
+      { name: "Deliverables List & Matrix", pillars: "Assignment", intel: ["Cl","Fn","Le"],
+        base: "12 emails total from 6 modules × product matrix. Desktop + mobile comps per email. Figma delivery.",
+        variants: { production_trafficking: "Full matrix:\n· Subscriptions Reminder — PPC + PPCC + CBMC = 3 emails\n· Mastercard Benefits — PPCC + CBMC = 2\n· BXO/World Val Prop — PPC + PPCC + CBMC = 3\n· Cashback→Points — CBMC = 1\n· Wallet Provisioning (D65) — PPCC + CBMC = 2\n· General Cashback (D45–60) — CBMC = 1\nTotal 12. Each: desktop 600px + mobile 375px artboards, light mode only, Figma page per module, layers named per naming convention [Product]—[Module]." } },
+      { name: "Copy & Content Requirements", pillars: "Company · Mandatories", intel: ["Cl","Fn"],
+        base: "Approved val-prop language per product. “No Interest if paid in full in 6 months” triggers G24 disclosure. Standard product disclosures per line. Tone per brand voice doc.",
+        variants: { creative: "Copy system: one voice, three products — same warmth, different proof. PPC leans flexibility, PPCC leans acceptance + financing, CBMC leans earning. Subject lines/pre-headers owed by CRM (flagged); body copy must not depend on unknown subject-line setup." } },
+      { name: "Format & Technical Specs per Channel", pillars: "Assignment", intel: ["Cl","Fn","Ex"],
+        base: "Email DTC, desktop + mobile. Figma files, one page per module. Image-area max weight and alt-text per accessibility checklist.",
+        variants: { production_trafficking: "Specs: 600px desktop / 375px mobile artboards; live-text headline zones (no text-in-image for L1); CTA button min 44px touch target; alt text on all imagery; total image weight ≤ 800KB/email; dark-mode-safe logo lockups; WCAG AA contrast throughout." } },
+      { name: "Mandatories (Brand · Legal · A11y)", pillars: "Mandatories", intel: ["Cl","Fn"],
+        base: "Approved language only per product. G24 disclosure verbatim where triggered. Standard PPC/PPCC/CBMC disclosures. WCAG AA. All legal approved before SYF handoff — hard gate." },
+      { name: "Source Assets & Rights", pillars: "Considerations", intel: ["Cl","Fn","Ex"],
+        base: "Card art + lifestyle imagery from client DAM; no stock outside approved library; rights check on any lifestyle image reused from prior campaigns." },
+      { name: "Variants & Versioning Logic", pillars: "Assignment", intel: ["Cl","Fn","De"],
+        base: "Versioning by product eligibility, not by segment. Naming: [Product]—[Module]. No language variants this phase.",
+        variants: { production_trafficking: "Versioning rules: product determines value-prop block + disclosure block; shared module shell stays identical across products to cut QA surface. Any copy edit to a shared shell re-flags all sibling versions for re-review — build the Figma components accordingly." } },
+      { name: "Routing & Approvals", pillars: "Considerations", intel: ["Cl","Fn"],
+        base: "Brand review → Marketer review → Legal → SYF submission. All legal approval must precede SYF coding handoff on 06/15.",
+        variants: { production_trafficking: "Routing detail: R1 template review 05/24 · R2 brand+marketer 05/28 · legal submission 06/01, feedback 06/08 · final files to SYF 06/15. Reviewer matrix from client sign-off doc; no parallel legal/SYF review permitted." } },
+      { name: "Deadlines, Trafficking & Delivery", pillars: "Considerations", intel: ["Cl","Fn","Ex"],
+        base: "Creative due to SYF 06/15; launch 07/15. Send-day TBDs (D65, D45–60 windows) must be confirmed by CRM before launch.",
+        variants: { production_trafficking: "Delivery: Figma link + asset export package (PNG @2x + copy doc) to SYF portal by 06/15 17:00 ET. Open items blocking trafficking: subject lines/pre-headers (CRM), send-day confirmation for 3 modules. Both flagged “client to provide” — release gate holds until resolved." } }
+    ],
+    dataSourcing: [
+      { area: "Product truths & approved language", internal: "Approved messaging library, product marketing docs", external: "Regulatory disclosure requirements (G24, CARD Act)", partner: "Issuing partner (SYF) approved-language register" },
+      { area: "Assets & rights", internal: "Client DAM, prior campaign files", external: "Rights & licensing databases, stock library terms", partner: "Production studio asset handoff specs" },
+      { area: "Specs & delivery", internal: "Email template system, accessibility checklist", external: "Platform/client rendering spec feeds (email clients)", partner: "SYF coding portal specs & delivery calendar" },
+      { area: "Send logic & timing", internal: "Lifecycle send-day calendar, CRM team inputs", external: "Deliverability reputation signals", partner: "ESP deployment windows" }
+    ]
+  }
+  ],
+
+  qaChecks: [
+    ["Quality", "All modules populated; gaps flagged “client to provide”"],
+    ["Quality", "Every figure and date traces to a named input — nothing fabricated"],
+    ["Quality", "Conditional pillars populated on real signal or correctly omitted"],
+    ["Posture", "Selected lens applied throughout; no off-posture drift"],
+    ["Posture", "Module weighting matches posture (deepen/compress verified)"],
+    ["Consistency", "Numbers reconcile across all modules"],
+    ["Consistency", "No module asserts what another rules out"]
+  ]
+};
+
+/* ---- config persistence (custom additions only) ---- */
+const LS_KEY = "aos-demo-custom";
+function loadCustom() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || { postures: [], briefTypes: [] }; } catch { return { postures: [], briefTypes: [] }; } }
+function saveCustom(c) { localStorage.setItem(LS_KEY, JSON.stringify(c)); }
+let CUSTOM = loadCustom();
+
+function allPostures() { return BASE_CONFIG.postures.concat(CUSTOM.postures); }
+function allTypes() { return BASE_CONFIG.briefTypes.concat(CUSTOM.briefTypes); }
+function getType(id) { return allTypes().find(t => t.id === id); }
+function getPosture(id) { return allPostures().find(p => p.id === id); }
+
+/* ---- state ---- */
+let state = { type: "campaign", posture: "media_performance", generated: false, running: false };
+
+/* ---- helpers ---- */
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const INTEL = { Cl: "Client", Fn: "Functional", De: "Deloitte", Le: "Learned", Ex: "External" };
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("visible"); setTimeout(() => t.classList.remove("visible"), 2200); }
+
+/* ---- selectors ---- */
+function posturesForType(typeId) {
+  return allPostures().filter(p => !p.typeSpecificTo || p.typeSpecificTo === typeId);
+}
+function renderControls() {
+  const ts = $("#type-seg"); ts.innerHTML = "";
+  allTypes().forEach(t => {
+    const b = el("button", "seg-btn" + (state.type === t.id ? " selected" : ""),
+      (t.custom ? '<span class="custom-star">★ </span>' : "") + t.name);
+    b.onclick = () => { state.type = t.id;
+      if (!posturesForType(t.id).some(p => p.id === state.posture)) state.posture = posturesForType(t.id)[0].id;
+      renderControls(); if (state.generated) rerender(); };
+    ts.appendChild(b);
+  });
+  const ps = $("#posture-seg"); ps.innerHTML = "";
+  posturesForType(state.type).forEach(p => {
+    const b = el("button", "seg-btn" + (state.posture === p.id ? " selected" : "") + (p.typeSpecificTo ? " type-specific" : ""),
+      (p.custom ? '<span class="custom-star">★ </span>' : "") + p.name);
+    b.onclick = () => { state.posture = p.id; renderControls(); if (state.generated) rerender(); };
+    ps.appendChild(b);
+  });
+}
+
+/* ---- pizza tracker ---- */
+function renderTracker(activeIdx, doneUpTo) {
+  const t = $("#tracker"); t.innerHTML = "";
+  BASE_CONFIG.stages.forEach((s, i) => {
+    if (i > 0) t.appendChild(el("div", "t-conn" + (i <= doneUpTo ? " done" : "")));
+    const st = el("div", "t-stage" + (i < activeIdx || (activeIdx === -2) ? " done" : i === activeIdx ? " active" : ""));
+    const isDone = activeIdx === -2 || i < activeIdx;
+    st.innerHTML = `<div class="t-bubble">${isDone ? "✓" : s.icon}</div>
+      <div class="t-name">${s.name}</div><div class="t-sub">${s.sub}</div>`;
+    t.appendChild(st);
+  });
+}
+
+/* ---- pipeline simulation ---- */
+async function generate() {
+  if (state.running) return;
+  state.running = true; state.generated = false;
+  $("#generate-btn").disabled = true;
+  const out = $("#output"); out.innerHTML = "";
+  const type = getType(state.type), posture = getPosture(state.posture);
+
+  const stageLogs = {
+    intake: [ `Brief type: ${type.name} · Posture: ${posture.name}`, `Ask: ${type.ask || "[placeholder ask for custom type]"}` ],
+    datapull: (type.dataPullLog || [["USER","Ask parsed"],["CLIENT","No uploads — placeholders in use"],["AOS","Fn/De/Le/Ex layers queried"]]).map(l => `${l[0]}: ${l[1]}`),
+    context: (type.pillars || [["Pillars","Standard 8-pillar set applied with placeholder answers"]]).map(p => `${p[0]} — ${p[1]}`),
+    narrative: ["Writing one story across all populated pillars…", "Narrative locked. Modules will project from it — never generated independently."],
+    modules: (type.modules || []).map(m => `${m.name} — derived`).concat(type.modules ? [] : ["[Custom type: placeholder modules derived]"]),
+    qa: BASE_CONFIG.qaChecks.map(c => `${c[0]}: ${c[1]} ✓`).concat(["1 auto-revision applied (number reconciliation) — re-scan passed"])
+  };
+
+  for (let i = 0; i < BASE_CONFIG.stages.length - 1; i++) {
+    const s = BASE_CONFIG.stages[i];
+    renderTracker(i, i);
+    const card = el("div", "card stage-card");
+    card.innerHTML = `<h3>${s.name}</h3>`;
+    out.prepend(card);
+    const lines = stageLogs[s.key] || ["…"];
+    for (let j = 0; j < lines.length; j++) {
+      const l = el("div", "log-line", `<span class="tick">✓</span><span>${lines[j]}</span>`);
+      l.style.animationDelay = "0s";
+      card.appendChild(l);
+      await sleep(Math.min(240, 900 / lines.length));
+    }
+    await sleep(200);
+  }
+  renderTracker(-2, BASE_CONFIG.stages.length);
+  state.running = false; state.generated = true;
+  $("#generate-btn").disabled = false;
+  renderBrief();
+  toast("Brief released — try switching posture or brief type to re-render it");
+}
+
+function rerender() { renderBrief(); toast(`Re-rendered as ${getType(state.type).name} · ${getPosture(state.posture).name}`); }
+
+/* ---- brief rendering ---- */
+function weightsFor(type, postureId) {
+  const w = (type.postureWeights || {})[postureId];
+  if (w) return w;
+  const p = getPosture(postureId);
+  if (p && p.deepenNames) {
+    return { deepen: (type.modules || []).map(m => m.name).filter(n => p.deepenNames.some(f => n.toLowerCase().includes(f.toLowerCase()))), compress: [] };
+  }
+  return { deepen: [], compress: [] };
+}
+
+function renderBrief() {
+  const out = $("#output"); out.innerHTML = "";
+  const type = getType(state.type), posture = getPosture(state.posture);
+  const w = weightsFor(type, posture.id);
+
+  const head = el("div", "card brief-header");
+  head.innerHTML = `<h2>${type.project || type.name + " · [custom type — placeholder project]"}</h2>
+    <span class="posture-chip">Lens: ${posture.name}</span>
+    <span class="qa-chip">✓ QA passed (1 auto-revision)</span>`;
+  out.appendChild(head);
+
+  out.appendChild(el("div", "section-label", "The central narrative"));
+  out.appendChild(el("div", "lens-note", `<span>🔍</span><div>${posture.lens || `Rendered through the ${posture.name.toUpperCase()} lens (custom): modules matching your deepen list are expanded; everything else stays at base depth.`}</div>`));
+  const nar = el("div", "card narrative");
+  (type.narrative ? type.narrative.base : [
+    `[Placeholder narrative for custom brief type “${type.name}”] One story written across the 8 pillars before any module exists — in the data-connected build this is generated from the assembled context.`,
+    "Modules below are projections of this narrative, reweighted by the selected posture."
+  ]).forEach(p => nar.appendChild(el("p", null, p)));
+  out.appendChild(nar);
+
+  out.appendChild(el("div", "section-label", `Modules · fixed set for ${type.name}, reweighted by ${posture.name}`));
+  const mods = type.modules || (type.moduleNames || []).map(n => ({ name: n, pillars: "—", intel: ["Fn"], base: `[Placeholder content for “${n}” — author or connect data]` }));
+  mods.forEach((m, i) => {
+    const deep = w.deepen.includes(m.name), comp = w.compress.includes(m.name);
+    const card = el("div", "card module" + (deep ? " deepened open" : ""));
+    const badge = deep ? `<span class="deepen-badge">▲ deepened</span>` : comp ? `<span class="compress-badge">▽ compressed</span>` : "";
+    const variant = (m.variants || {})[posture.id];
+    let content = m.base;
+    if (comp && !variant) content = content.split(/(?<=\.)\s/).slice(0, 1).join(" ") + " (Compressed under this lens — full detail available under its home posture.)";
+    card.innerHTML = `
+      <div class="module-head"><div class="module-num">${i + 1}</div><b>${m.name}</b>
+        <span style="font-size:11px;color:var(--ink-3)">${m.pillars || ""}</span>${badge}<span class="caret">▶</span></div>
+      <div class="module-body">
+        <div class="module-content">${content}</div>
+        ${variant ? `<div class="variant-note"><b>${posture.name} lens:</b>\n${variant}</div>` : ""}
+        <div class="module-meta">${(m.intel || []).map(t => `<span class="pill intel">${t} · ${INTEL[t] || t}</span>`).join("")}</div>
+      </div>`;
+    card.querySelector(".module-head").onclick = () => card.classList.toggle("open");
+    out.appendChild(card);
+  });
+}
+
+/* ---- idle state ---- */
+function renderIdle() {
+  const out = $("#output");
+  out.innerHTML = `<div class="hero">
+    <h1>Pick a type and a posture, then generate</h1>
+    <p>Watch the tracker walk the pipeline. Once the brief is out, switch posture or brief type and the same underlying narrative re-renders through the new lens — that's the whole idea.</p>
+    <button class="btn primary" onclick="generate()">Generate brief</button>
+  </div>`;
+  renderTracker(-1, -1);
+}
+
+/* ---- configure ---- */
+function addPosture() {
+  const name = $("#cfg-p-name").value.trim();
+  if (!name) return toast("Posture needs a name");
+  const id = "custom_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  if (getPosture(id)) return toast("That posture already exists");
+  CUSTOM.postures.push({ id, name, custom: true, reader: $("#cfg-p-reader").value.trim() || "Custom reader",
+    deepenNames: $("#cfg-p-deepen").value.split(",").map(s => s.trim()).filter(Boolean) });
+  saveCustom(CUSTOM); renderControls(); closeModals(); toast(`Posture “${name}” added — select it in the picker`);
+}
+function addBriefType() {
+  const name = $("#cfg-t-name").value.trim();
+  if (!name) return toast("Brief type needs a name");
+  const id = "custom_" + name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  if (getType(id)) return toast("That brief type already exists");
+  const moduleNames = $("#cfg-t-modules").value.split(",").map(s => s.trim()).filter(Boolean);
+  CUSTOM.briefTypes.push({ id, name, custom: true, desc: $("#cfg-t-desc").value.trim() || "Custom brief type",
+    moduleNames: moduleNames.length ? moduleNames : ["Background & Context","Objective","Audience","Mandatories","Measurement"] });
+  saveCustom(CUSTOM); renderControls(); closeModals(); toast(`Brief type “${name}” added — select it in the picker`);
+}
+function resetConfig() { CUSTOM = { postures: [], briefTypes: [] }; saveCustom(CUSTOM);
+  if (String(state.type).startsWith("custom_")) state.type = "campaign";
+  if (String(state.posture).startsWith("custom_")) state.posture = "media_performance";
+  renderControls(); if (state.generated) rerender(); closeModals(); toast("Custom additions removed"); }
+
+/* ---- exports ---- */
+function download(filename, text, mime) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: mime || "text/plain" }));
+  a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportLogic() {
+  let md = `# AOS Brief Agent — Logic & Requirements Export\n\nGenerated from the live demo config${CUSTOM.postures.length || CUSTOM.briefTypes.length ? " (includes custom additions)" : ""}.\n\n## Pipeline\n\n`;
+  md += BASE_CONFIG.stages.map((s, i) => `${i + 1}. **${s.name}** — ${s.sub}`).join("\n");
+  md += `\n\nRules: the narrative is written once, before any module. Modules are projections of the narrative — never generated independently. Posture reweights emphasis; it never changes a type's module list. QA is blocking: auto-revise up to 2×, then escalate to a human.\n\n## Postures\n\n| Posture | Reader | Behavior |\n|---|---|---|\n`;
+  allPostures().forEach(p => { md += `| ${p.name}${p.custom ? " ★custom" : ""}${p.typeSpecificTo ? ` (type-specific: ${p.typeSpecificTo})` : ""} | ${p.reader || "—"} | ${p.lens || ("Deepens modules matching: " + (p.deepenNames || []).join(", "))} |\n`; });
+  md += `\n## Brief types\n\n`;
+  allTypes().forEach(t => {
+    md += `### ${t.name}${t.custom ? " ★custom" : ""}\n${t.desc || ""}\n\nModules (fixed set):\n`;
+    const mods = t.modules ? t.modules.map(m => m.name) : (t.moduleNames || []);
+    mods.forEach((m, i) => md += `${i + 1}. ${m}\n`);
+    if (t.postureWeights) {
+      md += `\nPosture weighting:\n`;
+      Object.entries(t.postureWeights).forEach(([pid, w]) => {
+        const p = getPosture(pid); md += `- **${p ? p.name : pid}** — deepen: ${w.deepen.join("; ") || "—"} · compress: ${w.compress.join("; ") || "—"}\n`;
+      });
+    }
+    md += "\n";
+  });
+  md += `## QA gate checks\n\n` + BASE_CONFIG.qaChecks.map(c => `- **${c[0]}** — ${c[1]}`).join("\n") + "\n";
+  download("aos-logic-requirements.md", md, "text/markdown");
+  toast("Logic & requirements downloaded");
+}
+function exportSourcing() {
+  let md = `# AOS Brief Agent — Data Sourcing Map\n\nWhat to source per brief type, split by where it lives. Circulate internally, to data vendors, and to partners as the collection ask.\n\n`;
+  allTypes().forEach(t => {
+    md += `## ${t.name}${t.custom ? " ★custom" : ""}\n\n| Area | Source internally | Source externally (3rd-party) | Source from partners |\n|---|---|---|---|\n`;
+    (t.dataSourcing || [{ area: "[Define sourcing rows for this custom type]", internal: "—", external: "—", partner: "—" }])
+      .forEach(r => md += `| ${r.area} | ${r.internal} | ${r.external} | ${r.partner} |\n`);
+    md += "\n";
+  });
+  md += `## AOS intelligence layer (applies to every type)\n\n| Tag | Layer | Sourcing |\n|---|---|---|\n| Fn | Functional | Internal — frameworks, templates, checklists |\n| De | Deloitte | Internal proprietary — benchmarks, BrandWorth/TrustID, category data |\n| Le | Learned | Internal — patterns captured from prior agent runs |\n| Ex | External | External/partner — syndicated data, platform feeds, social listening, regulatory sources |\n`;
+  download("aos-data-sourcing-map.md", md, "text/markdown");
+  toast("Data sourcing map downloaded");
+}
+function exportConfig() {
+  download("aos-config.json", JSON.stringify({ base: BASE_CONFIG, custom: CUSTOM }, null, 2), "application/json");
+  toast("Config JSON downloaded");
+}
+
+/* ---- modals ---- */
+function openModal(name) { closeModals(); $("#overlay-" + name).classList.add("visible"); }
+function closeModals() { document.querySelectorAll(".overlay").forEach(o => o.classList.remove("visible")); }
+document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o) closeModals(); }));
+
+/* ---- init ---- */
+renderControls();
+renderIdle();
+</script>
+</body>
+</html>
