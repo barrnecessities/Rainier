@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgencyOS · Brief Agent — System Overview</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --surface: #fff; --ink: #111827; --ink-2: #374151; --ink-3: #6b7280;
+    --line: #e5e7eb; --line-2: #d1d5db;
+    --accent: #4f46e5; --accent-soft: #eef2ff; --accent-line: #c7d2fe;
+    --green: #16a34a; --green-soft: #f0fdf4;
+    --amber: #d97706; --amber-soft: #fffbeb;
+    --tag-user: #0e7490; --tag-user-bg: #ecfeff;
+    --tag-client: #7c3aed; --tag-client-bg: #f5f3ff;
+    --tag-aos: #b45309; --tag-aos-bg: #fffbeb;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(17,24,39,.05), 0 1px 6px rgba(17,24,39,.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 0 20px; height: 54px;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .logo-mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), #7c6cf0);
+    color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  }
+  .logo small { font-weight: 500; color: var(--ink-3); font-size: 12px; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 34px 20px 90px; }
+  .page-head { text-align: center; margin-bottom: 10px; }
+  .page-head h1 { font-size: 23px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .page-head p { color: var(--ink-3); max-width: 620px; margin: 0 auto; font-size: 13.5px; }
+
+  .formula {
+    display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 22px 0 8px; font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+  }
+  .formula .f-box { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 12px; box-shadow: var(--shadow); }
+  .formula .f-box.hot { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .formula .f-arrow { color: var(--line-2); font-weight: 800; }
+
+  /* layer bands */
+  .band { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 24px; }
+  .band-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+  .band-num {
+    width: 24px; height: 24px; border-radius: 999px; background: var(--accent-soft);
+    color: var(--accent); font-weight: 800; font-size: 12px; display: inline-grid; place-items: center; flex: none;
+    transform: translateY(4px);
+  }
+  .band-head h2 { font-size: 16px; letter-spacing: -.015em; margin: 0; }
+  .band-head .what { font-size: 12.5px; color: var(--ink-3); }
+  .band-body { margin-top: 12px; }
+
+  .connector { display: grid; justify-items: center; gap: 2px; padding: 8px 0; }
+  .connector .c-line { width: 2px; height: 14px; background: var(--line-2); border-radius: 2px; }
+  .connector .c-label {
+    font-size: 11.5px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 999px; padding: 3px 12px;
+  }
+
+  /* items */
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .item-chip {
+    border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 13px;
+    font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--surface); cursor: default;
+  }
+  .item-chip .sub { display: block; font-size: 10.5px; font-weight: 500; color: var(--ink-3); }
+  .item-chip.selectable { cursor: pointer; }
+  .item-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .item-chip.selected .sub { color: #ddd9ff; }
+  .item-chip.dashed { border-style: dashed; }
+  .hint { font-size: 11.5px; color: var(--ink-3); margin-top: 10px; font-style: italic; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 720px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  .mini-card { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fbfcfd; }
+  .mini-card b { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  .mini-card span { font-size: 11.5px; color: var(--ink-3); line-height: 1.4; display: block; }
+  .mini-card.cond { border-style: dashed; }
+  .cond-tag { font-size: 9.5px; font-weight: 800; letter-spacing: .05em; color: var(--ink-3); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; margin-left: 5px; vertical-align: 1px; }
+
+  .pill {
+    display: inline-flex; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+  }
+  .pill.user   { color: var(--tag-user);   background: var(--tag-user-bg);   border: 1px solid #a5f3fc; }
+  .pill.client { color: var(--tag-client); background: var(--tag-client-bg); border: 1px solid #ddd6fe; }
+  .pill.aos    { color: var(--tag-aos);    background: var(--tag-aos-bg);    border: 1px solid #fde68a; }
+
+  .src-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 720px) { .src-cols { grid-template-columns: 1fr; } }
+  .src-col { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fbfcfd; }
+  .src-col .pill { margin-bottom: 6px; }
+  .src-col p { margin: 0; font-size: 11.5px; color: var(--ink-3); }
+  .intel-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .intel-tag { font-size: 10px; font-weight: 700; color: var(--ink-3); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+
+  .narrative-band { background: linear-gradient(135deg, var(--accent-soft), #f5f4ff); border-color: var(--accent-line); }
+  .narrative-band .quote { font-size: 13.5px; color: #3730a3; font-style: italic; margin-top: 8px; }
+
+  /* modules grid with highlight states */
+  .mod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 720px) { .mod-grid { grid-template-columns: repeat(2, 1fr); } }
+  .mod-cell {
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px;
+    font-size: 12px; font-weight: 600; color: var(--ink-2); background: var(--surface);
+    display: flex; align-items: center; gap: 7px; transition: all .15s ease;
+  }
+  .mod-cell .n {
+    width: 18px; height: 18px; flex: none; border-radius: 5px; background: var(--bg);
+    border: 1px solid var(--line); display: grid; place-items: center;
+    font-size: 10px; font-weight: 700; color: var(--ink-3);
+  }
+  .mod-cell.hl-deep { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .mod-cell.hl-deep .n { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .mod-cell.hl-comp { opacity: .38; }
+
+  .qa-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 720px) { .qa-cols { grid-template-columns: 1fr; } }
+  .qa-col { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--green-soft); border-color: #bbf7d0; }
+  .qa-col b { font-size: 12.5px; color: var(--green); display: block; margin-bottom: 3px; }
+  .qa-col span { font-size: 11.5px; color: var(--ink-2); }
+  .qa-fail {
+    margin-top: 12px; font-size: 12px; color: #92400e; background: var(--amber-soft);
+    border: 1px solid #fde68a; border-radius: 8px; padding: 9px 12px;
+  }
+
+  .rules { margin-top: 26px; }
+  .rules h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 10px; }
+  .rule-row { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+  .rule-row b { color: var(--ink); }
+  .rule-row .r-ico { flex: none; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"><div class="logo-mark">A</div>AgencyOS <small>Brief Agent · System Overview</small></div>
+</header>
+
+<div class="page">
+  <div class="page-head">
+    <h1>How the pieces fit together</h1>
+    <p>Six layers, one run. Each layer feeds the next — and two of them (type and posture) are the only choices a user ever makes.</p>
+  </div>
+
+  <div class="formula">
+    <span class="f-box hot">Type</span><span class="f-arrow">+</span>
+    <span class="f-box hot">Posture</span><span class="f-arrow">+</span>
+    <span class="f-box">Data</span><span class="f-arrow">→</span>
+    <span class="f-box">Narrative</span><span class="f-arrow">→</span>
+    <span class="f-box">Modules</span><span class="f-arrow">→</span>
+    <span class="f-box">QA</span><span class="f-arrow">→</span>
+    <span class="f-box" style="border-color:var(--green);color:var(--green)">Brief</span>
+  </div>
+
+  <div class="connector"><div class="c-line"></div></div>
+
+  <!-- 1 · BRIEF TYPE -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">1</span><h2>Brief Type</h2>
+      <span class="what">— picked first. Decides how every question below is phrased and which module set the brief ends with.</span></div>
+    <div class="band-body chip-row" id="type-row"></div>
+    <div class="hint">Click a type — the pillar phrasing and module grid below switch to match.</div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">type unlocks the data pull &amp; phrases the pillars</span><div class="c-line"></div></div>
+
+  <!-- 2 · POSTURE -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">2</span><h2>Posture</h2>
+      <span class="what">— one lens per run. Reweights emphasis, tone and depth. Never changes what exists — only what gets deepened vs. compressed.</span></div>
+    <div class="band-body chip-row" id="posture-row"></div>
+    <div class="hint">Hover a posture — watch the module grid at layer 5 light up (deepened) and fade (compressed).</div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">both selections scope what data gets pulled</span><div class="c-line"></div></div>
+
+  <!-- 3 · SOURCE CHANNELS -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">3</span><h2>Source Channels</h2>
+      <span class="what">— every input carries exactly one tag. Pillars read them in priority order (e.g. CLIENT → AOS → USER). Nothing is ever fabricated.</span></div>
+    <div class="band-body src-cols">
+      <div class="src-col"><span class="pill user">USER</span>
+        <p>This run's ask: objective, named goal, budget, timeline, brief-specific mandatories. Never inferred.</p></div>
+      <div class="src-col"><span class="pill client">CLIENT</span>
+        <p>Uploaded reference docs: brand voice, segments, product truths, legal disclosures, prior performance.</p></div>
+      <div class="src-col"><span class="pill aos">AOS</span>
+        <p>The intelligence layer — what the platform knows independently of any single client:</p>
+        <div class="intel-row">
+          <span class="intel-tag">Fn · Frameworks</span><span class="intel-tag">De · Deloitte data</span>
+          <span class="intel-tag">Le · Learned patterns</span><span class="intel-tag">Ex · External 3P feeds</span>
+        </div></div>
+    </div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">channels answer the eight questions</span><div class="c-line"></div></div>
+
+  <!-- 4 · PILLARS -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">4</span><h2>Context — the 8 Pillars</h2>
+      <span class="what">— asked as questions, phrased per brief type. Two are conditional: real signal or omitted, never filler.</span></div>
+    <div class="band-body grid-4" id="pillar-grid"></div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">all populated pillars become ONE story</span><div class="c-line"></div></div>
+
+  <!-- 4.5 · NARRATIVE -->
+  <section class="band narrative-band">
+    <div class="band-head"><span class="band-num" style="background:#fff">✍</span><h2>The Central Narrative</h2>
+      <span class="what">— written once, before any module exists. This is what keeps the brief coherent.</span></div>
+    <div class="quote">"The narrative is written once so the brief stays consistent; postures reweight it and versions shift emphasis — the module set per brief type stays the same."</div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">the narrative projects into the type's fixed module set</span><div class="c-line"></div></div>
+
+  <!-- 5 · MODULES -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">5</span><h2>Modules <span id="mod-count" style="color:var(--ink-3);font-weight:500;font-size:13px"></span></h2>
+      <span class="what">— the output sections. Fixed list per type; always derived from the narrative, never written independently.</span></div>
+    <div class="band-body mod-grid" id="mod-grid"></div>
+    <div class="hint" id="mod-hint">Hovering a posture above highlights what it deepens (purple) and compresses (faded).</div>
+  </section>
+
+  <div class="connector"><div class="c-line"></div><span class="c-label">nothing ships until every check passes</span><div class="c-line"></div></div>
+
+  <!-- 6 · QA -->
+  <section class="band">
+    <div class="band-head"><span class="band-num">6</span><h2>QA Gate</h2>
+      <span class="what">— blocking. Auto-revises up to 2×, then escalates to a human with the failed checks attached.</span></div>
+    <div class="band-body qa-cols">
+      <div class="qa-col"><b>✓ Quality</b><span>Complete, grounded, nothing fabricated — every figure traces to a named source. Gaps flagged "client to provide."</span></div>
+      <div class="qa-col"><b>✓ Posture</b><span>The selected lens holds throughout — right modules deepened, no off-posture drift, reader-appropriate vocabulary.</span></div>
+      <div class="qa-col"><b>✓ Consistency</b><span>One coherent brief — numbers reconcile everywhere, no module contradicts another, terminology uniform.</span></div>
+    </div>
+    <div class="qa-fail">⚠ On any failure: the brief is <b>not</b> released. Revise → re-scan → (after 2 fails) escalate to a human Worker.</div>
+  </section>
+
+  <!-- rules -->
+  <div class="rules">
+    <h3>The four rules that make it hang together</h3>
+    <div class="rule-row"><span class="r-ico">1️⃣</span><div><b>Type first.</b> The brief type is known before context assembly — it phrases the pillar questions and scopes the data pull.</div></div>
+    <div class="rule-row"><span class="r-ico">📖</span><div><b>Narrative first.</b> One story is written across the pillars before any module exists. Modules are projections, never independent.</div></div>
+    <div class="rule-row"><span class="r-ico">🔍</span><div><b>Posture reweights, never restructures.</b> Same content, different lens — deepen and compress, not add and remove.</div></div>
+    <div class="rule-row"><span class="r-ico">🚧</span><div><b>QA blocks.</b> Only a fully passing scan releases the brief. Genuine gaps ship as explicit flags, never silent filler.</div></div>
+  </div>
+</div>
+
+<script>
+/* Shared data — mirrors demo.html's CONFIG shapes */
+const TYPES = [
+  { id: "campaign", name: "Campaign", sub: "One campaign to run · V1",
+    pillarPhrase: { Customer: "Who is the target, and what moves them?", Assignment: "What is this campaign — on what budget and timeline?" },
+    modules: ["Background & Context","Business Goal & Campaign Objective","Success Metrics & KPIs","Target Audience","Single-Minded Proposition","Messaging Direction","Channels & Scope","Budget","Timeline & Flighting","Mandatories & Guardrails","Measurement & Learning Plan"],
+    weights: {
+      creative:          { deepen: ["Single-Minded Proposition","Messaging Direction","Target Audience"], compress: ["Budget","Timeline & Flighting","Measurement & Learning Plan"] },
+      business:          { deepen: ["Business Goal & Campaign Objective","Success Metrics & KPIs","Budget"], compress: ["Messaging Direction"] },
+      technical:         { deepen: ["Channels & Scope","Measurement & Learning Plan","Timeline & Flighting"], compress: ["Single-Minded Proposition"] },
+      strategist:        { deepen: ["Background & Context","Target Audience","Measurement & Learning Plan"], compress: [] },
+      typeSpecific:      { deepen: ["Success Metrics & KPIs","Channels & Scope","Budget","Timeline & Flighting","Measurement & Learning Plan"], compress: ["Single-Minded Proposition","Messaging Direction"] }
+    },
+    typePosture: { name: "Media / Performance", sub: "channels · flighting · allocation" } },
+  { id: "strategy", name: "Strategy", sub: "What to do and why",
+    pillarPhrase: { Customer: "Who is the brand for, and what do we know about them?", Assignment: "What must this strategy decide?" },
+    modules: ["Business Context & Challenge","Objectives & Success Definition","Category & Competitive Landscape","Target Audience & Segments","Core Insight","Positioning & Value Proposition","Messaging Architecture","Brand Personality & Tone","Reasons to Believe / Proof","Success Measures","Guardrails & Constraints"],
+    weights: {
+      creative:   { deepen: ["Core Insight","Positioning & Value Proposition","Brand Personality & Tone"], compress: ["Success Measures"] },
+      business:   { deepen: ["Objectives & Success Definition","Success Measures"], compress: ["Brand Personality & Tone"] },
+      technical:  { deepen: ["Success Measures","Guardrails & Constraints"], compress: ["Core Insight"] },
+      strategist: { deepen: ["Business Context & Challenge","Core Insight","Positioning & Value Proposition","Success Measures"], compress: [] }
+    },
+    typePosture: null },
+  { id: "asset", name: "Asset / Production", sub: "Make the assets to spec · V2",
+    pillarPhrase: { Customer: "Who is each asset for?", Assignment: "Exactly what to make — spec, count, variants, destinations?" },
+    modules: ["Objective & Role of the Asset","Audience & Targeting","Single Message & Proposition","Deliverables List & Matrix","Copy & Content Requirements","Format & Technical Specs","Mandatories (Brand·Legal·A11y)","Source Assets & Rights","Variants & Versioning Logic","Routing & Approvals","Deadlines, Trafficking & Delivery"],
+    weights: {
+      creative:     { deepen: ["Objective & Role of the Asset","Single Message & Proposition","Copy & Content Requirements"], compress: ["Routing & Approvals","Deadlines, Trafficking & Delivery"] },
+      business:     { deepen: ["Objective & Role of the Asset","Deliverables List & Matrix"], compress: ["Format & Technical Specs"] },
+      technical:    { deepen: ["Format & Technical Specs","Variants & Versioning Logic","Deadlines, Trafficking & Delivery"], compress: ["Single Message & Proposition"] },
+      strategist:   { deepen: ["Objective & Role of the Asset","Audience & Targeting"], compress: ["Routing & Approvals"] },
+      typeSpecific: { deepen: ["Deliverables List & Matrix","Format & Technical Specs","Variants & Versioning Logic","Routing & Approvals","Deadlines, Trafficking & Delivery"], compress: ["Single Message & Proposition"] }
+    },
+    typePosture: { name: "Production / Trafficking", sub: "specs · versioning · delivery" } },
+  { id: "lifecycle", name: "Lifecycle / CRM", sub: "An ongoing program",
+    pillarPhrase: { Customer: "Which customers, segments, lifecycle stages?", Assignment: "What program — triggers, offers, channels, cadence?" },
+    modules: ["Program Objective & Stage","Audience & Segments","Entry/Exit Triggers & Eligibility","Journey Map / Program Logic","Offers & Treatments","Channels & Orchestration","Cadence & Contact Rules","Personalization & Data Fields","Consent, Privacy & Suppression","Success Metrics","Test & Control Design","Guardrails","Measurement & Optimization Loop"],
+    weights: {
+      creative:     { deepen: ["Offers & Treatments","Personalization & Data Fields"], compress: ["Consent, Privacy & Suppression"] },
+      business:     { deepen: ["Program Objective & Stage","Success Metrics"], compress: ["Journey Map / Program Logic"] },
+      technical:    { deepen: ["Entry/Exit Triggers & Eligibility","Channels & Orchestration","Personalization & Data Fields","Consent, Privacy & Suppression"], compress: [] },
+      strategist:   { deepen: ["Program Objective & Stage","Audience & Segments","Test & Control Design"], compress: [] },
+      typeSpecific: { deepen: ["Entry/Exit Triggers & Eligibility","Cadence & Contact Rules","Consent, Privacy & Suppression","Test & Control Design"], compress: ["Offers & Treatments"] }
+    },
+    typePosture: { name: "Lifecycle / CRM Operator", sub: "triggers · consent · cadence" } },
+  { id: "project", name: "Project / Engagement", sub: "The whole relationship",
+    pillarPhrase: { Customer: "Whose outcomes does the engagement ultimately serve?", Assignment: "What is AOS being asked to own — motions, workflows, scope?" },
+    modules: ["Background & Context","Objectives & Goal","Scope: Motions In/Out","Budget Envelope","Timeline & Milestones","Stakeholders & RACI","Success & KPIs","Ways of Working","Data & Access Setup","Constraints & Risks","Commercial & Legal","Learning Plan"],
+    weights: {
+      creative:     { deepen: ["Background & Context"], compress: ["Commercial & Legal"] },
+      business:     { deepen: ["Objectives & Goal","Budget Envelope","Success & KPIs"], compress: [] },
+      technical:    { deepen: ["Data & Access Setup","Ways of Working"], compress: [] },
+      strategist:   { deepen: ["Background & Context","Objectives & Goal","Learning Plan"], compress: [] },
+      typeSpecific: { deepen: ["Objectives & Goal","Budget Envelope","Stakeholders & RACI","Constraints & Risks","Commercial & Legal"], compress: ["Ways of Working"] }
+    },
+    typePosture: { name: "Executive / Sponsor", sub: "value · governance · risk" } }
+];
+
+const BASE_POSTURES = [
+  { id: "creative",   name: "Creative",            sub: "makers — the idea" },
+  { id: "business",   name: "Business",            sub: "the commercial case" },
+  { id: "technical",  name: "Technical / MarTech", sub: "feasibility & systems" },
+  { id: "strategist", name: "Strategist",          sub: "the logic chain" }
+];
+
+const PILLARS = [
+  { name: "Customer", cond: false, srcs: ["client","aos","user"] },
+  { name: "Company", cond: false, srcs: ["client","user"] },
+  { name: "Competitive", cond: true, srcs: ["aos","user"] },
+  { name: "Culture", cond: true, srcs: ["aos"] },
+  { name: "Opportunity", cond: false, srcs: ["user"] },
+  { name: "Assignment", cond: false, srcs: ["user"] },
+  { name: "Mandatories", cond: false, srcs: ["client","aos","user"] },
+  { name: "Considerations", cond: false, srcs: ["client","aos","user"] }
+];
+const PILLAR_DESC = {
+  Customer: "Who is this for?", Company: "Who is the client — what situation?",
+  Competitive: "A category move to answer?", Culture: "A cultural moment to ride?",
+  Opportunity: "What value, and why now?", Assignment: "What exactly is being asked?",
+  Mandatories: "Hard rules — legal, brand, regulatory.", Considerations: "Risks, measurement, dependencies."
+};
+
+let currentType = TYPES[0];
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+
+function renderTypes() {
+  const row = $("#type-row"); row.innerHTML = "";
+  TYPES.forEach(t => {
+    const c = el("div", "item-chip selectable" + (t === currentType ? " selected" : ""),
+      `${t.name}<span class="sub">${t.sub}</span>`);
+    c.onclick = () => { currentType = t; renderTypes(); renderPostures(); renderPillars(); renderModules(); };
+    row.appendChild(c);
+  });
+}
+
+function renderPostures() {
+  const row = $("#posture-row"); row.innerHTML = "";
+  const entries = BASE_POSTURES.map(p => ({ ...p, key: p.id }));
+  if (currentType.typePosture)
+    entries.push({ key: "typeSpecific", name: currentType.typePosture.name, sub: currentType.typePosture.sub + " · type-specific", dashed: true });
+  entries.forEach(p => {
+    const c = el("div", "item-chip" + (p.dashed ? " dashed" : ""), `${p.name}<span class="sub">${p.sub}</span>`);
+    c.onmouseenter = () => highlight(p.key);
+    c.onmouseleave = () => highlight(null);
+    row.appendChild(c);
+  });
+}
+
+function renderPillars() {
+  const grid = $("#pillar-grid"); grid.innerHTML = "";
+  PILLARS.forEach(p => {
+    const phrased = currentType.pillarPhrase[p.name];
+    const card = el("div", "mini-card" + (p.cond ? " cond" : ""),
+      `<b>${p.name}${p.cond ? '<span class="cond-tag">CONDITIONAL</span>' : ""}</b>
+       <span>${phrased ? `<i>“${phrased}”</i>` : PILLAR_DESC[p.name]}</span>
+       <span style="margin-top:6px">${p.srcs.map(s => `<span class="pill ${s}" style="margin-right:3px">${s}</span>`).join("")}</span>`);
+    grid.appendChild(card);
+  });
+}
+
+function renderModules() {
+  const grid = $("#mod-grid"); grid.innerHTML = "";
+  currentType.modules.forEach((m, i) => {
+    const cell = el("div", "mod-cell", `<span class="n">${i + 1}</span>${m}`);
+    cell.dataset.name = m;
+    grid.appendChild(cell);
+  });
+  $("#mod-count").textContent = `· ${currentType.modules.length} for ${currentType.name}`;
+}
+
+function highlight(postureKey) {
+  const cells = document.querySelectorAll(".mod-cell");
+  if (!postureKey) { cells.forEach(c => c.classList.remove("hl-deep", "hl-comp")); $("#mod-hint").textContent = "Hovering a posture above highlights what it deepens (purple) and compresses (faded)."; return; }
+  const w = currentType.weights[postureKey] || { deepen: [], compress: [] };
+  cells.forEach(c => {
+    c.classList.toggle("hl-deep", w.deepen.includes(c.dataset.name));
+    c.classList.toggle("hl-comp", w.compress.includes(c.dataset.name));
+  });
+  $("#mod-hint").textContent = `Deepened: ${w.deepen.length} · Compressed: ${w.compress.length} · Everything else stays at base depth. The module list itself never changes.`;
+}
+
+renderTypes(); renderPostures(); renderPillars(); renderModules();
+</script>
+</body>
+</html>
