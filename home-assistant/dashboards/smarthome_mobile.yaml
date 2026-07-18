@@ -57,3 +57,18 @@ views:
       - type: thermostat
         entity: climate.brandon_s_eight_sleep_side_climate
         name: Pod 3
+
+      # Room AC (Midea)
+      - type: thermostat
+        entity: climate.bedroom_ac
+        name: Bedroom AC
+
+      - type: entities
+        title: AC Auto
+        entities:
+          - entity: input_boolean.ac_auto_enabled
+            name: Bedtime Cool
+          - entity: input_number.ac_sleep_temp
+            name: Sleep Temp
+          - entity: input_number.ac_bedtime_hour
+            name: Bedtime Hour
