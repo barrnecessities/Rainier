@@ -41,6 +41,20 @@ export const env = {
   kindleEmail: process.env.KINDLE_EMAIL || "",
   emailTo: process.env.EMAIL_TO || "",
 
+  // Readwise Reader (your saved tweets / bookmarked articles).
+  readwiseToken: process.env.READWISE_TOKEN || "",
+  // Only pull bookmarks in these Reader locations (comma list): new,later,shortlist,archive,feed.
+  readwiseLocations: process.env.READWISE_LOCATIONS || "new,later,shortlist",
+  // Optional: only bookmarks carrying this Reader tag (e.g. "kindle"). Empty = all.
+  readwiseTag: process.env.READWISE_TAG || "",
+  // Look back this far for freshly-saved bookmarks (they may be older than news).
+  bookmarkLookbackHours: Number(process.env.BOOKMARK_LOOKBACK_HOURS || 30),
+  maxBookmarks: Number(process.env.MAX_BOOKMARKS || 15),
+  // If true, move processed bookmarks to Reader "archive" so they never repeat.
+  readwiseArchiveAfter: /^(1|true|yes)$/i.test(process.env.READWISE_ARCHIVE_AFTER || ""),
+  // Related-articles per bookmark (0 disables the "Related" block).
+  relatedPerBookmark: Number(process.env.RELATED_PER_BOOKMARK || 3),
+
   // Tuning knobs.
   maxArticles: Number(process.env.MAX_ARTICLES || 40),
   lookbackHours: Number(process.env.LOOKBACK_HOURS || 28),

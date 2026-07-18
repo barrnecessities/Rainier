@@ -1,11 +1,16 @@
 # Agentic Marketing Daily Brief
 
-A daily, ad-free brief on **agentic marketing & AI-in-marketing**, delivered as:
+A daily, ad-free brief on **agentic marketing & AI-in-marketing** — plus **your saved X (Twitter) bookmarks, rewritten for calm reading** — delivered as:
 
 - **EPUB → your Kindle** (full documents, ads stripped), and
 - **HTML → your inbox** (Claude-written executive summary).
 
-Pipeline: **RSS + Google News ingestion → full-text extraction (Readability, ad-free) → Claude clustering & summaries → EPUB + HTML → email/Send-to-Kindle.** Runs on a daily GitHub Actions cron.
+Two pipelines in one:
+
+1. **Marketing news** — RSS + Google News ingestion → full-text extraction (Readability, ad-free) → Claude clustering & summaries.
+2. **Your X bookmarks** — pulled from **Readwise Reader** → each saved tweet/article gets a **2-sentence TL;DR**, an **easy-to-consume rewrite** (threads merged into prose, filler stripped), and **related articles**.
+
+Both merge into one EPUB + email. Runs on a daily GitHub Actions cron.
 
 Topics tracked out of the box: Accenture Song, Deloitte Digital, Adobe (agentic), Salesforce Agentforce / Marketing Cloud, SIP, Braze, Writer, Jasper, Anthropic/Claude, OpenAI/Codex/GPT, Google/Gemini, and "agentic marketing" generally. Edit [`config/sources.json`](config/sources.json) to change them — no code changes needed.
 
@@ -17,9 +22,11 @@ Topics tracked out of the box: Accenture Song, Deloitte Digital, Adobe (agentic)
 |---|---|---|
 | Ingest | `src/ingest.js` | Pulls curated RSS feeds + a Google News RSS query per topic, filters to the last ~28h, dedupes by URL + title. |
 | Extract | `src/extract.js` | Resolves Google News redirects, fetches each article, runs Mozilla **Readability** to get clean full text (no ads/nav). Paywalled items fall back to the RSS preview. |
-| Summarize | `src/summarize.js` | One Claude call clusters stories into themed sections with "why it matters" + bullets, and picks the top story. |
-| Render | `src/render.js` | Builds the HTML email (summary) and EPUB chapters (summary + every full article). |
-| Deliver | `src/deliver.js` | Emails the brief and sends the EPUB to your Send-to-Kindle address via SMTP. |
+| Bookmarks | `src/readwise.js` | Pulls saved tweets + bookmarked articles from **Readwise Reader** (v3 API) using the full ad-free body Reader already extracted. |
+| Summarize | `src/summarize.js` | One Claude call clusters news into themed sections; a per-bookmark call writes a TL;DR + easy-read rewrite + a related-topic query. |
+| Related | `src/related.js` | For each bookmark, finds a few related articles via a Google News search on Claude's suggested query. |
+| Render | `src/render.js` | Builds the HTML email (summaries + bookmark TL;DRs) and EPUB chapters (full articles + full bookmark rewrites with Related links). |
+| Deliver | `src/deliver.js` | Emails the brief and sends the EPUB to your Send-to-Kindle address via SMTP. Optionally archives processed bookmarks in Reader. |
 
 Artifacts are always written to `out/` (also uploaded by the GitHub Action), so you can inspect a run even if email isn't configured.
 
@@ -40,7 +47,22 @@ Artifacts are always written to `out/` (also uploaded by the GitHub Action), so 
 ### 3. Anthropic API key
 Create a key at <https://console.anthropic.com>. Default model is `claude-sonnet-4-6`; set `BRIEF_MODEL=claude-opus-4-8` for best editorial quality or `claude-haiku-4-5-20251001` to minimize cost.
 
-### 4. Run locally
+### 4. Readwise Reader (your X bookmarks)
+This is how your saved tweets/articles get into the brief.
+
+1. Save tweets/articles to **[Readwise Reader](https://readwise.io/reader)**. The easiest capture paths:
+   - **Reader browser extension / mobile share sheet** — one tap to save any tweet or article.
+   - **Readwise's X (Twitter) integration** — connect your X account in Readwise so bookmarked/replied tweets sync automatically (Readwise → Settings → Integrations → Twitter).
+2. Get your API token at <https://readwise.io/access_token> and set `READWISE_TOKEN`.
+3. Optional controls (see `.env.example`):
+   - `READWISE_LOCATIONS` — which Reader shelves to pull (`new,later,shortlist` by default).
+   - `READWISE_TAG=kindle` — only send bookmarks you tag `kindle` in Reader (nice for curating exactly what goes to the device).
+   - `READWISE_ARCHIVE_AFTER=true` — auto-archive each bookmark after it's sent, so nothing repeats. Left `false` by default; instead a `BOOKMARK_LOOKBACK_HOURS` window (30h) keeps daily runs from re-sending.
+   - `MAX_BOOKMARKS` / `RELATED_PER_BOOKMARK` — cost and length knobs.
+
+Each bookmark becomes its own Kindle chapter: **TL;DR (1–2 sentences) → clean rewrite → Related reading → link to the original.**
+
+### 5. Run locally
 ```bash
 cd marketing-brief
 npm install
@@ -49,13 +71,13 @@ npm run dry-run          # builds EPUB+HTML into out/, does NOT send
 npm start                # builds and actually sends
 ```
 
-### 5. Schedule on GitHub Actions (recommended)
+### 6. Schedule on GitHub Actions (recommended)
 The workflow [`.github/workflows/daily-brief.yml`](../.github/workflows/daily-brief.yml) runs daily at 11:00 UTC (7am ET) and on manual dispatch.
 
 In the GitHub repo, add **Settings → Secrets and variables → Actions**:
 
-Secrets: `ANTHROPIC_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`, `KINDLE_EMAIL`, `EMAIL_TO`
-Variable (optional): `BRIEF_MODEL`
+Secrets: `ANTHROPIC_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`, `KINDLE_EMAIL`, `EMAIL_TO`, `READWISE_TOKEN`
+Variables (optional): `BRIEF_MODEL`, `READWISE_LOCATIONS`, `READWISE_TAG`, `READWISE_ARCHIVE_AFTER`
 
 Then trigger once via **Actions → Daily Marketing Brief → Run workflow** to test. The EPUB/HTML are uploaded as a build artifact every run.
 

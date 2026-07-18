@@ -41,6 +41,39 @@ function summaryHtml(summary, items) {
   return html;
 }
 
+// ---- Bookmarks: compact list for the email (TL;DRs only) ----
+function bookmarksEmailHtml(bookmarks) {
+  if (!bookmarks || !bookmarks.length) return "";
+  let html = `<hr/><h2>📑 From your X bookmarks (${bookmarks.length})</h2>`;
+  for (const b of bookmarks) {
+    html += `<p style="margin:14px 0"><strong>${esc(b.title)}</strong>${
+      b.topic ? ` <span style="color:#888">· ${esc(b.topic)}</span>` : ""
+    }<br/><span>${esc(b.tldr || "")}</span><br/><a href="${esc(b.url)}">original</a></p>`;
+  }
+  html += `<p style="color:#999"><small>Full rewrites + related reading are on your Kindle.</small></p>`;
+  return html;
+}
+
+// ---- Bookmarks: one full chapter each for the EPUB ----
+function bookmarkChapterHtml(b) {
+  const meta = [b.category === "tweet" ? "Saved tweet" : "Bookmarked article", b.author]
+    .filter(Boolean)
+    .join(" · ");
+  const tldr = b.tldr
+    ? `<blockquote style="border-left:4px solid #888;padding-left:12px;margin:0 0 16px"><strong>TL;DR.</strong> ${esc(
+        b.tldr
+      )}</blockquote>`
+    : "";
+  const related =
+    b.related && b.related.length
+      ? `<h3>Related reading</h3><ul>${b.related
+          .map((r) => `<li><a href="${esc(r.url)}">${esc(r.title)}</a>${r.source ? ` <em>(${esc(r.source)})</em>` : ""}</li>`)
+          .join("")}</ul>`
+      : "";
+  return `<p style="color:#666"><small>${esc(meta)} — <a href="${esc(b.url)}">source</a></small></p>
+${tldr}${b.rewrite_html || `<p>${esc(b.tldr || "")}</p>`}${related}`;
+}
+
 // ---- Full ad-free documents, EPUB only (keeps email light) ----
 function fullDocsHtml(items) {
   return items
@@ -58,21 +91,22 @@ ${note}${it.fullHtml || ""}`;
     .join("\n");
 }
 
-export function buildEmailHtml({ summary, items, dateStr }) {
+export function buildEmailHtml({ summary, items, dateStr, bookmarks = [] }) {
   return `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:680px;margin:auto;line-height:1.5;color:#111">
 <h1 style="margin-bottom:0">Agentic Marketing Daily Brief</h1>
-<p style="color:#666;margin-top:4px">${esc(dateStr)} · ${items.length} stories</p>
+<p style="color:#666;margin-top:4px">${esc(dateStr)} · ${items.length} stories · ${bookmarks.length} bookmarks</p>
 ${summaryHtml(summary, items)}
-<hr/><p style="color:#999"><small>Full ad-free articles delivered to your Kindle. Built by your marketing-brief pipeline.</small></p>
+${bookmarksEmailHtml(bookmarks)}
+<hr/><p style="color:#999"><small>Full ad-free articles + rewrites delivered to your Kindle. Built by your marketing-brief pipeline.</small></p>
 </body></html>`;
 }
 
-// epub-gen-memory takes a chapters array. Chapter 1 = the brief; then one chapter per article.
-export function buildEpubChapters({ summary, items, dateStr }) {
+// epub-gen-memory takes a chapters array. Ch.1 = brief; then news articles; then bookmarks.
+export function buildEpubChapters({ summary, items, dateStr, bookmarks = [] }) {
   const chapters = [
     {
       title: `Daily Brief — ${dateStr}`,
-      content: summaryHtml(summary, items),
+      content: summaryHtml(summary, items) + bookmarksEmailHtml(bookmarks),
     },
   ];
   for (let i = 0; i < items.length; i++) {
@@ -87,7 +121,13 @@ export function buildEpubChapters({ summary, items, dateStr }) {
       )}">source</a></small></p>${note}${it.fullHtml || ""}`,
     });
   }
+  if (bookmarks.length) {
+    chapters.push({ title: "— From your X bookmarks —", content: "<p>Your saved tweets and articles, rewritten for easy reading.</p>" });
+    for (const b of bookmarks) {
+      chapters.push({ title: `★ ${b.title.slice(0, 118)}`, content: bookmarkChapterHtml(b) });
+    }
+  }
   return chapters;
 }
 
-export { fullDocsHtml };
+export { fullDocsHtml, bookmarksEmailHtml, bookmarkChapterHtml };

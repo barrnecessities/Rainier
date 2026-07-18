@@ -32,6 +32,10 @@ jobs:
           FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
           KINDLE_EMAIL: ${{ secrets.KINDLE_EMAIL }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          READWISE_TOKEN: ${{ secrets.READWISE_TOKEN }}
+          READWISE_LOCATIONS: ${{ vars.READWISE_LOCATIONS }}
+          READWISE_TAG: ${{ vars.READWISE_TAG }}
+          READWISE_ARCHIVE_AFTER: ${{ vars.READWISE_ARCHIVE_AFTER }}
         run: node src/index.js
 
       - name: Upload artifacts
