@@ -55,6 +55,8 @@ export async function fetchBookmarks() {
     });
     for (const d of data.results || []) {
       if (!["tweet", "article"].includes(d.category)) continue;
+      // Fresh Reader accounts ship with "Getting Started" docs; keep them out of the brief.
+      if ((d.source || "").toLowerCase() === "readwise onboarding") continue;
       if (wantLocations.size && !wantLocations.has(d.location)) continue;
       const tags = Object.keys(d.tags || {}).map((t) => t.toLowerCase());
       if (wantTag && !tags.includes(wantTag)) continue;
