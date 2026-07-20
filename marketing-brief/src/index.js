@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import pLimit from "p-limit";
+import { env } from "./config.js";
 import { ingest } from "./ingest.js";
 import { extractAll } from "./extract.js";
 import { summarize, summarizeBookmark } from "./summarize.js";
@@ -14,11 +15,15 @@ import { buildEpubBuffer, deliver } from "./deliver.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, "..", "out");
 const dryRun = process.argv.includes("--dry-run");
+// --bookmarks-dump: skip news, send a digest of saved tweets/articles only.
+// Default window = last 7 days (weekly digest); add --all for the full library (one-off).
+const dumpMode = process.argv.includes("--bookmarks-dump");
+const dumpAll = process.argv.includes("--all");
 
 // For each saved bookmark: Claude writes a TL;DR + easy-read rewrite, then we
 // attach related articles. Bounded concurrency to respect API rate limits.
-async function processBookmarks() {
-  const raw = await fetchBookmarks();
+async function processBookmarks(fetchOpts = {}) {
+  const raw = await fetchBookmarks(fetchOpts);
   if (!raw.length) return [];
   const limit = pLimit(3);
   const out = await Promise.all(
@@ -39,7 +44,49 @@ async function processBookmarks() {
   return out;
 }
 
+// Bookmarks-only digest: weekly cron (last 7 days) or --all one-off full send.
+async function bookmarksDump() {
+  const dateStr = briefDate();
+  const scope = dumpAll ? "full library" : `last ${Math.round(env.bookmarkDumpLookbackHours / 24)} days`;
+  console.log(`\n== X Bookmarks Digest (${scope}) — ${dateStr} ==`);
+
+  console.log("1/3 Reading your X bookmarks (Readwise)…");
+  const bookmarks = await processBookmarks({
+    all: dumpAll,
+    lookbackHours: env.bookmarkDumpLookbackHours,
+    max: env.maxBookmarksDump,
+  });
+  if (!bookmarks.length) {
+    console.log("No bookmarks found. Connect X to Readwise (Settings > Integrations) or save tweets to Reader, then re-run.");
+    return;
+  }
+
+  console.log("2/3 Rendering EPUB + email…");
+  const heading = "X Bookmarks Digest";
+  const chapters = buildEpubChapters({ summary: null, items: [], dateStr, bookmarks, heading });
+  const epubBuffer = await buildEpubBuffer({ title: `${heading} — ${dateStr}`, chapters });
+  const emailHtml = buildEmailHtml({ summary: null, items: [], dateStr, bookmarks, heading });
+  const epubFilename = `x-bookmarks-${new Date().toISOString().slice(0, 10)}.epub`;
+
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, epubFilename), epubBuffer);
+  writeFileSync(join(outDir, "bookmarks-digest.html"), emailHtml);
+
+  console.log("3/3 Delivering…");
+  await deliver({
+    subject: `🔖 ${heading} — ${dateStr} (${bookmarks.length} saves)`,
+    emailHtml,
+    epubBuffer,
+    epubFilename,
+    dryRun,
+  });
+  if (!dryRun) await archiveBookmarks(bookmarks.map((b) => b.id).filter(Boolean));
+  console.log("Done.\n");
+}
+
 async function main() {
+  if (dumpMode) return bookmarksDump();
+
   const dateStr = briefDate();
   console.log(`\n== Agentic Marketing Daily Brief — ${dateStr} ==`);
 

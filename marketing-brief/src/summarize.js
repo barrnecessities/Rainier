@@ -11,13 +11,18 @@ Your job:
 1. Drop items that are off-topic, pure SEO spam, or near-duplicates.
 2. Cluster the rest into 3-7 themed sections (e.g. "Salesforce / Agentforce", "Frontier labs", "Agencies").
 3. For each section write a 1-2 sentence "why it matters" and 2-5 tight bullets, each citing the item number(s).
-4. Pick the single most important story of the day.
+4. For each section, add "po_take": EXACTLY ONE sentence of so-what analysis from this persona:
+   you are the product owner of Deloitte's agentic-marketing platform — Deloitte's answer to
+   Accenture Song. What should this news make you think, worry about, or do? Be specific and
+   opinionated (competitive threat, partnership angle, roadmap implication, positioning gap) —
+   never generic filler like "worth watching".
+5. Pick the single most important story of the day, and give it a "po_take" too.
 
 Return ONLY valid JSON (no markdown fences) matching:
 {
-  "headline_story": { "item": <number>, "one_liner": "<=160 chars" },
+  "headline_story": { "item": <number>, "one_liner": "<=160 chars", "po_take": "one sentence" },
   "sections": [
-    { "title": "string", "why_it_matters": "string",
+    { "title": "string", "why_it_matters": "string", "po_take": "one sentence",
       "bullets": [ { "text": "string", "items": [<numbers>] } ] }
   ]
 }`;

@@ -53,15 +53,18 @@ export const env = {
   // Optional: only bookmarks carrying this Reader tag (e.g. "kindle"). Empty = all.
   readwiseTag: val("READWISE_TAG"),
   // Look back this far for freshly-saved bookmarks (they may be older than news).
-  bookmarkLookbackHours: Number(process.env.BOOKMARK_LOOKBACK_HOURS || 30),
-  maxBookmarks: Number(process.env.MAX_BOOKMARKS || 15),
+  bookmarkLookbackHours: Number(val("BOOKMARK_LOOKBACK_HOURS") || 30),
+  maxBookmarks: Number(val("MAX_BOOKMARKS") || 15),
+  // Bookmarks-dump mode (weekly digest / one-off full send).
+  bookmarkDumpLookbackHours: Number(val("BOOKMARK_DUMP_LOOKBACK_HOURS") || 168),
+  maxBookmarksDump: Number(val("MAX_BOOKMARKS_DUMP") || 50),
   // If true, move processed bookmarks to Reader "archive" so they never repeat.
-  readwiseArchiveAfter: /^(1|true|yes)$/i.test(process.env.READWISE_ARCHIVE_AFTER || ""),
+  readwiseArchiveAfter: /^(1|true|yes)$/i.test(val("READWISE_ARCHIVE_AFTER")),
   // Related-articles per bookmark (0 disables the "Related" block).
-  relatedPerBookmark: Number(process.env.RELATED_PER_BOOKMARK || 3),
+  relatedPerBookmark: Number(val("RELATED_PER_BOOKMARK") || 3),
 
   // Tuning knobs.
-  maxArticles: Number(process.env.MAX_ARTICLES || 40),
+  maxArticles: Number(val("MAX_ARTICLES") || 60),
   lookbackHours: Number(process.env.LOOKBACK_HOURS || 28),
   extractConcurrency: Number(process.env.EXTRACT_CONCURRENCY || 5),
   timezone: process.env.BRIEF_TZ || "America/New_York",
