@@ -1,0 +1,28 @@
+{
+  "name": "marketing-brief",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Daily agentic-marketing news brief: RSS + Google News ingestion -> ad-free full-text extraction -> Claude clustering/summaries -> EPUB + HTML delivered to Kindle and email.",
+  "bin": {
+    "marketing-brief": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dry-run": "node src/index.js --dry-run",
+    "lint": "node --check src/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@mozilla/readability": "^0.5.0",
+    "dotenv": "^16.4.5",
+    "epub-gen-memory": "^1.1.1",
+    "jsdom": "^24.1.1",
+    "nodemailer": "^6.9.14",
+    "p-limit": "^5.0.0",
+    "rss-parser": "^3.13.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

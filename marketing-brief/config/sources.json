@@ -1,0 +1,28 @@
+{
+  "_comment": "Two kinds of sources. 'feeds' are curated editorial RSS feeds (full or near-full text). 'topics' are turned into Google News RSS search queries automatically so you don't have to hand-create Google Alerts. Edit freely. Set 'enabled' false to mute a source without deleting it.",
+
+  "feeds": [
+    { "name": "MarTech", "url": "https://martech.org/feed/", "enabled": true },
+    { "name": "Salesforce Ben", "url": "https://www.salesforceben.com/feed/", "enabled": true },
+    { "name": "Marketing AI Institute", "url": "https://www.marketingaiinstitute.com/blog/rss.xml", "enabled": true },
+    { "name": "Adobe Blog", "url": "https://blog.adobe.com/en/rss.xml", "enabled": true },
+    { "name": "Anthropic News", "url": "https://news.google.com/rss/search?q=Anthropic+Claude+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": true },
+    { "name": "Economist - Business (headlines only, paywalled full text)", "url": "https://www.economist.com/business/rss.xml", "enabled": true },
+    { "name": "Economist - The World This Week (headlines only)", "url": "https://www.economist.com/the-world-this-week/rss.xml", "enabled": true }
+  ],
+
+  "topics": [
+    { "name": "Accenture Song", "query": "\"Accenture Song\" marketing OR AI OR agentic", "enabled": true },
+    { "name": "Deloitte Digital", "query": "\"Deloitte Digital\" marketing OR AI OR agentic", "enabled": true },
+    { "name": "SIP (Salesforce/Adobe product - CONFIRM exact name)", "query": "Salesforce OR Adobe \"SIP\" marketing", "enabled": true },
+    { "name": "Adobe (agentic marketing)", "query": "Adobe (Agent Orchestrator OR \"Experience Platform\" OR Firefly OR GenStudio) marketing agentic", "enabled": true },
+    { "name": "Salesforce Agentforce Marketing", "query": "Salesforce (Agentforce OR \"Marketing Cloud\") agent", "enabled": true },
+    { "name": "Braze", "query": "Braze (AI OR agent OR \"Project Catalyst\") marketing", "enabled": true },
+    { "name": "Writer AI", "query": "\"Writer\" (Writer.com OR \"Palmyra\") enterprise AI marketing", "enabled": true },
+    { "name": "Jasper AI", "query": "Jasper AI marketing (agent OR platform)", "enabled": true },
+    { "name": "Anthropic / Claude (marketing)", "query": "Anthropic OR Claude marketing OR advertising OR agent", "enabled": true },
+    { "name": "OpenAI Codex / GPT (marketing)", "query": "OpenAI (Codex OR GPT) marketing OR agent OR advertising", "enabled": true },
+    { "name": "Google Gemini (marketing)", "query": "Google Gemini marketing OR advertising OR agent", "enabled": true },
+    { "name": "Agentic marketing (general)", "query": "\"agentic marketing\" OR \"AI agents\" martech", "enabled": true }
+  ]
+}
