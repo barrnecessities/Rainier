@@ -12,6 +12,10 @@ Two pipelines in one:
 
 Both merge into one EPUB + email. Runs on a daily GitHub Actions cron.
 
+Every section of the news brief includes a **"PO lens"** — one sentence of so-what analysis from the perspective of the product owner of Deloitte's agentic-marketing platform (Deloitte's answer to Accenture Song).
+
+There is also a **bookmarks-only digest** (`node src/index.js --bookmarks-dump`): a weekly Sunday cron sends everything you saved in the last 7 days as its own Kindle EPUB, and running the workflow manually with scope `all` does a one-off full send of your entire Reader library (`.github/workflows/weekly-bookmarks.yml`).
+
 Topics tracked out of the box: Accenture Song, Deloitte Digital, Adobe (agentic), Salesforce Agentforce / Marketing Cloud, SIP, Braze, Writer, Jasper, Anthropic/Claude, OpenAI/Codex/GPT, Google/Gemini, and "agentic marketing" generally. Edit [`config/sources.json`](config/sources.json) to change them — no code changes needed.
 
 ---

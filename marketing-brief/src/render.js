@@ -24,16 +24,24 @@ function summaryHtml(summary, items) {
       .map((it) => ` <a href="${esc(it.url)}">[${esc(it.source)}]</a>`)
       .join("");
 
+  const poLens = (take) =>
+    take
+      ? `<p style="border-left:3px solid #b8860b;padding-left:10px;margin:8px 0">💡 <strong>PO lens:</strong> <em>${esc(
+          take
+        )}</em></p>`
+      : "";
+
   let html = "";
   const hs = summary.headline_story;
   if (hs && items[hs.item - 1]) {
     html += `<p style="font-size:1.05em"><strong>📌 Top story:</strong> ${esc(hs.one_liner)} <a href="${esc(
       items[hs.item - 1].url
-    )}">→</a></p><hr/>`;
+    )}">→</a></p>${poLens(hs.po_take)}<hr/>`;
   }
   for (const sec of summary.sections || []) {
     html += `<h2>${esc(sec.title)}</h2>`;
     if (sec.why_it_matters) html += `<p><em>${esc(sec.why_it_matters)}</em></p>`;
+    html += poLens(sec.po_take);
     html += "<ul>";
     for (const b of sec.bullets || []) html += `<li>${esc(b.text)}${ref(b.items)}</li>`;
     html += "</ul>";
@@ -91,22 +99,25 @@ ${note}${it.fullHtml || ""}`;
     .join("\n");
 }
 
-export function buildEmailHtml({ summary, items, dateStr, bookmarks = [] }) {
+export function buildEmailHtml({ summary, items, dateStr, bookmarks = [], heading = "Agentic Marketing Daily Brief" }) {
   return `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:680px;margin:auto;line-height:1.5;color:#111">
-<h1 style="margin-bottom:0">Agentic Marketing Daily Brief</h1>
+<h1 style="margin-bottom:0">${esc(heading)}</h1>
 <p style="color:#666;margin-top:4px">${esc(dateStr)} · ${items.length} stories · ${bookmarks.length} bookmarks</p>
-${summaryHtml(summary, items)}
+${items.length ? summaryHtml(summary, items) : ""}
 ${bookmarksEmailHtml(bookmarks)}
 <hr/><p style="color:#999"><small>Full ad-free articles + rewrites delivered to your Kindle. Built by your marketing-brief pipeline.</small></p>
 </body></html>`;
 }
 
 // epub-gen-memory takes a chapters array. Ch.1 = brief; then news articles; then bookmarks.
-export function buildEpubChapters({ summary, items, dateStr, bookmarks = [] }) {
+export function buildEpubChapters({ summary, items, dateStr, bookmarks = [], heading = "Daily Brief" }) {
+  const lead = items.length
+    ? summaryHtml(summary, items) + bookmarksEmailHtml(bookmarks)
+    : `<p>Your saved tweets and articles, rewritten for easy reading.</p>` + bookmarksEmailHtml(bookmarks);
   const chapters = [
     {
-      title: `Daily Brief — ${dateStr}`,
-      content: summaryHtml(summary, items) + bookmarksEmailHtml(bookmarks),
+      title: `${heading} — ${dateStr}`,
+      content: lead,
     },
   ];
   for (let i = 0; i < items.length; i++) {

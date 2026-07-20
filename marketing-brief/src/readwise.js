@@ -34,16 +34,22 @@ async function listPage(params) {
   return res.json();
 }
 
-// Pull tweets + articles you saved to Reader within the lookback window.
-export async function fetchBookmarks() {
+// Pull tweets + articles you saved to Reader.
+// opts.lookbackHours overrides the default window; opts.all ignores the window
+// entirely (full-library dump); opts.max overrides the cap.
+export async function fetchBookmarks(opts = {}) {
   if (!env.readwiseToken) {
     console.warn("  ! READWISE_TOKEN not set — skipping bookmarks section");
     return [];
   }
 
   const wantLocations = new Set(splitList(env.readwiseLocations));
-  const updatedAfter = new Date(Date.now() - env.bookmarkLookbackHours * 3600 * 1000).toISOString();
+  const lookbackHours = opts.lookbackHours ?? env.bookmarkLookbackHours;
+  const updatedAfter = opts.all
+    ? undefined
+    : new Date(Date.now() - lookbackHours * 3600 * 1000).toISOString();
   const wantTag = env.readwiseTag.trim().toLowerCase();
+  const maxItems = opts.max ?? env.maxBookmarks;
 
   const collected = [];
   let cursor = undefined;
@@ -78,7 +84,7 @@ export async function fetchBookmarks() {
 
   // Newest first, cap for cost.
   collected.sort((a, b) => (Date.parse(b.savedAt || 0) || 0) - (Date.parse(a.savedAt || 0) || 0));
-  const capped = collected.slice(0, env.maxBookmarks);
+  const capped = collected.slice(0, maxItems);
   console.log(`  fetched ${collected.length} bookmarks -> ${capped.length} kept`);
   return capped;
 }
