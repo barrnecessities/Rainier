@@ -5,7 +5,7 @@
     { "name": "MarTech", "url": "https://martech.org/feed/", "enabled": true },
     { "name": "Salesforce Ben", "url": "https://www.salesforceben.com/feed/", "enabled": true },
     { "name": "Marketing AI Institute", "url": "https://www.marketingaiinstitute.com/blog/rss.xml", "enabled": true },
-    { "name": "Adobe Blog", "url": "https://blog.adobe.com/en/rss.xml", "enabled": true },
+    { "name": "Adobe News", "url": "https://news.google.com/rss/search?q=Adobe+(marketing+OR+GenStudio+OR+Firefly+OR+%22Experience+Platform%22)+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": true },
     { "name": "Anthropic News", "url": "https://news.google.com/rss/search?q=Anthropic+Claude+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": true },
     { "name": "Economist - Business (headlines only, paywalled full text)", "url": "https://www.economist.com/business/rss.xml", "enabled": true },
     { "name": "Economist - The World This Week (headlines only)", "url": "https://www.economist.com/the-world-this-week/rss.xml", "enabled": true }

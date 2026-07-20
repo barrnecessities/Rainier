@@ -27,26 +27,31 @@ export const allFeeds = [
     .map((t) => ({ name: t.name, url: googleNewsRss(t.query), kind: "topic" })),
 ];
 
-export const env = {
-  anthropicKey: process.env.ANTHROPIC_API_KEY || "",
-  model: process.env.BRIEF_MODEL || "claude-sonnet-4-6",
+// Trim every value read from env. Secrets pasted into CI often carry a
+// trailing newline/space; for values used as HTTP headers (API keys) that
+// stray whitespace throws "is not a legal HTTP header value" and kills the run.
+const val = (name, dflt = "") => (process.env[name] ?? dflt).toString().trim();
 
-  smtpHost: process.env.SMTP_HOST || "smtp.gmail.com",
-  smtpPort: Number(process.env.SMTP_PORT || 465),
-  smtpUser: process.env.SMTP_USER || "",
-  smtpPass: process.env.SMTP_PASS || "",
-  fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER || "",
+export const env = {
+  anthropicKey: val("ANTHROPIC_API_KEY"),
+  model: val("BRIEF_MODEL") || "claude-sonnet-4-6",
+
+  smtpHost: val("SMTP_HOST") || "smtp.gmail.com",
+  smtpPort: Number(val("SMTP_PORT") || 465),
+  smtpUser: val("SMTP_USER"),
+  smtpPass: val("SMTP_PASS"),
+  fromEmail: val("FROM_EMAIL") || val("SMTP_USER"),
 
   // Comma-separated lists supported.
-  kindleEmail: process.env.KINDLE_EMAIL || "",
-  emailTo: process.env.EMAIL_TO || "",
+  kindleEmail: val("KINDLE_EMAIL"),
+  emailTo: val("EMAIL_TO"),
 
   // Readwise Reader (your saved tweets / bookmarked articles).
-  readwiseToken: process.env.READWISE_TOKEN || "",
+  readwiseToken: val("READWISE_TOKEN"),
   // Only pull bookmarks in these Reader locations (comma list): new,later,shortlist,archive,feed.
-  readwiseLocations: process.env.READWISE_LOCATIONS || "new,later,shortlist",
+  readwiseLocations: val("READWISE_LOCATIONS") || "new,later,shortlist",
   // Optional: only bookmarks carrying this Reader tag (e.g. "kindle"). Empty = all.
-  readwiseTag: process.env.READWISE_TAG || "",
+  readwiseTag: val("READWISE_TAG"),
   // Look back this far for freshly-saved bookmarks (they may be older than news).
   bookmarkLookbackHours: Number(process.env.BOOKMARK_LOOKBACK_HOURS || 30),
   maxBookmarks: Number(process.env.MAX_BOOKMARKS || 15),

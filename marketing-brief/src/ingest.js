@@ -69,10 +69,23 @@ export async function ingest() {
     deduped.push(it);
   }
 
-  // Prefer most recent; cap to keep extraction + token cost bounded.
-  deduped.sort((a, b) => (Date.parse(b.publishedAt || 0) || 0) - (Date.parse(a.publishedAt || 0) || 0));
-  const capped = deduped.slice(0, env.maxArticles);
+  // Prefer most recent within each group.
+  const byDate = (a, b) => (Date.parse(b.publishedAt || 0) || 0) - (Date.parse(a.publishedAt || 0) || 0);
+  deduped.sort(byDate);
 
-  console.log(`  ingested ${items.length} raw -> ${fresh.length} fresh -> ${deduped.length} unique -> ${capped.length} kept`);
+  // Curated "feed" items are direct publisher links that extract to clean full
+  // text; "topic" items are Google News redirects that usually don't. Keep the
+  // curated ones first so full-text extraction isn't crowded out, then fill the
+  // rest with the freshest topic items.
+  const feedItems = deduped.filter((it) => it.kind === "feed");
+  const topicItems = deduped.filter((it) => it.kind !== "feed");
+  const capped = [...feedItems, ...topicItems].slice(0, env.maxArticles);
+  capped.sort(byDate);
+
+  console.log(
+    `  ingested ${items.length} raw -> ${fresh.length} fresh -> ${deduped.length} unique -> ${capped.length} kept (${
+      feedItems.length
+    } curated)`
+  );
   return capped;
 }
