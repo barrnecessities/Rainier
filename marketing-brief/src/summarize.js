@@ -52,14 +52,18 @@ export async function summarize(items) {
     .map((it, i) => `[${i + 1}] (${it.source}) ${it.title}\n${(it.text || it.snippet || "").slice(0, 700)}`)
     .join("\n\n");
 
-  const msg = await client().messages.create({
-    model: env.model,
-    max_tokens: 4000,
-    system: SYSTEM,
-    messages: [{ role: "user", content: `Today's articles:\n\n${list}` }],
-  });
-
-  return parseJson(textOf(msg), "AI summary") || null;
+  try {
+    const msg = await client().messages.create({
+      model: env.model,
+      max_tokens: 4000,
+      system: SYSTEM,
+      messages: [{ role: "user", content: `Today's articles:\n\n${list}` }],
+    });
+    return parseJson(textOf(msg), "AI summary") || null;
+  } catch (e) {
+    console.warn(`  ! news summary failed (${e.message}); shipping raw list`);
+    return null;
+  }
 }
 
 const BOOKMARK_SYSTEM = `You transform a saved tweet or bookmarked article into a calm, distraction-free read for a Kindle.
@@ -76,16 +80,21 @@ export async function summarizeBookmark(item) {
   if (!env.anthropicKey) return null;
   const body = (item.text || item.readwiseSummary || "").slice(0, 12000);
   const kind = item.category === "tweet" ? "Saved tweet/thread" : "Bookmarked article";
-  const msg = await client().messages.create({
-    model: env.model,
-    max_tokens: 3000,
-    system: BOOKMARK_SYSTEM,
-    messages: [
-      {
-        role: "user",
-        content: `${kind}\nTitle: ${item.title}\nAuthor: ${item.author || "unknown"}\nURL: ${item.url}\n\nContent:\n${body}`,
-      },
-    ],
-  });
-  return parseJson(textOf(msg), "bookmark rewrite");
+  try {
+    const msg = await client().messages.create({
+      model: env.model,
+      max_tokens: 3000,
+      system: BOOKMARK_SYSTEM,
+      messages: [
+        {
+          role: "user",
+          content: `${kind}\nTitle: ${item.title}\nAuthor: ${item.author || "unknown"}\nURL: ${item.url}\n\nContent:\n${body}`,
+        },
+      ],
+    });
+    return parseJson(textOf(msg), "bookmark rewrite");
+  } catch (e) {
+    console.warn(`  ! bookmark rewrite failed for "${item.title?.slice(0, 50)}" (${e.message})`);
+    return null;
+  }
 }
