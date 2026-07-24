@@ -2,13 +2,34 @@ import nodemailer from "nodemailer";
 import epub from "epub-gen-memory";
 import { env, splitList } from "./config.js";
 
+// epub-gen-memory downloads every <img> in chapter HTML to embed it. Publisher
+// CDNs often 403 those fetches (bot protection), which must never kill the run.
+function stripImages(html) {
+  return String(html || "")
+    .replace(/<picture[\s\S]*?<\/picture>/gi, "")
+    .replace(/<figure[\s\S]*?<\/figure>/gi, "")
+    .replace(/<img[^>]*>/gi, "")
+    .replace(/<source[^>]*>/gi, "");
+}
+
 export async function buildEpubBuffer({ title, chapters }) {
   // epub-gen-memory default export: (optionsOrTitle, content) => Promise<Buffer>
   const fn = epub.default || epub;
-  return await fn(
-    { title, author: "Marketing Brief", lang: "en", tocTitle: "Contents" },
-    chapters
-  );
+  const options = {
+    title,
+    author: "Marketing Brief",
+    lang: "en",
+    tocTitle: "Contents",
+    ignoreFailedDownloads: true, // blocked image -> warn, don't throw
+    fetchTimeout: 10000,
+  };
+  try {
+    return await fn(options, chapters);
+  } catch (e) {
+    console.warn(`  ! EPUB build failed (${e.message}); retrying without images`);
+    const textOnly = chapters.map((c) => ({ ...c, content: stripImages(c.content) }));
+    return await fn(options, textOnly);
+  }
 }
 
 function transport() {
