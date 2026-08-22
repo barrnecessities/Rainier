@@ -3,6 +3,24 @@
 Living log of getting the **new downstairs 3 Day Blinds** into Home Assistant so they
 join the wake alarm. Updated as we go so we never re-tread dead ends.
 
+## RESOLVED (2026-08-22)
+
+Bought the **PowerView Gen 3 Gateway (~$195)**. This was always option 2 in "Remaining
+options" below — the guaranteed, plug-and-play path. All the gateway-less BLE
+work (ESP32 emulator, key extraction) below is now moot for this home; kept as
+reference only in case a future gateway-less shade ever needs it.
+
+Setup:
+1. Plugged the gateway in near the downstairs shades; 3 Day Blinds app auto-detected it
+   on the existing home (`s9wjegWptJWFp7bOAa06`) and paired all three shades
+   (`hny#2488`, `hny#C88A`, `hny#331A`).
+2. In HA: **Settings → Devices & Services → + Add Integration → "PowerView"**
+   (official `hunterdouglas_powerview` integration, no HACS, no key needed —
+   the gateway handles auth). Auto-discovered on the network.
+3. Next: wire the resulting `cover.*` entities into
+   `home-assistant/packages/smarthome_alarm.yaml` per the plan below, once entity
+   IDs are confirmed from Settings → Devices & Services → Entities.
+
 ## The setup (facts)
 
 - **Bedroom blinds (old):** Motionblinds, "3 Day Blinds 1.0" app → already in HA as
