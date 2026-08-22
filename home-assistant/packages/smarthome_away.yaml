@@ -17,10 +17,11 @@ automation:
           {{ (now() - states.group.household_presence.last_changed).total_seconds() > 300 }}
     action:
       - parallel:
-          # Lights off
+          # Lights off (whole house — `entity_id: all`; `area_id: home` is
+          # not a real area and silently does nothing)
           - service: light.turn_off
             target:
-              area_id: home
+              entity_id: all
           # Blinds to privacy position (not fully dark)
           - service: cover.set_cover_position
             target:
@@ -56,14 +57,15 @@ automation:
           color_temp_kelvin: 3000
           transition: 2
       # Open blinds to natural position during daytime
+      # (real bedroom entity; TODO(powerview): add downstairs cover.* IDs
+      # once the Gen 3 Gateway integration is set up)
       - condition: sun
         after: sunrise
         before: sunset
       - service: cover.set_cover_position
         target:
           entity_id:
-            - cover.bedroom_blinds
-            - cover.living_room_blinds
+            - cover.topdownbottomup_0001_combined
         data:
           position: 50
 

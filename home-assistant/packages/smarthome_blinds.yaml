@@ -51,7 +51,7 @@ automation:
     action:
       - service: cover.set_cover_position
         target:
-          entity_id: cover.bedroom_blinds  # sun-facing
+          entity_id: cover.topdownbottomup_0001_combined  # sun-facing bedroom
         data:
           position: 20
 

@@ -5,13 +5,19 @@ homeassistant:
 # Hue-compatible voice assistant) can discover and run them with no cloud
 # subscription. In the Alexa app: Devices → + → Discover, on the same WiFi.
 # Say "Alexa, turn on <name>" to run a mode.
+# NOTE: listen_port MUST be 80 — newer Echo devices only discover emulated
+# Hue bridges on port 80.
 emulated_hue:
   host_ip: 10.0.0.78
-  listen_port: 8300
+  listen_port: 80
   expose_by_default: false
   entities:
     script.mode_all_off:
       name: "All Off"
+    script.mode_away_night:
+      name: "Away Night"
+    script.mode_sleep:
+      name: "Sleep Mode"
 
 lovelace:
   mode: yaml
@@ -22,3 +28,9 @@ lovelace:
       icon: mdi:home-lightbulb
       show_in_sidebar: true
       filename: dashboards/lockly_hue_mobile.yaml
+    smarthome-mobile:
+      mode: yaml
+      title: Smart Home
+      icon: mdi:home-automation
+      show_in_sidebar: true
+      filename: dashboards/smarthome_mobile.yaml

@@ -137,13 +137,25 @@ automation:
               entity_id: cover.topdownbottomup_0001_combined
             data:
               position: 50
-          - service: light.turn_on
-            target:
-              entity_id: light.bedroom
-            data:
-              brightness_pct: 65
-              color_temp_kelvin: 4000
-              transition: 180
+          # TODO(powerview): open downstairs blinds to 50% here once the
+          # Gen 3 Gateway entities exist.
+          - sequence:
+              # Whole house on at a moderate morning level first…
+              - service: light.turn_on
+                target:
+                  entity_id: all
+                data:
+                  brightness_pct: 50
+                  color_temp_kelvin: 3500
+                  transition: 60
+              # …then the bedroom continues its sunrise curve on top.
+              - service: light.turn_on
+                target:
+                  entity_id: light.bedroom
+                data:
+                  brightness_pct: 65
+                  color_temp_kelvin: 4000
+                  transition: 180
           - service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
@@ -196,7 +208,7 @@ automation:
               position: 100
           - service: light.turn_on
             target:
-              entity_id: light.bedroom
+              entity_id: all
             data:
               brightness_pct: 85
               color_temp_kelvin: 5000

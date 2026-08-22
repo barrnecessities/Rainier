@@ -1,0 +1,49 @@
+# Weeknight sleep mode — Sunday through Thursday nights, the bedroom
+# automatically winds down at the configured time by running script.mode_sleep
+# (defined in smarthome_modes.yaml). Friday/Saturday nights are untouched.
+#
+# Skips automatically if nobody is home (Away Night / travel), and can be
+# disabled entirely with the toggle.
+
+input_boolean:
+  weeknight_sleep_enabled:
+    name: Weeknight Sleep Mode (Sun–Thu)
+    icon: mdi:bed-clock
+
+input_datetime:
+  weeknight_sleep_time:
+    name: Weeknight Sleep Time
+    has_date: false
+    has_time: true
+    icon: mdi:clock-time-ten-outline
+
+automation:
+  - alias: "Sleep — Weeknight wind-down (Sun–Thu)"
+    id: sleep_weeknight_winddown
+    trigger:
+      - platform: time
+        at: input_datetime.weeknight_sleep_time
+    condition:
+      - condition: state
+        entity_id: input_boolean.weeknight_sleep_enabled
+        state: "on"
+      # Sun–Thu *nights* (the evenings before Mon–Fri workdays)
+      - condition: time
+        weekday:
+          - sun
+          - mon
+          - tue
+          - wed
+          - thu
+      # Don't run the wind-down for an empty house
+      - condition: state
+        entity_id: group.household_presence
+        state: "home"
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.mode_sleep
+      - service: logbook.log
+        data:
+          name: Sleep Mode
+          message: Weeknight wind-down started.
