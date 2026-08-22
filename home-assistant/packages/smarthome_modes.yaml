@@ -1,0 +1,29 @@
+# Voice-callable "mode" scripts. Each script here is exposed to Alexa via
+# emulated_hue (see configuration.yaml) as a fake Hue device — say
+# "Alexa, turn on <name>" to run it. No Nabu Casa Cloud subscription needed.
+#
+# To add another mode: copy the script block, give it a new id + alias, then
+# add it to the `entities:` list under `emulated_hue:` in configuration.yaml.
+
+script:
+  mode_all_off:
+    alias: "All Off"
+    icon: mdi:power
+    sequence:
+      # Lights off, whole house
+      - service: light.turn_off
+        target:
+          area_id: home
+      # Room AC off
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.bedroom_ac
+        data:
+          hvac_mode: "off"
+      # 8sleep pod off
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          hvac_mode: "off"
+    mode: single

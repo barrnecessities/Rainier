@@ -1,6 +1,18 @@
 homeassistant:
   packages: !include_dir_named packages
 
+# Exposes selected scripts as fake Philips Hue devices so Alexa (or any
+# Hue-compatible voice assistant) can discover and run them with no cloud
+# subscription. In the Alexa app: Devices → + → Discover, on the same WiFi.
+# Say "Alexa, turn on <name>" to run a mode.
+emulated_hue:
+  host_ip: 10.0.0.78
+  listen_port: 8300
+  expose_by_default: false
+  entities:
+    script.mode_all_off:
+      name: "All Off"
+
 lovelace:
   mode: yaml
   dashboards:
