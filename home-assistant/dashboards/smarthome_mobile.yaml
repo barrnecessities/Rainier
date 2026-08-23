@@ -116,15 +116,17 @@ views:
         entity: light.living_room
         name: Living Room
 
+      # Lockly is not integrated with HA (no lock.* entities exist), so no
+      # front-door row here. Add one if a Matter/Secure Link path is set up.
       - type: entities
         title: Status
         entities:
           - entity: person.brandon_barron
             name: Brandon
-          - entity: lock.lockly_front_door
-            name: Front Door
           - entity: media_player.bedroom
             name: Bedroom Speaker
+          - entity: sensor.sun_next_dawn
+            name: Next Sunrise
 
   # ─────────────────────────────── BLINDS ──────────────────────────────
   - title: Blinds
