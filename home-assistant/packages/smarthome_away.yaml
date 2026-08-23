@@ -25,7 +25,11 @@ automation:
           # Blinds to privacy position (not fully dark)
           - service: cover.set_cover_position
             target:
-              entity_id: cover.topdownbottomup_0001_combined
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.shade_1
+                - cover.shade_2
+                - cover.shade_3
             data:
               position: 15
           # 8sleep: standby (eco)
@@ -57,8 +61,6 @@ automation:
           color_temp_kelvin: 3000
           transition: 2
       # Open blinds to natural position during daytime
-      # (real bedroom entity; TODO(powerview): add downstairs cover.* IDs
-      # once the Gen 3 Gateway integration is set up)
       - condition: sun
         after: sunrise
         before: sunset
@@ -66,6 +68,9 @@ automation:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
         data:
           position: 50
 
@@ -73,6 +78,6 @@ group:
   household_presence:
     name: Household Presence
     entities:
-      - person.home_owner
+      - person.brandon_barron
     # Add additional person entities here as needed, e.g.:
     # - person.partner

@@ -66,11 +66,13 @@ script:
           # Blinds down to privacy position (15%, matches away mode)
           - service: cover.set_cover_position
             target:
-              entity_id: cover.topdownbottomup_0001_combined
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.shade_1
+                - cover.shade_2
+                - cover.shade_3
             data:
               position: 15
-          # TODO(powerview): add downstairs cover.* entities here once the
-          # PowerView Gen 3 Gateway integration is added and entity IDs known.
       # Skip tomorrow's wake alarm; re-enable it manually or via the
       # "someone arrived home" automation below.
       - service: input_boolean.turn_off
@@ -99,10 +101,13 @@ script:
       # Blinds fully closed for sleep
       - service: cover.set_cover_position
         target:
-          entity_id: cover.topdownbottomup_0001_combined
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
         data:
           position: 0
-      # TODO(powerview): close downstairs blinds here too once entities exist.
       # Cool the room now (in addition to the fixed 9pm AC automation, so
       # a manual "Sleep Mode" always gets you a cool room even off-schedule)
       - service: climate.set_temperature

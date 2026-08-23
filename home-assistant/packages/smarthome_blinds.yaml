@@ -1,6 +1,12 @@
 # Sun + weather blind automation
 # Runs automatically unless the user overrides from the app.
 # Override is cleared when the next sun event fires.
+#
+# Covers:
+#   cover.topdownbottomup_0001_combined — bedroom (Motionblinds bridge)
+#   cover.shade_1/2/3 — downstairs Duettes (PowerView Gen 3 gateway "Bop")
+# Weather: weather.forecast_home (Met.no). No UV sensor on this system, so
+# glare protection keys off sun elevation + sunny sky instead of a UV index.
 
 input_boolean:
   blinds_auto_mode:
@@ -22,17 +28,18 @@ automation:
     action:
       - service: cover.set_cover_position
         target:
-          entity_id: cover.topdownbottomup_0001_combined
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
         data:
           position: 30
 
-  # High UV / hot afternoon: close sun-facing side to 20%
-  - alias: "Blinds — UV glare protection"
+  # Sunny midday: close the sun-facing bedroom blind to cut glare/heat
+  - alias: "Blinds — Sun glare protection"
     id: blinds_uv_protection
     trigger:
-      - platform: numeric_state
-        entity_id: sensor.uv_index
-        above: 5
       - platform: numeric_state
         entity_id: sun.sun
         attribute: elevation
@@ -41,13 +48,11 @@ automation:
       - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
-      - condition: numeric_state
-        entity_id: sensor.uv_index
-        above: 5
-      - condition: numeric_state
-        entity_id: sun.sun
-        attribute: elevation
-        above: 30
+      - condition: state
+        entity_id: weather.forecast_home
+        state:
+          - sunny
+          - partlycloudy
     action:
       - service: cover.set_cover_position
         target:
@@ -60,7 +65,7 @@ automation:
     id: blinds_overcast
     trigger:
       - platform: state
-        entity_id: weather.home
+        entity_id: weather.forecast_home
         to:
           - overcast
           - rainy
@@ -77,7 +82,10 @@ automation:
       - service: cover.set_cover_position
         target:
           entity_id:
-            cover.topdownbottomup_0001_combined
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
         data:
           position: 70
 
@@ -96,7 +104,10 @@ automation:
       - service: cover.set_cover_position
         target:
           entity_id:
-            cover.topdownbottomup_0001_combined
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
         data:
           position: 0
 

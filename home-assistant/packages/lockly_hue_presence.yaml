@@ -81,7 +81,8 @@ automation:
     condition:
       - condition: template
         value_template: >-
-          {{ (as_timestamp(now()) - as_timestamp(states.lock.lockly_front_door.last_changed, default=0)) > 21600 }}
+          {{ states.lock.lockly_front_door is not none
+             and (as_timestamp(now()) - as_timestamp(states.lock.lockly_front_door.last_changed, default=0)) > 21600 }}
     action:
       - service: persistent_notification.create
         data:

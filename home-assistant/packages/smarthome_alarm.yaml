@@ -134,11 +134,13 @@ automation:
       - parallel:
           - service: cover.set_cover_position
             target:
-              entity_id: cover.topdownbottomup_0001_combined
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.shade_1
+                - cover.shade_2
+                - cover.shade_3
             data:
               position: 50
-          # TODO(powerview): open downstairs blinds to 50% here once the
-          # Gen 3 Gateway entities exist.
           - sequence:
               # Whole house on at a moderate morning level first…
               - service: light.turn_on
@@ -203,7 +205,11 @@ automation:
       - parallel:
           - service: cover.set_cover_position
             target:
-              entity_id: cover.topdownbottomup_0001_combined
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.shade_1
+                - cover.shade_2
+                - cover.shade_3
             data:
               position: 100
           - service: light.turn_on
