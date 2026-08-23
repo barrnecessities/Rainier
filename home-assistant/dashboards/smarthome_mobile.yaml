@@ -1,36 +1,113 @@
-# Fallback HA dashboard (mobile-optimized)
-# Use this if the Next.js app is unavailable.
-# Add to HA: Settings → Dashboards → + Add Dashboard → YAML mode
+# Hearth — mobile-first HA dashboard
+# Four tabs: Home (daily driver), Blinds, Climate, Schedule (set-and-forget).
+#
+# Entity notes:
+#   cover.shade_1/2/3 — downstairs Duettes (PowerView gateway "Bop")
+#   cover.topdownbottomup_0001_combined — bedroom (Motionblinds bridge)
+#   climate.bedroom_ac — placeholder until the Midea AC is added; its cards
+#     will read "unavailable" until then, which is the intended signal.
 
 title: Hearth
 views:
+  # ─────────────────────────────── HOME ───────────────────────────────
   - title: Home
     path: home
     icon: mdi:home
-    theme: Backend-selected
-    badges: []
     cards:
-      # Wake Alarm
-      - type: entities
-        title: Wake Alarm
-        entities:
-          - entity: input_datetime.wake_alarm
-            name: Wake Time
-          - entity: input_boolean.wake_alarm_enabled
-            name: Enabled
+      - type: markdown
+        content: >
+          ## {{ ['Good morning', 'Good afternoon', 'Good evening'][
+          0 if now().hour < 12 else 1 if now().hour < 17 else 2] }}, Brandon
 
-      # Blinds
-      - type: entities
-        title: Blinds
-        entities:
-          - entity: cover.bedroom_blinds
-            name: Bedroom
-          - entity: cover.living_room_blinds
-            name: Living Room
-          - entity: input_boolean.blinds_auto_mode
-            name: Auto Mode
+          {{ states('weather.forecast_home') | replace('partlycloudy',
+          'partly cloudy') | title }} ·
+          {{ state_attr('weather.forecast_home', 'temperature') | round }}°F ·
+          sunset {{ as_timestamp(states('sensor.sun_next_setting'))
+          | timestamp_custom('%-I:%M %p', true) }}
 
-      # Lights
+      # One-tap modes — the three Alexa scripts, also tappable here
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: button
+            entity: script.mode_sleep
+            name: Sleep
+            icon: mdi:weather-night
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.mode_sleep
+          - type: button
+            entity: script.mode_all_off
+            name: All Off
+            icon: mdi:power
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.mode_all_off
+          - type: button
+            entity: script.mode_away_night
+            name: Away Night
+            icon: mdi:bag-suitcase
+            show_state: false
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.mode_away_night
+
+      # Whole-house blind control
+      - type: entities
+        title: All Blinds
+        show_header_toggle: false
+        entities:
+          - type: buttons
+            entities:
+              - entity: cover.shade_1
+                name: Open All
+                tap_action:
+                  action: call-service
+                  service: cover.set_cover_position
+                  data:
+                    position: 100
+                  target:
+                    entity_id:
+                      - cover.topdownbottomup_0001_combined
+                      - cover.shade_1
+                      - cover.shade_2
+                      - cover.shade_3
+              - entity: cover.shade_2
+                name: Half
+                tap_action:
+                  action: call-service
+                  service: cover.set_cover_position
+                  data:
+                    position: 50
+                  target:
+                    entity_id:
+                      - cover.topdownbottomup_0001_combined
+                      - cover.shade_1
+                      - cover.shade_2
+                      - cover.shade_3
+              - entity: cover.shade_3
+                name: Close All
+                tap_action:
+                  action: call-service
+                  service: cover.set_cover_position
+                  data:
+                    position: 0
+                  target:
+                    entity_id:
+                      - cover.topdownbottomup_0001_combined
+                      - cover.shade_1
+                      - cover.shade_2
+                      - cover.shade_3
+
       - type: light
         entity: light.bedroom
         name: Bedroom
@@ -39,36 +116,134 @@ views:
         entity: light.living_room
         name: Living Room
 
-      # Weather
-      - type: weather-forecast
-        entity: weather.home
-        forecast_type: daily
-
-      # Presence
       - type: entities
-        title: Presence
+        title: Status
         entities:
-          - entity: person.home_owner
-            name: Home Owner
-          - entity: group.household_presence
-            name: Household
+          - entity: person.brandon_barron
+            name: Brandon
+          - entity: lock.lockly_front_door
+            name: Front Door
+          - entity: media_player.bedroom
+            name: Bedroom Speaker
 
-      # 8sleep Pod
+  # ─────────────────────────────── BLINDS ──────────────────────────────
+  - title: Blinds
+    path: blinds
+    icon: mdi:blinds-horizontal
+    cards:
+      - type: entities
+        title: Automatic Control
+        entities:
+          - entity: input_boolean.blinds_auto_mode
+            name: Auto Mode (sun + weather)
+        footer:
+          type: graph
+          entity: sensor.sun_solar_elevation
+          hours_to_show: 24
+
+      - type: markdown
+        content: >
+          Auto mode: **30%** just after sunrise · **20%** bedroom when the sun
+          is high and skies are clear · **70%** when overcast · **closed** 15
+          min after sunset. Manual changes hold until the next sun event, and
+          auto mode re-arms itself at midnight.
+
+      - type: entities
+        title: Downstairs (PowerView)
+        entities:
+          - entity: cover.shade_1
+            name: Shade One
+          - entity: cover.shade_2
+            name: Shade Two
+          - entity: cover.shade_3
+            name: Shade Three
+
+      - type: entities
+        title: Bedroom (Motionblinds)
+        entities:
+          - entity: cover.topdownbottomup_0001_combined
+            name: Bedroom Blind
+          - entity: cover.topdownbottomup_0001_top
+            name: Top Rail
+          - entity: cover.topdownbottomup_0001_bottom
+            name: Bottom Rail
+
+  # ─────────────────────────────── CLIMATE ─────────────────────────────
+  - title: Climate
+    path: climate
+    icon: mdi:thermometer
+    cards:
       - type: thermostat
         entity: climate.brandon_s_eight_sleep_side_climate
-        name: Pod 3
+        name: 8sleep Pod
 
-      # Room AC (Midea)
       - type: thermostat
         entity: climate.bedroom_ac
-        name: Bedroom AC
+        name: Room AC
 
       - type: entities
-        title: AC Auto
+        title: Bedtime Cooling
         entities:
           - entity: input_boolean.ac_auto_enabled
-            name: Bedtime Cool
+            name: AC Auto
           - entity: input_number.ac_sleep_temp
             name: Sleep Temp
           - entity: input_number.ac_bedtime_hour
-            name: Bedtime Hour
+            name: Start Hour (24h)
+
+      - type: weather-forecast
+        entity: weather.forecast_home
+        forecast_type: daily
+
+  # ─────────────────────────────── SCHEDULE ────────────────────────────
+  - title: Schedule
+    path: schedule
+    icon: mdi:calendar-clock
+    cards:
+      - type: entities
+        title: Wake Alarm
+        entities:
+          - entity: input_boolean.wake_alarm_enabled
+            name: Enabled
+          - entity: input_datetime.wake_alarm
+            name: Wake Time
+
+      - type: markdown
+        content: >
+          **T-40** pod warms · **T-30 → T-10** bedroom sunrise ·
+          **T-0** blinds to 50%, whole house lights, Spotify ·
+          **T+10** blinds open, full daylight.
+
+      - type: entities
+        title: Weeknight Sleep (Sun–Thu)
+        entities:
+          - entity: input_boolean.weeknight_sleep_enabled
+            name: Enabled
+          - entity: input_datetime.weeknight_sleep_time
+            name: Start Time
+
+      - type: markdown
+        content: >
+          Runs Sleep Mode automatically on weeknights — skipped when nobody is
+          home. Any night, say **"Alexa, turn on Sleep Mode"** to run it early.
+
+      - type: entities
+        title: Presence Automation
+        entities:
+          - entity: input_boolean.lockly_hue_presence_automation_enabled
+            name: Lockly Lights
+          - entity: group.household_presence
+            name: Household
+          - entity: input_datetime.lockly_last_presence_run
+            name: Last Run
+
+      - type: history-graph
+        title: Recent Activity
+        hours_to_show: 24
+        entities:
+          - entity: cover.shade_1
+            name: Shade One
+          - entity: light.bedroom
+            name: Bedroom Light
+          - entity: person.brandon_barron
+            name: Brandon
