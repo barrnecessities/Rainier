@@ -11,13 +11,30 @@ emulated_hue:
   host_ip: 10.0.0.78
   listen_port: 80
   expose_by_default: false
+  # NOTE: with expose_by_default false, every entity needs an explicit
+  # hidden: false or it is NOT published to Alexa.
   entities:
     script.mode_all_off:
       name: "All Off"
+      hidden: false
     script.mode_away_night:
       name: "Away Night"
+      hidden: false
     script.mode_sleep:
       name: "Sleep Mode"
+      hidden: false
+    cover.shade_1:
+      name: "Shade One"
+      hidden: false
+    cover.shade_2:
+      name: "Shade Two"
+      hidden: false
+    cover.shade_3:
+      name: "Shade Three"
+      hidden: false
+    cover.topdownbottomup_0001_combined:
+      name: "Bedroom Blinds"
+      hidden: false
 
 lovelace:
   mode: yaml
