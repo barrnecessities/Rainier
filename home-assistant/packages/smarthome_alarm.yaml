@@ -6,7 +6,7 @@ input_datetime:
     name: Wake Alarm
     has_date: false
     has_time: true
-    initial: "06:30:00"
+    initial: "05:20:00"
     icon: mdi:alarm
 
 input_boolean:
