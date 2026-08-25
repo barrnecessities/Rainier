@@ -1,0 +1,78 @@
+# Sync Alexa alarms → the HA wake alarm.
+#
+# Requires the Alexa Media Player integration (HACS → "Alexa Media Player"),
+# which exposes a sensor.<echo>_next_alarm timestamp per Echo device.
+#
+# Why sync instead of trigger: the wake sequence begins 40 minutes BEFORE
+# the alarm (pod pre-warm, then the light sunrise), so HA has to know the
+# time ahead of time. Reading Alexa's alarm and copying it into
+# input_datetime.wake_alarm gives the whole sequence its lead time.
+#
+# Entity-name agnostic: scans every sensor ending in `_next_alarm` and takes
+# the soonest upcoming one, so it works whatever your Echoes are called.
+# Inert until Alexa Media Player is installed — no sensors, nothing happens.
+
+input_boolean:
+  alexa_alarm_sync_enabled:
+    name: Sync Alexa Alarm → Wake Alarm
+    icon: mdi:alarm-multiple
+    initial: true
+
+automation:
+  - alias: "Wake Alarm — Sync from Alexa"
+    id: wake_alarm_sync_from_alexa
+    mode: single
+    trigger:
+      # Poll rather than watch: trigger entity IDs can't be wildcarded, and
+      # the set of Echo sensors can change as devices come and go.
+      - platform: time_pattern
+        minutes: "/5"
+      - platform: homeassistant
+        event: start
+    condition:
+      - condition: state
+        entity_id: input_boolean.alexa_alarm_sync_enabled
+        state: "on"
+      # Only act when at least one Echo has a real upcoming alarm
+      - condition: template
+        value_template: >
+          {{ states.sensor
+             | selectattr('entity_id', 'search', '_next_alarm$')
+             | rejectattr('state', 'in', ['unknown', 'unavailable', 'none', ''])
+             | list | count > 0 }}
+    variables:
+      # Soonest upcoming alarm across all Echo devices
+      next_alarm: >
+        {{ states.sensor
+           | selectattr('entity_id', 'search', '_next_alarm$')
+           | rejectattr('state', 'in', ['unknown', 'unavailable', 'none', ''])
+           | map(attribute='state')
+           | select('search', '^[0-9]{4}-')
+           | sort | first | default('') }}
+    action:
+      - continue_on_error: true
+        choose:
+          - conditions:
+              - condition: template
+                value_template: >
+                  {{ next_alarm != ''
+                     and as_timestamp(next_alarm, default=0) > as_timestamp(now())
+                     and next_alarm[11:16] != states('input_datetime.wake_alarm')[0:5] }}
+            sequence:
+              - continue_on_error: true
+                service: input_datetime.set_datetime
+                target:
+                  entity_id: input_datetime.wake_alarm
+                data:
+                  time: "{{ next_alarm[11:16] }}:00"
+              # An alarm set in Alexa implies you want the sequence to run
+              - continue_on_error: true
+                service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.wake_alarm_enabled
+              - continue_on_error: true
+                service: logbook.log
+                data:
+                  name: Wake Alarm
+                  message: >
+                    Synced from Alexa — wake time set to {{ next_alarm[11:16] }}.
