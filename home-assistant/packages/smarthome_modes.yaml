@@ -18,23 +18,27 @@ script:
     sequence:
       - parallel:
           # Every light in the house
-          - service: light.turn_off
+          - continue_on_error: true
+            service: light.turn_off
             target:
               entity_id: all
           # Room AC off
-          - service: climate.set_hvac_mode
+          - continue_on_error: true
+            service: climate.set_hvac_mode
             target:
               entity_id: climate.bedroom_ac
             data:
               hvac_mode: "off"
           # 8sleep pod off
-          - service: climate.set_hvac_mode
+          - continue_on_error: true
+            service: climate.set_hvac_mode
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
               hvac_mode: "off"
           # Stop any music
-          - service: media_player.media_pause
+          - continue_on_error: true
+            service: media_player.media_pause
             target:
               entity_id: media_player.bedroom
 
@@ -47,24 +51,29 @@ script:
     mode: single
     sequence:
       - parallel:
-          - service: light.turn_off
+          - continue_on_error: true
+            service: light.turn_off
             target:
               entity_id: all
-          - service: climate.set_hvac_mode
+          - continue_on_error: true
+            service: climate.set_hvac_mode
             target:
               entity_id: climate.bedroom_ac
             data:
               hvac_mode: "off"
-          - service: climate.set_hvac_mode
+          - continue_on_error: true
+            service: climate.set_hvac_mode
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
               hvac_mode: "off"
-          - service: media_player.media_pause
+          - continue_on_error: true
+            service: media_player.media_pause
             target:
               entity_id: media_player.bedroom
           # Blinds down to privacy position (15%, matches away mode)
-          - service: cover.set_cover_position
+          - continue_on_error: true
+            service: cover.set_cover_position
             target:
               entity_id:
                 - cover.topdownbottomup_0001_combined
@@ -75,7 +84,8 @@ script:
               position: 15
       # Skip tomorrow's wake alarm; re-enable it manually or via the
       # "someone arrived home" automation below.
-      - service: input_boolean.turn_off
+      - continue_on_error: true
+        service: input_boolean.turn_off
         target:
           entity_id: input_boolean.wake_alarm_enabled
 
@@ -88,10 +98,12 @@ script:
     mode: restart
     sequence:
       # Bedroom to candlelight, rest of house off
-      - service: light.turn_off
+      - continue_on_error: true
+        service: light.turn_off
         target:
           entity_id: all
-      - service: light.turn_on
+      - continue_on_error: true
+        service: light.turn_on
         target:
           entity_id: light.bedroom
         data:
@@ -99,7 +111,8 @@ script:
           color_temp_kelvin: 2000
           transition: 10
       # Blinds fully closed for sleep
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
@@ -110,7 +123,8 @@ script:
           position: 0
       # Cool the room now (in addition to the fixed 9pm AC automation, so
       # a manual "Sleep Mode" always gets you a cool room even off-schedule)
-      - service: climate.set_temperature
+      - continue_on_error: true
+        service: climate.set_temperature
         target:
           entity_id: climate.bedroom_ac
         data:
@@ -119,7 +133,8 @@ script:
       # 30-minute wind-down, then bedroom lights out
       - delay:
           minutes: 30
-      - service: light.turn_off
+      - continue_on_error: true
+        service: light.turn_off
         target:
           entity_id: light.bedroom
         data:
@@ -139,10 +154,12 @@ automation:
         entity_id: input_boolean.wake_alarm_enabled
         state: "off"
     action:
-      - service: input_boolean.turn_on
+      - continue_on_error: true
+        service: input_boolean.turn_on
         target:
           entity_id: input_boolean.wake_alarm_enabled
-      - service: logbook.log
+      - continue_on_error: true
+        service: logbook.log
         data:
           name: Modes
           message: Wake alarm re-enabled after arriving home.

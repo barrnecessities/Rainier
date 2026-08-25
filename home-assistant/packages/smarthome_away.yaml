@@ -19,11 +19,13 @@ automation:
       - parallel:
           # Lights off (whole house — `entity_id: all`; `area_id: home` is
           # not a real area and silently does nothing)
-          - service: light.turn_off
+          - continue_on_error: true
+            service: light.turn_off
             target:
               entity_id: all
           # Blinds to privacy position (not fully dark)
-          - service: cover.set_cover_position
+          - continue_on_error: true
+            service: cover.set_cover_position
             target:
               entity_id:
                 - cover.topdownbottomup_0001_combined
@@ -33,7 +35,8 @@ automation:
             data:
               position: 15
           # 8sleep: standby (eco)
-          - service: climate.set_hvac_mode
+          - continue_on_error: true
+            service: climate.set_hvac_mode
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
@@ -53,7 +56,8 @@ automation:
           {{ trigger.from_state.state == 'not_home' }}
     action:
       # Entryway/living room lights on (matches lockly_hue_presence pattern)
-      - service: light.turn_on
+      - continue_on_error: true
+        service: light.turn_on
         target:
           entity_id: light.living_room
         data:
@@ -64,7 +68,8 @@ automation:
       - condition: sun
         after: sunrise
         before: sunset
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined

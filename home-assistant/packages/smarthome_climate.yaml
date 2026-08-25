@@ -52,7 +52,8 @@ automation:
           {{ now().hour == states('input_number.ac_bedtime_hour') | int
              and now().minute == 0 }}
     action:
-      - service: climate.set_temperature
+      - continue_on_error: true
+        service: climate.set_temperature
         target:
           entity_id: climate.bedroom_ac
         data:
@@ -76,7 +77,8 @@ automation:
         entity_id: input_boolean.ac_auto_enabled
         state: "on"
     action:
-      - service: climate.set_hvac_mode
+      - continue_on_error: true
+        service: climate.set_hvac_mode
         target:
           entity_id: climate.bedroom_ac
         data:
@@ -92,7 +94,8 @@ automation:
         for:
           minutes: 5
     action:
-      - service: climate.set_hvac_mode
+      - continue_on_error: true
+        service: climate.set_hvac_mode
         target:
           entity_id: climate.bedroom_ac
         data:

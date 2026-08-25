@@ -6,12 +6,14 @@ input_datetime:
     name: Wake Alarm
     has_date: false
     has_time: true
+    initial: "06:30:00"
     icon: mdi:alarm
 
 input_boolean:
   wake_alarm_enabled:
     name: Wake Alarm Enabled
     icon: mdi:alarm-check
+    initial: true
 
 automation:
   # T-40 min: 8sleep pod heat begins
@@ -28,7 +30,8 @@ automation:
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
-      - service: climate.set_temperature
+      - continue_on_error: true
+        service: climate.set_temperature
         target:
           entity_id: climate.brandon_s_eight_sleep_side_climate
         data:
@@ -49,14 +52,16 @@ automation:
         state: "on"
     action:
       - parallel:
-          - service: light.turn_on
+          - continue_on_error: true
+            service: light.turn_on
             target:
               entity_id: light.bedroom
             data:
               brightness_pct: 10
               color_temp_kelvin: 2200
               transition: 60
-          - service: climate.set_temperature
+          - continue_on_error: true
+            service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
@@ -77,14 +82,16 @@ automation:
         state: "on"
     action:
       - parallel:
-          - service: light.turn_on
+          - continue_on_error: true
+            service: light.turn_on
             target:
               entity_id: light.bedroom
             data:
               brightness_pct: 25
               color_temp_kelvin: 2700
               transition: 120
-          - service: climate.set_temperature
+          - continue_on_error: true
+            service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
@@ -105,14 +112,16 @@ automation:
         state: "on"
     action:
       - parallel:
-          - service: light.turn_on
+          - continue_on_error: true
+            service: light.turn_on
             target:
               entity_id: light.bedroom
             data:
               brightness_pct: 45
               color_temp_kelvin: 3200
               transition: 120
-          - service: climate.set_temperature
+          - continue_on_error: true
+            service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
@@ -132,7 +141,8 @@ automation:
         state: "on"
     action:
       - parallel:
-          - service: cover.set_cover_position
+          - continue_on_error: true
+            service: cover.set_cover_position
             target:
               entity_id:
                 - cover.topdownbottomup_0001_combined
@@ -143,7 +153,8 @@ automation:
               position: 50
           - sequence:
               # Whole house on at a moderate morning level first…
-              - service: light.turn_on
+              - continue_on_error: true
+                service: light.turn_on
                 target:
                   entity_id: all
                 data:
@@ -151,38 +162,44 @@ automation:
                   color_temp_kelvin: 3500
                   transition: 60
               # …then the bedroom continues its sunrise curve on top.
-              - service: light.turn_on
+              - continue_on_error: true
+                service: light.turn_on
                 target:
                   entity_id: light.bedroom
                 data:
                   brightness_pct: 65
                   color_temp_kelvin: 4000
                   transition: 180
-          - service: climate.set_temperature
+          - continue_on_error: true
+            service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:
               temperature: 80
           - sequence:
-              - service: media_player.volume_set
+              - continue_on_error: true
+                service: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
                 data:
                   volume_level: 0.2
-              - service: media_player.select_source
+              - continue_on_error: true
+                service: media_player.select_source
                 target:
                   entity_id: media_player.spotify_brandon_barron
                 data:
                   source: Bedroom
               - delay:
                   seconds: 2
-              - service: media_player.play_media
+              - continue_on_error: true
+                service: media_player.play_media
                 target:
                   entity_id: media_player.spotify_brandon_barron
                 data:
                   media_content_id: "spotify:playlist:2PscIFWQyXsQAdPZ0Y9GS2"
                   media_content_type: music
-              - service: media_player.media_shuffle_set
+              - continue_on_error: true
+                service: media_player.media_shuffle_set
                 target:
                   entity_id: media_player.spotify_brandon_barron
                 data:
@@ -203,7 +220,8 @@ automation:
         state: "on"
     action:
       - parallel:
-          - service: cover.set_cover_position
+          - continue_on_error: true
+            service: cover.set_cover_position
             target:
               entity_id:
                 - cover.topdownbottomup_0001_combined
@@ -212,14 +230,16 @@ automation:
                 - cover.shade_3
             data:
               position: 100
-          - service: light.turn_on
+          - continue_on_error: true
+            service: light.turn_on
             target:
               entity_id: all
             data:
               brightness_pct: 85
               color_temp_kelvin: 5000
               transition: 120
-          - service: climate.set_temperature
+          - continue_on_error: true
+            service: climate.set_temperature
             target:
               entity_id: climate.brandon_s_eight_sleep_side_climate
             data:

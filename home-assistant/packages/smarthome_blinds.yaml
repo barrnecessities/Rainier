@@ -12,6 +12,7 @@ input_boolean:
   blinds_auto_mode:
     name: Blinds Auto Mode
     icon: mdi:blinds-horizontal-closed
+    initial: true
 
 automation:
   # Sunrise: gentle open to 30%
@@ -26,7 +27,8 @@ automation:
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
     action:
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
@@ -54,7 +56,8 @@ automation:
           - sunny
           - partlycloudy
     action:
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id: cover.topdownbottomup_0001_combined  # sun-facing bedroom
         data:
@@ -79,7 +82,8 @@ automation:
         after: sunrise
         before: sunset
     action:
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
@@ -101,7 +105,8 @@ automation:
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
     action:
-      - service: cover.set_cover_position
+      - continue_on_error: true
+        service: cover.set_cover_position
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
@@ -118,6 +123,7 @@ automation:
       - platform: time
         at: "00:00:00"
     action:
-      - service: input_boolean.turn_on
+      - continue_on_error: true
+        service: input_boolean.turn_on
         target:
           entity_id: input_boolean.blinds_auto_mode
