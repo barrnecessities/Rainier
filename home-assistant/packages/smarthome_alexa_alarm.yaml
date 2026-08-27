@@ -16,7 +16,6 @@ input_boolean:
   alexa_alarm_sync_enabled:
     name: Sync Alexa Alarm → Wake Alarm
     icon: mdi:alarm-multiple
-    initial: true
 
 automation:
   - alias: "Wake Alarm — Sync from Alexa"
@@ -30,6 +29,9 @@ automation:
       - platform: homeassistant
         event: start
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.alexa_alarm_sync_enabled
         state: "on"

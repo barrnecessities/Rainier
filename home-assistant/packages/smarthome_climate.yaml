@@ -44,6 +44,9 @@ automation:
         minutes: "0"
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.ac_auto_enabled
         state: "on"
       # Fire only at the configured bedtime hour, on the hour
@@ -71,6 +74,9 @@ automation:
           {{ wake.strftime('%H:%M') == now().strftime('%H:%M') }}
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
       - condition: state
@@ -93,6 +99,10 @@ automation:
         to: "not_home"
         for:
           minutes: 5
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
     action:
       - continue_on_error: true
         service: climate.set_hvac_mode

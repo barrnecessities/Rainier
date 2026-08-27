@@ -1,0 +1,81 @@
+# Master control — one switch that gates every automation in the house.
+#
+# input_boolean.automations_enabled is checked as the FIRST condition of
+# every automation in these packages. Off = the house never acts on its
+# own; manual control (dashboard taps, Alexa commands, the mode scripts)
+# still works, because those are you acting, not the house.
+#
+# No `initial:` on purpose — initial re-applies on every restart and
+# silently overwrites UI changes. State persists across restarts; a
+# brand-new install starts with everything OFF, which is the safe default.
+#
+# input_boolean.pod_auto_enabled additionally gates every automated
+# 8sleep temperature change (wake pre-warm, sunrise steps, away eco).
+# Off = the pod runs its own program untouched.
+
+input_boolean:
+  automations_enabled:
+    name: Master Automations
+    icon: mdi:robot
+
+  pod_auto_enabled:
+    name: 8sleep Auto (wake warming)
+    icon: mdi:bed-clock
+
+# "All Lights" as a real entity, so the dashboard gets one tile with a
+# brightness slider that drives every light together.
+light:
+  - platform: group
+    name: All Lights
+    unique_id: hearth_all_lights
+    entities:
+      - light.bedroom
+      - light.living_room
+      - light.entryway
+
+# One-tap whole-house blind positions for the dashboard.
+script:
+  blinds_open_all:
+    alias: "Blinds · Open All"
+    icon: mdi:blinds-open
+    sequence:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
+        data:
+          position: 100
+
+  blinds_half_all:
+    alias: "Blinds · Half"
+    icon: mdi:blinds-horizontal
+    sequence:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
+        data:
+          position: 50
+
+  blinds_close_all:
+    alias: "Blinds · Close All"
+    icon: mdi:blinds-horizontal-closed
+    sequence:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
+        data:
+          position: 0

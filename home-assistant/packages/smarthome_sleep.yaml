@@ -9,14 +9,12 @@ input_boolean:
   weeknight_sleep_enabled:
     name: Weeknight Sleep Mode (Sun–Thu)
     icon: mdi:bed-clock
-    initial: true
 
 input_datetime:
   weeknight_sleep_time:
     name: Weeknight Sleep Time
     has_date: false
     has_time: true
-    initial: "21:30:00"
     icon: mdi:clock-time-ten-outline
 
 automation:
@@ -26,6 +24,9 @@ automation:
       - platform: time
         at: input_datetime.weeknight_sleep_time
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.weeknight_sleep_enabled
         state: "on"

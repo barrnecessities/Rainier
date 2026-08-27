@@ -151,6 +151,9 @@ automation:
         to: "home"
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "off"
     action:

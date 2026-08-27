@@ -6,14 +6,12 @@ input_datetime:
     name: Wake Alarm
     has_date: false
     has_time: true
-    initial: "05:20:00"
     icon: mdi:alarm
 
 input_boolean:
   wake_alarm_enabled:
     name: Wake Alarm Enabled
     icon: mdi:alarm-check
-    initial: true
 
 automation:
   # T-40 min: 8sleep pod heat begins
@@ -27,15 +25,23 @@ automation:
           {{ (wake - timedelta(minutes=40)).strftime('%H:%M') == now.strftime('%H:%M') }}
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
-      - continue_on_error: true
-        service: climate.set_temperature
-        target:
-          entity_id: climate.brandon_s_eight_sleep_side_climate
-        data:
-          temperature: 72
+      - if:
+          - condition: state
+            entity_id: input_boolean.pod_auto_enabled
+            state: "on"
+        then:
+          - continue_on_error: true
+            service: climate.set_temperature
+            target:
+              entity_id: climate.brandon_s_eight_sleep_side_climate
+            data:
+              temperature: 72
 
   # T-30 min: Sunrise begins — 10%, 2200K + pod 74°F
   - alias: "Wake Alarm — Hue sunrise start (T-30)"
@@ -47,6 +53,9 @@ automation:
           {% set now = now() %}
           {{ (wake - timedelta(minutes=30)).strftime('%H:%M') == now.strftime('%H:%M') }}
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
@@ -60,12 +69,17 @@ automation:
               brightness_pct: 10
               color_temp_kelvin: 2200
               transition: 60
-          - continue_on_error: true
-            service: climate.set_temperature
-            target:
-              entity_id: climate.brandon_s_eight_sleep_side_climate
-            data:
-              temperature: 74
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_temperature
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  temperature: 74
 
   # T-20 min: Sunrise step 2 — 25%, 2700K + pod 76°F
   - alias: "Wake Alarm — Hue sunrise step 2 (T-20)"
@@ -77,6 +91,9 @@ automation:
           {% set now = now() %}
           {{ (wake - timedelta(minutes=20)).strftime('%H:%M') == now.strftime('%H:%M') }}
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
@@ -90,12 +107,17 @@ automation:
               brightness_pct: 25
               color_temp_kelvin: 2700
               transition: 120
-          - continue_on_error: true
-            service: climate.set_temperature
-            target:
-              entity_id: climate.brandon_s_eight_sleep_side_climate
-            data:
-              temperature: 76
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_temperature
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  temperature: 76
 
   # T-10 min: Sunrise step 3 — 45%, 3200K + pod 78°F
   - alias: "Wake Alarm — Hue sunrise step 3 (T-10)"
@@ -107,6 +129,9 @@ automation:
           {% set now = now() %}
           {{ (wake - timedelta(minutes=10)).strftime('%H:%M') == now.strftime('%H:%M') }}
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
@@ -120,12 +145,17 @@ automation:
               brightness_pct: 45
               color_temp_kelvin: 3200
               transition: 120
-          - continue_on_error: true
-            service: climate.set_temperature
-            target:
-              entity_id: climate.brandon_s_eight_sleep_side_climate
-            data:
-              temperature: 78
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_temperature
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  temperature: 78
 
   # T-0: Wake time — blinds open 50%, lights 65%, pod 80°F, music starts
   - alias: "Wake Alarm — Wake time"
@@ -136,6 +166,9 @@ automation:
           {% set wake = today_at(states('input_datetime.wake_alarm')) %}
           {{ wake.strftime('%H:%M') == now().strftime('%H:%M') }}
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
@@ -170,12 +203,17 @@ automation:
                   brightness_pct: 65
                   color_temp_kelvin: 4000
                   transition: 180
-          - continue_on_error: true
-            service: climate.set_temperature
-            target:
-              entity_id: climate.brandon_s_eight_sleep_side_climate
-            data:
-              temperature: 80
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_temperature
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  temperature: 80
           - sequence:
               - continue_on_error: true
                 service: media_player.volume_set
@@ -216,6 +254,9 @@ automation:
           {{ (wake + timedelta(minutes=10)).strftime('%H:%M') == now.strftime('%H:%M') }}
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.wake_alarm_enabled
         state: "on"
     action:
@@ -238,9 +279,14 @@ automation:
               brightness_pct: 85
               color_temp_kelvin: 5000
               transition: 120
-          - continue_on_error: true
-            service: climate.set_temperature
-            target:
-              entity_id: climate.brandon_s_eight_sleep_side_climate
-            data:
-              temperature: 82
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_temperature
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  temperature: 82

@@ -12,7 +12,6 @@ input_boolean:
   blinds_auto_mode:
     name: Blinds Auto Mode
     icon: mdi:blinds-horizontal-closed
-    initial: true
 
 automation:
   # Sunrise: gentle open to 30%
@@ -23,6 +22,9 @@ automation:
         event: sunrise
         offset: "+00:05"
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
@@ -47,6 +49,9 @@ automation:
         attribute: elevation
         above: 30
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
@@ -76,6 +81,9 @@ automation:
           - cloudy
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
       - condition: sun
@@ -102,6 +110,9 @@ automation:
         offset: "+00:15"
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
     action:
@@ -122,6 +133,10 @@ automation:
     trigger:
       - platform: time
         at: "00:00:00"
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
     action:
       - continue_on_error: true
         service: input_boolean.turn_on
