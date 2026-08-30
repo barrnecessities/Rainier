@@ -185,11 +185,12 @@ automation:
             data:
               position: 50
           - sequence:
-              # Whole house on at a moderate morning level first…
+              # Whole house on at a moderate morning level first — the
+              # interior group, NOT `all`, so outside lights stay off…
               - continue_on_error: true
                 service: light.turn_on
                 target:
-                  entity_id: all
+                  entity_id: light.all_lights
                 data:
                   brightness_pct: 50
                   color_temp_kelvin: 3500
@@ -274,7 +275,7 @@ automation:
           - continue_on_error: true
             service: light.turn_on
             target:
-              entity_id: all
+              entity_id: light.all_lights
             data:
               brightness_pct: 85
               color_temp_kelvin: 5000

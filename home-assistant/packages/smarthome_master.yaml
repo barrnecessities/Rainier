@@ -22,8 +22,12 @@ input_boolean:
     name: 8sleep Auto (wake warming)
     icon: mdi:bed-clock
 
-# "All Lights" as a real entity, so the dashboard gets one tile with a
-# brightness slider that drives every light together.
+# "All Lights" as a real entity — INTERIOR Hue room groups only, so wake
+# and dashboard "on" actions never light the yard (light.outside stays out
+# on purpose; `entity_id: all` is still used for turn-OFF actions, where
+# hitting everything is exactly right).
+# TODO(verify): membership pending the light entity-ID dump — Hue room
+# group IDs assumed from room names.
 light:
   - platform: group
     name: All Lights
@@ -31,7 +35,7 @@ light:
     entities:
       - light.bedroom
       - light.living_room
-      - light.entryway
+      - light.kitchen
 
 # One-tap whole-house blind positions for the dashboard.
 script:

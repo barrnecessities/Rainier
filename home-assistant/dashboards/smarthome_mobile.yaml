@@ -30,6 +30,15 @@ views:
               action: toggle
             grid_options:
               columns: full
+          - type: tile
+            entity: input_boolean.travel_mode
+            name: Travel Mode
+            icon: mdi:airplane
+            color: purple
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
           - type: markdown
             content: >
               {% if is_state('input_boolean.automations_enabled', 'on') -%}
@@ -155,13 +164,6 @@ views:
           - type: tile
             entity: light.living_room
             name: Living Room
-            grid_options:
-              columns: full
-            features:
-              - type: light-brightness
-          - type: tile
-            entity: light.entryway
-            name: Entryway
             grid_options:
               columns: full
             features:

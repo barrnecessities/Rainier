@@ -1,0 +1,128 @@
+# Travel Mode — one switch for multi-day trips.
+#
+# Flip it on (dashboard, laptop, or HA app) and the house goes dormant:
+#   - Master Automations off  → no wake alarm, no weeknight sleep, no
+#     blinds schedule, no away logic, nothing runs on its own
+#   - 8sleep Auto + Bedtime Cooling off
+#   - Every light off, all four blinds fully closed, AC off, pod off
+#   - A guard automation keeps the pod OFF for the whole trip, even if
+#     the 8sleep's own native schedule tries to turn it back on
+#
+# Flip it off when you're back. Deliberately, nothing re-enables itself:
+# you choose when Master Automations comes back on (a notification
+# reminds you). The travel automations are NOT gated on the master
+# switch — flipping this toggle is a manual act and must always work.
+
+input_boolean:
+  travel_mode:
+    name: Travel Mode
+    icon: mdi:airplane
+
+automation:
+  - alias: "Travel — Departure shutdown"
+    id: travel_on_shutdown
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: input_boolean.travel_mode
+        to: "on"
+    action:
+      # Silence every schedule first
+      - continue_on_error: true
+        service: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.automations_enabled
+            - input_boolean.pod_auto_enabled
+            - input_boolean.ac_auto_enabled
+            - input_boolean.wake_alarm_enabled
+            - input_boolean.weeknight_sleep_enabled
+            - input_boolean.blinds_auto_mode
+      # Then shut the house down
+      - continue_on_error: true
+        service: light.turn_off
+        target:
+          entity_id: all
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.shade_1
+            - cover.shade_2
+            - cover.shade_3
+        data:
+          position: 0
+      - continue_on_error: true
+        service: climate.set_hvac_mode
+        target:
+          entity_id: climate.bedroom_ac
+        data:
+          hvac_mode: "off"
+      - continue_on_error: true
+        service: climate.set_hvac_mode
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          hvac_mode: "off"
+      - continue_on_error: true
+        service: media_player.media_pause
+        target:
+          entity_id: media_player.bedroom
+      - continue_on_error: true
+        service: logbook.log
+        data:
+          name: Travel Mode
+          message: House shut down for travel.
+
+  # The 8sleep runs its own native schedule and will try to turn itself
+  # back on at night. While Travel Mode is on, put it straight back off.
+  - alias: "Travel — Keep the pod off"
+    id: travel_pod_guard
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: climate.brandon_s_eight_sleep_side_climate
+        from: "off"
+    condition:
+      - condition: state
+        entity_id: input_boolean.travel_mode
+        state: "on"
+      # Ignore unavailable/unknown flaps — only act on a real turn-on
+      - condition: template
+        value_template: >
+          {{ trigger.to_state.state not in ['unavailable', 'unknown', 'off'] }}
+    action:
+      - continue_on_error: true
+        service: climate.set_hvac_mode
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          hvac_mode: "off"
+      - continue_on_error: true
+        service: logbook.log
+        data:
+          name: Travel Mode
+          message: 8sleep tried to turn on — switched back off.
+
+  - alias: "Travel — Welcome back"
+    id: travel_off_return
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: input_boolean.travel_mode
+        to: "off"
+    action:
+      - continue_on_error: true
+        service: persistent_notification.create
+        data:
+          title: Welcome home
+          message: >
+            Travel Mode is off. Nothing re-enabled itself — flip on
+            Master Automations (and any feature toggles you want) from
+            the Hearth dashboard when you're ready.
+      - continue_on_error: true
+        service: logbook.log
+        data:
+          name: Travel Mode
+          message: Travel mode ended; house left in manual mode.
