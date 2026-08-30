@@ -4,7 +4,7 @@
 #
 # Covers:
 #   cover.topdownbottomup_0001_combined — bedroom (Motionblinds bridge)
-#   cover.shade_1/2/3 — downstairs Duettes (PowerView Gen 3 gateway "Bop")
+#   cover.bedroom_shade_1/2/3 — downstairs Duettes (PowerView Gen 3 gateway "Bop")
 # Weather: weather.forecast_home (Met.no). No UV sensor on this system, so
 # glare protection keys off sun elevation + sunny sky instead of a UV index.
 
@@ -34,9 +34,9 @@ automation:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 30
 
@@ -95,9 +95,9 @@ automation:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 70
 
@@ -121,9 +121,9 @@ automation:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 0
 

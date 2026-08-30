@@ -47,9 +47,9 @@ script:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 100
 
@@ -62,9 +62,9 @@ script:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 50
 
@@ -77,8 +77,8 @@ script:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 0

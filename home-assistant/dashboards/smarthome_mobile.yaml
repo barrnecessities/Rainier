@@ -315,21 +315,21 @@ views:
             heading: Downstairs
             heading_style: title
           - type: tile
-            entity: cover.shade_1
+            entity: cover.bedroom_shade_1
             name: Shade One
             grid_options:
               columns: full
             features:
               - type: cover-position
           - type: tile
-            entity: cover.shade_2
+            entity: cover.bedroom_shade_2
             name: Shade Two
             grid_options:
               columns: full
             features:
               - type: cover-position
           - type: tile
-            entity: cover.shade_3
+            entity: cover.bedroom_shade_3
             name: Shade Three
             grid_options:
               columns: full
@@ -409,7 +409,7 @@ views:
             title: Last 24 hours
             hours_to_show: 24
             entities:
-              - entity: cover.shade_1
+              - entity: cover.bedroom_shade_1
                 name: Shade One
               - entity: light.bedroom
                 name: Bedroom Light

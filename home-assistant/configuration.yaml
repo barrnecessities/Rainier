@@ -23,13 +23,13 @@ emulated_hue:
     script.mode_sleep:
       name: "Sleep Mode"
       hidden: false
-    cover.shade_1:
+    cover.bedroom_shade_1:
       name: "Shade One"
       hidden: false
-    cover.shade_2:
+    cover.bedroom_shade_2:
       name: "Shade Two"
       hidden: false
-    cover.shade_3:
+    cover.bedroom_shade_3:
       name: "Shade Three"
       hidden: false
     cover.topdownbottomup_0001_combined:

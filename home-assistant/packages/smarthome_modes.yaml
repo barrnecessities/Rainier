@@ -77,9 +77,9 @@ script:
             target:
               entity_id:
                 - cover.topdownbottomup_0001_combined
-                - cover.shade_1
-                - cover.shade_2
-                - cover.shade_3
+                - cover.bedroom_shade_1
+                - cover.bedroom_shade_2
+                - cover.bedroom_shade_3
             data:
               position: 15
       # Skip tomorrow's wake alarm; re-enable it manually or via the
@@ -116,9 +116,9 @@ script:
         target:
           entity_id:
             - cover.topdownbottomup_0001_combined
-            - cover.shade_1
-            - cover.shade_2
-            - cover.shade_3
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
         data:
           position: 0
       # Cool the room now (in addition to the fixed 9pm AC automation, so
