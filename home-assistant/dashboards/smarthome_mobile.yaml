@@ -168,6 +168,48 @@ views:
               columns: full
             features:
               - type: light-brightness
+          - type: tile
+            entity: light.kitchen
+            name: Kitchen
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.jungle
+            name: Jungle
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.bathroom
+            name: Bathroom
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.hallway
+            name: Hallway
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.stairway
+            name: Stairway
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.outside
+            name: Outside
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
 
   # ─────────────────────────────── CLIMATE ─────────────────────────────
   - title: Climate
