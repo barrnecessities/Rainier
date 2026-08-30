@@ -368,6 +368,12 @@ views:
             entity: input_datetime.wake_alarm
             name: Wake Time
           - type: tile
+            entity: input_boolean.wake_weekdays_only
+            name: Weekdays Only
+            icon: mdi:calendar-week
+            tap_action:
+              action: toggle
+          - type: tile
             entity: input_boolean.alexa_alarm_sync_enabled
             name: Sync from Alexa
             icon: mdi:alarm-multiple
