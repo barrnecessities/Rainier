@@ -28,6 +28,11 @@ automation:
       - condition: state
         entity_id: input_boolean.blinds_auto_mode
         state: "on"
+      # Only a gentle open from CLOSED. If the wake alarm (or you) already
+      # opened the blinds wider, don't pull them back down to 30%.
+      - condition: template
+        value_template: >
+          {{ (state_attr('cover.bedroom_shade_1', 'current_position') | int(0)) < 40 }}
     action:
       - continue_on_error: true
         service: cover.set_cover_position
