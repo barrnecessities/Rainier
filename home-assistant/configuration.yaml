@@ -35,6 +35,9 @@ emulated_hue:
     cover.topdownbottomup_0001_combined:
       name: "Bedroom Blinds"
       hidden: false
+    input_boolean.travel_mode:
+      name: "Travel Mode"
+      hidden: false
 
 lovelace:
   mode: yaml

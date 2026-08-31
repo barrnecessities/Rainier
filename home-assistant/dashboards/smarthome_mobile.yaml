@@ -127,6 +127,15 @@ views:
             icon: mdi:blinds-horizontal-closed
             tap_action:
               action: toggle
+          - type: button
+            name: House Guide
+            icon: mdi:book-open-page-variant
+            show_state: false
+            tap_action:
+              action: url
+              url_path: https://claude.ai/code/artifact/73775775-a7ff-44bd-a78f-4272f7fe1ab7
+            grid_options:
+              columns: full
 
   # ─────────────────────────────── LIGHTS ──────────────────────────────
   - title: Lights
