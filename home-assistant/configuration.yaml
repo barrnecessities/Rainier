@@ -1,18 +1,23 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
 homeassistant:
   packages: !include_dir_named packages
 
-# Exposes selected scripts as fake Philips Hue devices so Alexa (or any
-# Hue-compatible voice assistant) can discover and run them with no cloud
-# subscription. In the Alexa app: Devices → + → Discover, on the same WiFi.
-# Say "Alexa, turn on <name>" to run a mode.
-# NOTE: listen_port MUST be 80 — newer Echo devices only discover emulated
-# Hue bridges on port 80.
+# Alexa bridge — publishes these as fake Hue devices on port 80.
+# After any change here: restart, then "Alexa, discover devices".
 emulated_hue:
   host_ip: 10.0.0.78
   listen_port: 80
   expose_by_default: false
-  # NOTE: with expose_by_default false, every entity needs an explicit
-  # hidden: false or it is NOT published to Alexa.
   entities:
     script.mode_all_off:
       name: "All Off"
@@ -40,7 +45,7 @@ emulated_hue:
       hidden: false
 
 lovelace:
-  mode: yaml
+  mode: storage
   dashboards:
     lockly-hue-mobile:
       mode: yaml
