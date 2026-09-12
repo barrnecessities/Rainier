@@ -1,0 +1,93 @@
+# The two master voice commands, on one Alexa device named "Everything":
+#
+#   "Alexa, turn everything on"  → progressive morning ramp: all interior
+#       lights fade in warm and dim, then step up to full daylight
+#       brightness over ~3 minutes. Lights only.
+#   "Alexa, turn everything off" → every light off, all four blinds
+#       closed. The going-to-bed move.
+#
+# Implemented as a template switch (so Alexa gets a real on/off device)
+# driving two scripts. The pod and AC are deliberately untouched by both —
+# these commands are lights + blinds, nothing else, always.
+
+switch:
+  - platform: template
+    switches:
+      everything:
+        friendly_name: Everything
+        value_template: "{{ is_state('light.all_lights', 'on') }}"
+        icon_template: mdi:home-lightbulb-outline
+        turn_on:
+          - service: script.turn_on
+            target:
+              entity_id: script.everything_on
+        turn_off:
+          - service: script.turn_on
+            target:
+              entity_id: script.everything_off
+
+script:
+  everything_on:
+    alias: "Everything On (morning ramp)"
+    icon: mdi:weather-sunset-up
+    mode: restart
+    sequence:
+      # Stage 1 — gentle: warm and dim, like first light
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.all_lights
+        data:
+          brightness_pct: 20
+          color_temp_kelvin: 2700
+          transition: 3
+      - delay:
+          seconds: 30
+      # Stage 2 — mid-morning
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.all_lights
+        data:
+          brightness_pct: 60
+          color_temp_kelvin: 3500
+          transition: 60
+      - delay:
+          seconds: 60
+      # Stage 3 — full daylight
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.all_lights
+        data:
+          brightness_pct: 100
+          color_temp_kelvin: 5000
+          transition: 90
+
+  everything_off:
+    alias: "Everything Off (bed)"
+    icon: mdi:power-sleep
+    mode: single
+    sequence:
+      # Stop a morning ramp if one is mid-run, so it can't relight the house
+      - continue_on_error: true
+        service: script.turn_off
+        target:
+          entity_id: script.everything_on
+      - parallel:
+          - continue_on_error: true
+            service: light.turn_off
+            target:
+              entity_id: all
+            data:
+              transition: 2
+          - continue_on_error: true
+            service: cover.set_cover_position
+            target:
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.bedroom_shade_1
+                - cover.bedroom_shade_2
+                - cover.bedroom_shade_3
+            data:
+              position: 0

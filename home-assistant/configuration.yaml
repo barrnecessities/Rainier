@@ -14,31 +14,18 @@ homeassistant:
 
 # Alexa bridge — publishes these as fake Hue devices on port 80.
 # After any change here: restart, then "Alexa, discover devices".
+#
+# Deliberately minimal: ONE device named "Everything" carries both master
+# commands ("Alexa, turn everything on/off"), plus Travel Mode for trips.
+# Rooms and individual lights are voiced through the native Hue skill;
+# scenes/shades are dashboard-only, so voice stays simple and consistent.
 emulated_hue:
   host_ip: 10.0.0.78
   listen_port: 80
   expose_by_default: false
   entities:
-    script.mode_all_off:
-      name: "All Off"
-      hidden: false
-    script.mode_away_night:
-      name: "Away Night"
-      hidden: false
-    script.mode_sleep:
-      name: "Sleep Mode"
-      hidden: false
-    cover.bedroom_shade_1:
-      name: "Shade One"
-      hidden: false
-    cover.bedroom_shade_2:
-      name: "Shade Two"
-      hidden: false
-    cover.bedroom_shade_3:
-      name: "Shade Three"
-      hidden: false
-    cover.topdownbottomup_0001_combined:
-      name: "Bedroom Blinds"
+    switch.everything:
+      name: "Everything"
       hidden: false
     input_boolean.travel_mode:
       name: "Travel Mode"

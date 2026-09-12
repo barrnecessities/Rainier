@@ -83,6 +83,20 @@ views:
             heading_style: title
             icon: mdi:gesture-tap
           - type: tile
+            entity: script.everything_on
+            name: Everything On
+            icon: mdi:weather-sunset-up
+            color: orange
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.everything_off
+            name: Everything Off
+            icon: mdi:power-sleep
+            color: blue-grey
+            tap_action:
+              action: toggle
+          - type: tile
             entity: script.mode_sleep
             name: Sleep
             icon: mdi:weather-night
