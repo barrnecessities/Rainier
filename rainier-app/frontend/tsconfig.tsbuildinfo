@@ -1,1 +1,0 @@
-{"root":["./src/main.tsx","./src/app/routes.tsx","./src/features/auth/loginpage.tsx","./src/features/dashboard/dashboardpage.tsx","./src/features/mountain/mountainprogress.tsx","./src/features/plan/weeklyplanchecklist.tsx","./src/lib/api.ts"],"version":"5.9.3"}

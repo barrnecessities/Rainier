@@ -1,8 +1,38 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
 homeassistant:
   packages: !include_dir_named packages
 
+# Alexa bridge — publishes these as fake Hue devices on port 80.
+# After any change here: restart, then "Alexa, discover devices".
+#
+# Deliberately minimal: ONE device named "Everything" carries both master
+# commands ("Alexa, turn everything on/off"), plus Travel Mode for trips.
+# Rooms and individual lights are voiced through the native Hue skill;
+# scenes/shades are dashboard-only, so voice stays simple and consistent.
+emulated_hue:
+  host_ip: 10.0.0.78
+  listen_port: 80
+  expose_by_default: false
+  entities:
+    switch.everything:
+      name: "Everything"
+      hidden: false
+    input_boolean.travel_mode:
+      name: "Travel Mode"
+      hidden: false
+
 lovelace:
-  mode: yaml
+  mode: storage
   dashboards:
     lockly-hue-mobile:
       mode: yaml
@@ -10,3 +40,9 @@ lovelace:
       icon: mdi:home-lightbulb
       show_in_sidebar: true
       filename: dashboards/lockly_hue_mobile.yaml
+    smarthome-mobile:
+      mode: yaml
+      title: Smart Home
+      icon: mdi:home-automation
+      show_in_sidebar: true
+      filename: dashboards/smarthome_mobile.yaml
