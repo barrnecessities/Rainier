@@ -43,7 +43,7 @@ script:
           transition: 3
       - delay:
           seconds: 30
-      # Stage 2 — mid-morning
+      # Stage 2 — mid-morning: lights up, blinds to half
       - continue_on_error: true
         service: light.turn_on
         target:
@@ -52,9 +52,19 @@ script:
           brightness_pct: 60
           color_temp_kelvin: 3500
           transition: 60
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 50
       - delay:
           seconds: 60
-      # Stage 3 — full daylight
+      # Stage 3 — full daylight: lights at 100%, blinds fully open
       - continue_on_error: true
         service: light.turn_on
         target:
@@ -63,6 +73,16 @@ script:
           brightness_pct: 100
           color_temp_kelvin: 5000
           transition: 90
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 100
 
   bedtime:
     alias: "Bedtime (dim + blinds down)"
