@@ -64,6 +64,32 @@ script:
           color_temp_kelvin: 5000
           transition: 90
 
+  bedtime:
+    alias: "Bedtime (dim + blinds down)"
+    icon: mdi:weather-night
+    mode: restart
+    sequence:
+      # Wind-down stage: every interior light to a low warm glow…
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.all_lights
+        data:
+          brightness_pct: 20
+          color_temp_kelvin: 2200
+          transition: 10
+      # …and all blinds down for the night
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 0
+
   everything_off:
     alias: "Everything Off (bed)"
     icon: mdi:power-sleep
@@ -74,20 +100,25 @@ script:
         service: script.turn_off
         target:
           entity_id: script.everything_on
-      - parallel:
-          - continue_on_error: true
-            service: light.turn_off
-            target:
-              entity_id: all
-            data:
-              transition: 2
-          - continue_on_error: true
-            service: cover.set_cover_position
-            target:
-              entity_id:
-                - cover.topdownbottomup_0001_combined
-                - cover.bedroom_shade_1
-                - cover.bedroom_shade_2
-                - cover.bedroom_shade_3
-            data:
-              position: 0
+      # Blinds FIRST, and always re-commanded to closed — this is the
+      # "double-check": position 0 is idempotent, so any blind that missed
+      # an earlier close (or was reopened) gets the order again.
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 0
+      - delay:
+          seconds: 2
+      # Then lights out, last.
+      - continue_on_error: true
+        service: light.turn_off
+        target:
+          entity_id: all
+        data:
+          transition: 2
