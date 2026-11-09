@@ -1,0 +1,180 @@
+# Voice-callable "mode" scripts. Each script here is exposed to Alexa via
+# emulated_hue (see configuration.yaml) as a fake Hue device — say
+# "Alexa, turn on <name>" to run it. No Nabu Casa Cloud subscription needed.
+# For nicer phrases ("Alexa, good night"), wrap each in an Alexa Routine.
+#
+# To add another mode: copy a script block, give it a new id + alias, then
+# add it to the `entities:` list under `emulated_hue:` in configuration.yaml.
+#
+# NOTE: `entity_id: all` is the correct whole-house target for lights.
+# (`area_id: home` is NOT a real area and silently does nothing.)
+
+script:
+  # "Alexa, turn on All Off" — quick kill switch for everything.
+  mode_all_off:
+    alias: "All Off"
+    icon: mdi:power
+    mode: single
+    sequence:
+      - parallel:
+          # Every light in the house
+          - continue_on_error: true
+            service: light.turn_off
+            target:
+              entity_id: all
+          # Room AC off
+          - continue_on_error: true
+            service: climate.set_hvac_mode
+            target:
+              entity_id: climate.bedroom_ac
+            data:
+              hvac_mode: "off"
+          # 8sleep pod off — ONLY when 8sleep Auto permits HA to touch
+          # the bed. With 8sleep Auto off, the pod runs its own program
+          # untouched, even through All Off / Away Night.
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  hvac_mode: "off"
+          # Stop any music
+          - continue_on_error: true
+            service: media_player.media_pause
+            target:
+              entity_id: media_player.bedroom
+
+  # "Alexa, turn on Away Night" — for nights not sleeping at home.
+  # All Off + blinds to privacy + wake alarm skipped so the house doesn't
+  # run the full sunrise show for nobody.
+  mode_away_night:
+    alias: "Away Night"
+    icon: mdi:bag-suitcase
+    mode: single
+    sequence:
+      - parallel:
+          - continue_on_error: true
+            service: light.turn_off
+            target:
+              entity_id: all
+          - continue_on_error: true
+            service: climate.set_hvac_mode
+            target:
+              entity_id: climate.bedroom_ac
+            data:
+              hvac_mode: "off"
+          - if:
+              - condition: state
+                entity_id: input_boolean.pod_auto_enabled
+                state: "on"
+            then:
+              - continue_on_error: true
+                service: climate.set_hvac_mode
+                target:
+                  entity_id: climate.brandon_s_eight_sleep_side_climate
+                data:
+                  hvac_mode: "off"
+          - continue_on_error: true
+            service: media_player.media_pause
+            target:
+              entity_id: media_player.bedroom
+          # Blinds down to privacy position (15%, matches away mode)
+          - continue_on_error: true
+            service: cover.set_cover_position
+            target:
+              entity_id:
+                - cover.topdownbottomup_0001_combined
+                - cover.bedroom_shade_1
+                - cover.bedroom_shade_2
+                - cover.bedroom_shade_3
+            data:
+              position: 15
+      # Skip tomorrow's wake alarm; re-enable it manually or via the
+      # "someone arrived home" automation below.
+      - continue_on_error: true
+        service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.wake_alarm_enabled
+
+  # "Alexa, turn on Sleep Mode" — manual trigger of the nightly wind-down.
+  # Also fired automatically Sun–Thu by the weeknight automation
+  # (see smarthome_sleep.yaml).
+  mode_sleep:
+    alias: "Sleep Mode"
+    icon: mdi:weather-night
+    mode: restart
+    sequence:
+      # Bedroom to candlelight, rest of house off
+      - continue_on_error: true
+        service: light.turn_off
+        target:
+          entity_id: all
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.bedroom
+        data:
+          brightness_pct: 15
+          color_temp_kelvin: 2000
+          transition: 10
+      # Blinds fully closed for sleep
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 0
+      # Cool the room now (in addition to the fixed 9pm AC automation, so
+      # a manual "Sleep Mode" always gets you a cool room even off-schedule)
+      - continue_on_error: true
+        service: climate.set_temperature
+        target:
+          entity_id: climate.bedroom_ac
+        data:
+          temperature: "{{ states('input_number.ac_sleep_temp') | int }}"
+          hvac_mode: cool
+      # 30-minute wind-down, then bedroom lights out
+      - delay:
+          minutes: 30
+      - continue_on_error: true
+        service: light.turn_off
+        target:
+          entity_id: light.bedroom
+        data:
+          transition: 30
+
+# Re-enable the wake alarm when someone comes home after an Away Night,
+# so a skipped alarm never stays skipped by accident.
+automation:
+  - alias: "Modes — Re-enable wake alarm on arrival"
+    id: modes_rearm_wake_alarm
+    trigger:
+      - platform: state
+        entity_id: group.household_presence
+        to: "home"
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.wake_alarm_enabled
+        state: "off"
+    action:
+      - continue_on_error: true
+        service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.wake_alarm_enabled
+      - continue_on_error: true
+        service: logbook.log
+        data:
+          name: Modes
+          message: Wake alarm re-enabled after arriving home.

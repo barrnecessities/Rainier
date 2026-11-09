@@ -23,6 +23,9 @@ automation:
           seconds: 45
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.lockly_hue_presence_automation_enabled
         state: "on"
     action:
@@ -53,6 +56,9 @@ automation:
           seconds: 45
     condition:
       - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
         entity_id: input_boolean.lockly_hue_presence_automation_enabled
         state: "on"
     action:
@@ -79,9 +85,13 @@ automation:
       - platform: time_pattern
         hours: "/1"
     condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
       - condition: template
         value_template: >-
-          {{ (as_timestamp(now()) - as_timestamp(states.lock.lockly_front_door.last_changed, default=0)) > 21600 }}
+          {{ states.lock.lockly_front_door is not none
+             and (as_timestamp(now()) - as_timestamp(states.lock.lockly_front_door.last_changed, default=0)) > 21600 }}
     action:
       - service: persistent_notification.create
         data:

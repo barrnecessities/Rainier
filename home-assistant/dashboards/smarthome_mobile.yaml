@@ -1,0 +1,446 @@
+# Hearth — sections/tile dashboard, designed to live full-screen on an iPad.
+#
+# Control hierarchy:
+#   Master Automations (input_boolean.automations_enabled) gates EVERY
+#   automation. Off = the house never acts on its own; taps here and Alexa
+#   commands still work. Feature toggles sit under it; 8sleep Auto
+#   additionally gates automated pod temperature changes.
+
+title: Hearth
+views:
+  # ─────────────────────────────── HOME ───────────────────────────────
+  - title: Home
+    path: home
+    icon: mdi:home-variant
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Automations
+            heading_style: title
+            icon: mdi:robot
+          - type: tile
+            entity: input_boolean.automations_enabled
+            name: Master Automations
+            icon: mdi:robot
+            color: green
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+          - type: tile
+            entity: input_boolean.travel_mode
+            name: Travel Mode
+            icon: mdi:airplane
+            color: purple
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+          - type: markdown
+            content: >
+              {% if is_state('input_boolean.automations_enabled', 'on') -%}
+              **The house is running itself** — wake alarm, sleep schedule,
+              blinds, and climate follow their toggles below.
+              {%- else -%}
+              **Manual mode** — the house takes no action on its own.
+              Everything here and Alexa still respond to you. The 8sleep
+              runs its native program.
+              {%- endif %}
+            grid_options:
+              columns: full
+          - type: tile
+            entity: input_boolean.wake_alarm_enabled
+            name: Wake Alarm
+            icon: mdi:alarm
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_boolean.weeknight_sleep_enabled
+            name: Weeknight Sleep
+            icon: mdi:bed-clock
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_boolean.blinds_auto_mode
+            name: Blinds Auto
+            icon: mdi:blinds-horizontal
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_boolean.pod_auto_enabled
+            name: 8sleep Auto
+            icon: mdi:bed
+            tap_action:
+              action: toggle
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: Scenes
+            heading_style: title
+            icon: mdi:gesture-tap
+          - type: tile
+            entity: script.everything_on
+            name: Everything On
+            icon: mdi:weather-sunset-up
+            color: orange
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.everything_off
+            name: Everything Off
+            icon: mdi:power-sleep
+            color: blue-grey
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.mode_sleep
+            name: Sleep
+            icon: mdi:weather-night
+            color: indigo
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.mode_all_off
+            name: All Off
+            icon: mdi:power
+            color: red
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.mode_away_night
+            name: Away Night
+            icon: mdi:bag-suitcase
+            color: amber
+            tap_action:
+              action: toggle
+          - type: heading
+            heading: Quick control
+            heading_style: subtitle
+          - type: tile
+            entity: light.all_lights
+            name: All Lights
+            icon: mdi:lightbulb-group
+            color: yellow
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: script.blinds_open_all
+            name: Blinds Up
+            icon: mdi:blinds-open
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.blinds_close_all
+            name: Blinds Down
+            icon: mdi:blinds-horizontal-closed
+            tap_action:
+              action: toggle
+          - type: button
+            name: House Guide
+            icon: mdi:book-open-page-variant
+            show_state: false
+            tap_action:
+              action: url
+              url_path: https://claude.ai/code/artifact/73775775-a7ff-44bd-a78f-4272f7fe1ab7
+            grid_options:
+              columns: full
+
+  # ─────────────────────────────── LIGHTS ──────────────────────────────
+  - title: Lights
+    path: lights
+    icon: mdi:lightbulb-outline
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Whole house
+            heading_style: title
+            icon: mdi:lightbulb-group
+          - type: tile
+            entity: light.all_lights
+            name: All Lights
+            color: yellow
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+      - type: grid
+        cards:
+          - type: heading
+            heading: Rooms
+            heading_style: title
+          - type: tile
+            entity: light.bedroom
+            name: Bedroom
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.living_room
+            name: Living Room
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.kitchen
+            name: Kitchen
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.jungle
+            name: Jungle
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.bathroom
+            name: Bathroom
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.hallway
+            name: Hallway
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.stairway
+            name: Stairway
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: light.outside
+            name: Outside
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+
+  # ─────────────────────────────── CLIMATE ─────────────────────────────
+  - title: Climate
+    path: climate
+    icon: mdi:thermometer
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Bed
+            heading_style: title
+            icon: mdi:bed
+          - type: thermostat
+            entity: climate.brandon_s_eight_sleep_side_climate
+            name: 8sleep Pod
+          - type: tile
+            entity: input_boolean.pod_auto_enabled
+            name: 8sleep Auto (wake warming)
+            icon: mdi:bed-clock
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+      - type: grid
+        cards:
+          - type: heading
+            heading: Room air
+            heading_style: title
+            icon: mdi:air-conditioner
+          - type: thermostat
+            entity: climate.bedroom_ac
+            name: Room AC
+          - type: tile
+            entity: input_boolean.ac_auto_enabled
+            name: Bedtime Cooling
+            icon: mdi:snowflake-clock
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+          - type: entities
+            title: Cooling settings
+            entities:
+              - entity: input_number.ac_sleep_temp
+                name: Sleep Temp
+              - entity: input_number.ac_bedtime_hour
+                name: Start Hour (24h)
+          - type: weather-forecast
+            entity: weather.forecast_home
+            forecast_type: daily
+
+  # ─────────────────────────────── BLINDS ──────────────────────────────
+  - title: Blinds
+    path: blinds
+    icon: mdi:blinds-horizontal
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Everything at once
+            heading_style: title
+            icon: mdi:blinds-horizontal
+          - type: tile
+            entity: script.blinds_open_all
+            name: Open
+            icon: mdi:blinds-open
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.blinds_half_all
+            name: Half
+            icon: mdi:blinds-horizontal
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: script.blinds_close_all
+            name: Close
+            icon: mdi:blinds-horizontal-closed
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_boolean.blinds_auto_mode
+            name: Auto (sun + weather)
+            icon: mdi:sun-clock
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+          - type: markdown
+            content: >
+              Auto mode: **30%** after sunrise · bedroom to **20%** in
+              direct midday sun · **70%** when overcast · **closed** after
+              sunset. Re-arms itself at midnight.
+            grid_options:
+              columns: full
+      - type: grid
+        cards:
+          - type: heading
+            heading: Downstairs
+            heading_style: title
+          - type: tile
+            entity: cover.bedroom_shade_1
+            name: Shade One
+            grid_options:
+              columns: full
+            features:
+              - type: cover-position
+          - type: tile
+            entity: cover.bedroom_shade_2
+            name: Shade Two
+            grid_options:
+              columns: full
+            features:
+              - type: cover-position
+          - type: tile
+            entity: cover.bedroom_shade_3
+            name: Shade Three
+            grid_options:
+              columns: full
+            features:
+              - type: cover-position
+          - type: heading
+            heading: Bedroom
+            heading_style: subtitle
+          - type: tile
+            entity: cover.topdownbottomup_0001_combined
+            name: Bedroom Blind
+            grid_options:
+              columns: full
+            features:
+              - type: cover-position
+
+  # ─────────────────────────────── SCHEDULE ────────────────────────────
+  - title: Schedule
+    path: schedule
+    icon: mdi:calendar-clock
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Wake
+            heading_style: title
+            icon: mdi:alarm
+          - type: tile
+            entity: input_boolean.wake_alarm_enabled
+            name: Wake Alarm
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_datetime.wake_alarm
+            name: Wake Time
+          - type: tile
+            entity: input_boolean.wake_weekdays_only
+            name: Weekdays Only
+            icon: mdi:calendar-week
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_boolean.alexa_alarm_sync_enabled
+            name: Sync from Alexa
+            icon: mdi:alarm-multiple
+            tap_action:
+              action: toggle
+            grid_options:
+              columns: full
+          - type: markdown
+            content: >
+              **T-40** pod warms *(needs 8sleep Auto on)* · **T-30 → T-10**
+              bedroom sunrise · **T-0** blinds 50%, house lights, Spotify ·
+              **T+10** everything full.
+            grid_options:
+              columns: full
+      - type: grid
+        cards:
+          - type: heading
+            heading: Night
+            heading_style: title
+            icon: mdi:weather-night
+          - type: tile
+            entity: input_boolean.weeknight_sleep_enabled
+            name: Weeknight Sleep (Sun–Thu)
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: input_datetime.weeknight_sleep_time
+            name: Start Time
+          - type: heading
+            heading: Presence
+            heading_style: subtitle
+          - type: tile
+            entity: person.brandon_barron
+            name: Brandon
+          - type: tile
+            entity: group.household_presence
+            name: Household
+          - type: history-graph
+            title: Last 24 hours
+            hours_to_show: 24
+            entities:
+              - entity: cover.bedroom_shade_1
+                name: Shade One
+              - entity: light.bedroom
+                name: Bedroom Light
+              - entity: person.brandon_barron
+                name: Brandon

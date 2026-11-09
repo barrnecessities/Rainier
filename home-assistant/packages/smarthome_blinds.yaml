@@ -1,0 +1,149 @@
+# Sun + weather blind automation
+# Runs automatically unless the user overrides from the app.
+# Override is cleared when the next sun event fires.
+#
+# Covers:
+#   cover.topdownbottomup_0001_combined — bedroom (Motionblinds bridge)
+#   cover.bedroom_shade_1/2/3 — downstairs Duettes (PowerView Gen 3 gateway "Bop")
+# Weather: weather.forecast_home (Met.no). No UV sensor on this system, so
+# glare protection keys off sun elevation + sunny sky instead of a UV index.
+
+input_boolean:
+  blinds_auto_mode:
+    name: Blinds Auto Mode
+    icon: mdi:blinds-horizontal-closed
+
+automation:
+  # Sunrise: gentle open to 30%
+  - alias: "Blinds — Sunrise open"
+    id: blinds_sunrise_open
+    trigger:
+      - platform: sun
+        event: sunrise
+        offset: "+00:05"
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.blinds_auto_mode
+        state: "on"
+      # Only a gentle open from CLOSED. If the wake alarm (or you) already
+      # opened the blinds wider, don't pull them back down to 30%.
+      - condition: template
+        value_template: >
+          {{ (state_attr('cover.bedroom_shade_1', 'current_position') | int(0)) < 40 }}
+    action:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 30
+
+  # Sunny midday: close the sun-facing bedroom blind to cut glare/heat
+  - alias: "Blinds — Sun glare protection"
+    id: blinds_uv_protection
+    trigger:
+      - platform: numeric_state
+        entity_id: sun.sun
+        attribute: elevation
+        above: 30
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.blinds_auto_mode
+        state: "on"
+      - condition: state
+        entity_id: weather.forecast_home
+        state:
+          - sunny
+          - partlycloudy
+    action:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id: cover.topdownbottomup_0001_combined  # sun-facing bedroom
+        data:
+          position: 20
+
+  # Overcast or rain: open wider for natural light
+  - alias: "Blinds — Overcast open wider"
+    id: blinds_overcast
+    trigger:
+      - platform: state
+        entity_id: weather.forecast_home
+        to:
+          - overcast
+          - rainy
+          - pouring
+          - cloudy
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.blinds_auto_mode
+        state: "on"
+      - condition: sun
+        after: sunrise
+        before: sunset
+    action:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 70
+
+  # Sunset: close all
+  - alias: "Blinds — Sunset close"
+    id: blinds_sunset_close
+    trigger:
+      - platform: sun
+        event: sunset
+        offset: "+00:15"
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.blinds_auto_mode
+        state: "on"
+    action:
+      - continue_on_error: true
+        service: cover.set_cover_position
+        target:
+          entity_id:
+            - cover.topdownbottomup_0001_combined
+            - cover.bedroom_shade_1
+            - cover.bedroom_shade_2
+            - cover.bedroom_shade_3
+        data:
+          position: 0
+
+  # Re-enable auto mode at midnight (resets any manual override)
+  - alias: "Blinds — Reset auto mode at midnight"
+    id: blinds_reset_auto
+    trigger:
+      - platform: time
+        at: "00:00:00"
+    condition:
+      - condition: state
+        entity_id: input_boolean.automations_enabled
+        state: "on"
+    action:
+      - continue_on_error: true
+        service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.blinds_auto_mode
