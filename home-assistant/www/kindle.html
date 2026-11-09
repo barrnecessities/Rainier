@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth</title>
+<style>
+  /* E-ink rules: pure black on pure white, no grays that dither, no
+     animation, huge tap targets, zero JavaScript required. */
+  body { background:#fff; color:#000; margin:0; padding:16px;
+         font-family: Georgia, serif; }
+  h1 { font-size:28px; margin:4px 0 14px; border-bottom:3px solid #000;
+       padding-bottom:8px; }
+  h2 { font-size:20px; margin:18px 0 8px; }
+  form { display:inline; }
+  button {
+    font-family: Georgia, serif; font-size:24px; font-weight:bold;
+    color:#000; background:#fff; border:3px solid #000; border-radius:10px;
+    padding:22px 10px; margin:6px 4px; width:46%; min-height:80px;
+  }
+  button.wide { width:94%; }
+  button:active { background:#000; color:#fff; }
+  .note { font-size:15px; color:#000; margin-top:16px;
+          border-top:1px solid #000; padding-top:8px; }
+  iframe { width:1px; height:1px; border:0; visibility:hidden; }
+</style>
+</head>
+<body>
+<h1>Hearth</h1>
+
+<h2>House</h2>
+<form action="/api/webhook/hearth-evon-af0ce1e1" method="post" target="sink"><button class="wide">&#9728; Everything On</button></form>
+<form action="/api/webhook/hearth-bedtime-663400e7" method="post" target="sink"><button class="wide">&#9790; Bedtime (dim + blinds)</button></form>
+<form action="/api/webhook/hearth-evoff-4636acb7" method="post" target="sink"><button class="wide">&#9679; Everything Off</button></form>
+
+<h2>Lights</h2>
+<form action="/api/webhook/hearth-lights-on-dbb8af81" method="post" target="sink"><button>All On</button></form>
+<form action="/api/webhook/hearth-lights-off-d30dd9df" method="post" target="sink"><button>All Off</button></form>
+<form action="/api/webhook/hearth-bed-light-a099d747" method="post" target="sink"><button>Bedroom</button></form>
+<form action="/api/webhook/hearth-living-light-acc8dcd9" method="post" target="sink"><button>Living Room</button></form>
+
+<h2>Blinds</h2>
+<form action="/api/webhook/hearth-blinds-up-38ceca15" method="post" target="sink"><button>&#9650; Up</button></form>
+<form action="/api/webhook/hearth-blinds-down-6b8231eb" method="post" target="sink"><button>&#9660; Down</button></form>
+
+<h2>Bed (8sleep)</h2>
+<form action="/api/webhook/hearth-pod-warm-c3440b84" method="post" target="sink"><button>Warmer +2&deg;</button></form>
+<form action="/api/webhook/hearth-pod-cool-5e0dd400" method="post" target="sink"><button>Cooler &minus;2&deg;</button></form>
+<form action="/api/webhook/hearth-pod-off-532eed3f" method="post" target="sink"><button class="wide">Bed Off</button></form>
+
+<!-- TODO(mysa): thermostat Heat Up / Heat Down buttons go here once the
+     Mysa is paired and its webhooks exist in smarthome_kindle.yaml. -->
+
+<p class="note">Buttons act instantly; the page stays put. Local network
+only. Bed buttons nudge the pod &plusmn;2&deg; &mdash; its own program keeps
+running otherwise.</p>
+
+<iframe name="sink" title="sink"></iframe>
+</body>
+</html>

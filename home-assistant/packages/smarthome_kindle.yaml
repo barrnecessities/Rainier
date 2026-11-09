@@ -1,0 +1,204 @@
+# Kindle Scribe remote — webhook-triggered controls.
+#
+# The Scribe's browser can't run the HA frontend or its login, so
+# /config/www/kindle.html (served at /local/kindle.html) posts to these
+# webhooks instead. Each is a MANUAL user action — a button press on a
+# physical remote — so these are deliberately NOT gated behind
+# input_boolean.automations_enabled, same as dashboard taps and Alexa.
+#
+# Security: webhook IDs are random and unguessable, and every trigger is
+# local_only — nothing outside your LAN can reach them.
+
+automation:
+  - alias: "Kindle — Everything On"
+    id: kindle_everything_on
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-evon-af0ce1e1
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: script.turn_on
+        target:
+          entity_id: script.everything_on
+
+  - alias: "Kindle — Bedtime"
+    id: kindle_bedtime
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-bedtime-663400e7
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: script.turn_on
+        target:
+          entity_id: script.bedtime
+
+  - alias: "Kindle — Everything Off"
+    id: kindle_everything_off
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-evoff-4636acb7
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: script.turn_on
+        target:
+          entity_id: script.everything_off
+
+  - alias: "Kindle — Lights On"
+    id: kindle_lights_on
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-lights-on-dbb8af81
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: light.turn_on
+        target:
+          entity_id: light.all_lights
+        data:
+          brightness_pct: 80
+          color_temp_kelvin: 4000
+
+  - alias: "Kindle — Lights Off"
+    id: kindle_lights_off
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-lights-off-d30dd9df
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: light.turn_off
+        target:
+          entity_id: all
+
+  - alias: "Kindle — Bedroom light toggle"
+    id: kindle_bed_light
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-bed-light-a099d747
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: light.toggle
+        target:
+          entity_id: light.bedroom
+        data:
+          brightness_pct: 60
+          color_temp_kelvin: 3000
+
+  - alias: "Kindle — Living room light toggle"
+    id: kindle_living_light
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-living-light-acc8dcd9
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: light.toggle
+        target:
+          entity_id: light.living_room
+        data:
+          brightness_pct: 60
+          color_temp_kelvin: 3000
+
+  - alias: "Kindle — Blinds up"
+    id: kindle_blinds_up
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-blinds-up-38ceca15
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: script.turn_on
+        target:
+          entity_id: script.blinds_open_all
+
+  - alias: "Kindle — Blinds down"
+    id: kindle_blinds_down
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-blinds-down-6b8231eb
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: script.turn_on
+        target:
+          entity_id: script.blinds_close_all
+
+  # Pod buttons are manual acts, allowed like any dashboard tap. They nudge
+  # the current target by 2°F within the pod's sane range.
+  - alias: "Kindle — Pod warmer"
+    id: kindle_pod_warm
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-pod-warm-c3440b84
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: climate.set_temperature
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          temperature: >
+            {{ [ (state_attr('climate.brandon_s_eight_sleep_side_climate',
+                  'temperature') | float(75)) + 2, 110 ] | min }}
+
+  - alias: "Kindle — Pod cooler"
+    id: kindle_pod_cool
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-pod-cool-5e0dd400
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: climate.set_temperature
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          temperature: >
+            {{ [ (state_attr('climate.brandon_s_eight_sleep_side_climate',
+                  'temperature') | float(75)) - 2, 55 ] | max }}
+
+  - alias: "Kindle — Pod off"
+    id: kindle_pod_off
+    mode: single
+    trigger:
+      - platform: webhook
+        webhook_id: hearth-pod-off-532eed3f
+        allowed_methods: [GET, POST]
+        local_only: true
+    action:
+      - continue_on_error: true
+        service: climate.set_hvac_mode
+        target:
+          entity_id: climate.brandon_s_eight_sleep_side_climate
+        data:
+          hvac_mode: "off"
+
+  # TODO(mysa): once the Mysa thermostat is paired via HomeKit and its
+  # climate.* entity id is known, add Heat Up / Heat Down webhooks here and
+  # un-comment the matching buttons in www/kindle.html.
