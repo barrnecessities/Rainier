@@ -21,7 +21,7 @@ function googleNewsRss(query) {
 export const allFeeds = [
   ...sources.feeds
     .filter((f) => f.enabled !== false)
-    .map((f) => ({ name: f.name, url: f.url, kind: "feed" })),
+    .map((f) => ({ name: f.name, url: f.url, kind: "feed", lookbackHours: f.lookbackHours })),
   ...sources.topics
     .filter((t) => t.enabled !== false)
     .map((t) => ({ name: t.name, url: googleNewsRss(t.query), kind: "topic" })),
@@ -64,7 +64,12 @@ export const env = {
   relatedPerBookmark: Number(val("RELATED_PER_BOOKMARK") || 3),
 
   // Tuning knobs.
+  // Candidate pool sent to Claude for ranking.
   maxArticles: Number(val("MAX_ARTICLES") || 60),
+  // Cap per source so one noisy Google News query can't flood the pool.
+  maxPerSource: Number(val("MAX_PER_SOURCE") || 4),
+  // How many articles Claude may keep for the brief (and the Kindle chapters).
+  maxSelected: Number(val("MAX_SELECTED") || 12),
   lookbackHours: Number(process.env.LOOKBACK_HOURS || 28),
   extractConcurrency: Number(process.env.EXTRACT_CONCURRENCY || 5),
   timezone: process.env.BRIEF_TZ || "America/New_York",

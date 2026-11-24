@@ -1,25 +1,47 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "./config.js";
 
-const SYSTEM = `You are the editor of a daily executive brief on AGENTIC MARKETING and AI-in-marketing.
-Audience: a marketing-technology strategist tracking Accenture Song, Deloitte Digital, Adobe, Salesforce
-(Agentforce/Marketing Cloud), Braze, Writer, Jasper, and the frontier AI labs (Anthropic/Claude,
-OpenAI/Codex/GPT, Google/Gemini) as they relate to marketing.
+const SYSTEM = `You are the editor of a short, highly selective daily brief on AGENTIC AI and AI-in-marketing.
+Audience: a marketing-technology strategist and hands-on Claude power user. They track Accenture Song,
+Deloitte Digital, Adobe, Salesforce (Agentforce/Marketing Cloud), Braze, Writer, Jasper and the frontier
+AI labs (Anthropic/Claude, OpenAI, Google/Gemini), and they want to get better at using Claude and
+AI agents in their own work.
 
-You will receive a numbered list of today's articles (title, source, preview text).
-Your job:
-1. Drop items that are off-topic, pure SEO spam, or near-duplicates.
-2. Cluster the rest into 3-7 themed sections (e.g. "Salesforce / Agentforce", "Frontier labs", "Agencies").
-3. For each section write a 1-2 sentence "why it matters" and 2-5 tight bullets, each citing the item number(s).
+You will receive a numbered list of candidate articles (title, source, preview or full text).
+Items marked [preview only] could not be fetched in full.
+
+Be ruthless. Most candidates should NOT make the cut. Keep at most {{MAX_SELECTED}} items, and fewer on a slow day.
+
+KEEP items that are substantive:
+- Practical how-tos, workflows, tips and techniques for Claude, Claude Code, skills, MCP or AI agents
+  (the reader should be able to try something today).
+- Real agent deployments with specifics: who, what, results, lessons.
+- Meaningful launches or strategy moves by the companies above, with concrete detail.
+- Original analysis or reporting that changes how a strategist should think.
+
+DROP:
+- Press releases, partner/award announcements, funding rounds and stock or IPO market chatter
+  (unless it materially changes strategy).
+- Listicles, SEO content, "X ways AI will change marketing" think pieces, vague trend posts.
+- Thin rewrites of another outlet's story, near-duplicates (keep the best version), and
+  [preview only] items unless the story is clearly major.
+- Off-topic items.
+
+Then:
+1. Rank the kept items, best first, in "keep".
+2. Cluster ONLY the kept items into 2-6 themed sections. When any kept item is a practical how-to,
+   include a section titled "Using Claude & agents" that says in each bullet what to try.
+3. For each section write a 1-2 sentence "why it matters" and 1-4 tight bullets, each citing item number(s).
 4. For each section, add "po_take": EXACTLY ONE sentence of so-what analysis from this persona:
-   you are the product owner of Deloitte's agentic-marketing platform — Deloitte's answer to
-   Accenture Song. What should this news make you think, worry about, or do? Be specific and
-   opinionated (competitive threat, partnership angle, roadmap implication, positioning gap) —
+   you are the product owner of Deloitte's agentic-marketing platform (Deloitte's answer to
+   Accenture Song). What should this news make you think, worry about, or do? Be specific and
+   opinionated (competitive threat, partnership angle, roadmap implication, positioning gap),
    never generic filler like "worth watching".
 5. Pick the single most important story of the day, and give it a "po_take" too.
 
 Return ONLY valid JSON (no markdown fences) matching:
 {
+  "keep": [<item numbers, best first>],
   "headline_story": { "item": <number>, "one_liner": "<=160 chars", "po_take": "one sentence" },
   "sections": [
     { "title": "string", "why_it_matters": "string", "po_take": "one sentence",
@@ -54,14 +76,21 @@ export async function summarize(items) {
   }
 
   const list = items
-    .map((it, i) => `[${i + 1}] (${it.source}) ${it.title}\n${(it.text || it.snippet || "").slice(0, 700)}`)
+    .map(
+      (it, i) =>
+        `[${i + 1}] (${it.source})${it.extracted === false ? " [preview only]" : ""} ${it.title}\n${(
+          it.text ||
+          it.snippet ||
+          ""
+        ).slice(0, 700)}`
+    )
     .join("\n\n");
 
   try {
     const msg = await client().messages.create({
       model: env.model,
       max_tokens: 4000,
-      system: SYSTEM,
+      system: SYSTEM.replace("{{MAX_SELECTED}}", String(env.maxSelected)),
       messages: [{ role: "user", content: `Today's articles:\n\n${list}` }],
     });
     return parseJson(textOf(msg), "AI summary") || null;
@@ -69,6 +98,40 @@ export async function summarize(items) {
     console.warn(`  ! news summary failed (${e.message}); shipping raw list`);
     return null;
   }
+}
+
+// Narrow the article list to what Claude kept, in its ranked order, and
+// renumber every reference in the summary to match. Items a section cites but
+// "keep" forgot are appended so no bullet loses its link. Without a summary
+// (no API key / failure) the list is just capped so the Kindle stays short.
+export function applySelection(summary, items, max = env.maxSelected) {
+  if (!summary) return { summary, items: items.slice(0, max) };
+  const valid = (n) => Number.isInteger(n) && n >= 1 && n <= items.length;
+  const cited = [
+    summary.headline_story?.item,
+    ...(summary.sections || []).flatMap((s) => (s.bullets || []).flatMap((b) => b.items || [])),
+  ];
+  const order = [];
+  for (const n of [...(summary.keep || []), ...cited]) {
+    if (valid(n) && !order.includes(n)) order.push(n);
+  }
+  const kept = order.slice(0, Math.max(max, 1));
+  const remap = new Map(kept.map((oldN, i) => [oldN, i + 1]));
+  const re = (nums) => (nums || []).map((n) => remap.get(n)).filter(Boolean);
+
+  const sections = (summary.sections || [])
+    .map((sec) => ({
+      ...sec,
+      bullets: (sec.bullets || []).map((b) => ({ ...b, items: re(b.items) })).filter((b) => b.items.length),
+    }))
+    .filter((sec) => sec.bullets.length);
+  const hs = summary.headline_story;
+  const headline_story = hs && remap.has(hs.item) ? { ...hs, item: remap.get(hs.item) } : null;
+
+  return {
+    summary: { ...summary, keep: kept.map((n) => remap.get(n)), headline_story, sections },
+    items: kept.map((n) => items[n - 1]),
+  };
 }
 
 const BOOKMARK_SYSTEM = `You transform a saved tweet or bookmarked article into a calm, distraction-free read for a Kindle.

@@ -6,7 +6,7 @@ import pLimit from "p-limit";
 import { env } from "./config.js";
 import { ingest } from "./ingest.js";
 import { extractAll } from "./extract.js";
-import { summarize, summarizeBookmark } from "./summarize.js";
+import { summarize, summarizeBookmark, applySelection } from "./summarize.js";
 import { fetchBookmarks, archiveBookmarks } from "./readwise.js";
 import { findRelated } from "./related.js";
 import { buildEmailHtml, buildEpubChapters, fullDocsHtml, bookmarkChapterHtml, briefDate } from "./render.js";
@@ -94,18 +94,21 @@ async function main() {
   const raw = await ingest();
 
   console.log("2/6 Extracting full ad-free text…");
-  const items = raw.length ? await extractAll(raw) : [];
+  const candidates = raw.length ? await extractAll(raw) : [];
 
   console.log("3/6 Reading your X bookmarks (Readwise)…");
   const bookmarks = await processBookmarks();
 
-  if (!items.length && !bookmarks.length) {
+  if (!candidates.length && !bookmarks.length) {
     console.log("No fresh stories or bookmarks today. Nothing to send.");
     return;
   }
 
   console.log("4/6 Summarizing news with Claude…");
-  const summary = items.length ? await summarize(items) : null;
+  const rawSummary = candidates.length ? await summarize(candidates) : null;
+  // Only the articles Claude kept go into the email and onto the Kindle.
+  const { summary, items } = applySelection(rawSummary, candidates);
+  console.log(`  selected ${items.length}/${candidates.length} articles`);
 
   console.log("5/6 Rendering EPUB + email…");
   const chapters = buildEpubChapters({ summary, items, dateStr, bookmarks });
