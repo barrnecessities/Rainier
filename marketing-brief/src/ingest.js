@@ -31,21 +31,24 @@ function withinLookback(item, sinceMs) {
 
 // Pull every feed, normalize items, drop stale ones, dedupe by URL then title.
 export async function ingest() {
-  const sinceMs = Date.now() - env.lookbackHours * 3600 * 1000;
+  const now = Date.now();
   const settled = await Promise.allSettled(
     allFeeds.map(async (f) => {
       const feed = await parser.parseURL(f.url);
-      return (feed.items || []).map((it) => ({
-        title: (it.title || "").trim(),
-        url: normalizeUrl(it.link),
-        source: f.name,
-        kind: f.kind,
-        publishedAt: it.isoDate || it.pubDate || null,
-        snippet: (it.contentSnippet || it.content || it.summary || "")
-          .replace(/\s+/g, " ")
-          .trim()
-          .slice(0, 600),
-      }));
+      const sinceMs = now - (f.lookbackHours || env.lookbackHours) * 3600 * 1000;
+      return (feed.items || [])
+        .filter((it) => withinLookback(it, sinceMs))
+        .map((it) => ({
+          title: (it.title || "").trim(),
+          url: normalizeUrl(it.link),
+          source: f.name,
+          kind: f.kind,
+          publishedAt: it.isoDate || it.pubDate || null,
+          snippet: (it.contentSnippet || it.content || it.summary || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 600),
+        }));
     })
   );
 
@@ -56,7 +59,7 @@ export async function ingest() {
     else console.warn(`  ! feed failed: ${allFeeds[i].name} (${r.reason?.message || r.reason})`);
   }
 
-  const fresh = items.filter((it) => it.url && it.title && withinLookback(it, sinceMs));
+  const fresh = items.filter((it) => it.url && it.title);
 
   const seenUrl = new Set();
   const seenTitle = new Set();
@@ -73,17 +76,26 @@ export async function ingest() {
   const byDate = (a, b) => (Date.parse(b.publishedAt || 0) || 0) - (Date.parse(a.publishedAt || 0) || 0);
   deduped.sort(byDate);
 
+  // Keep at most N items per source (freshest first) so a chatty feed or a
+  // broad Google News query can't crowd out the rest of the pool.
+  const perSource = new Map();
+  const balanced = deduped.filter((it) => {
+    const n = (perSource.get(it.source) || 0) + 1;
+    perSource.set(it.source, n);
+    return n <= env.maxPerSource;
+  });
+
   // Curated "feed" items are direct publisher links that extract to clean full
   // text; "topic" items are Google News redirects that usually don't. Keep the
   // curated ones first so full-text extraction isn't crowded out, then fill the
   // rest with the freshest topic items.
-  const feedItems = deduped.filter((it) => it.kind === "feed");
-  const topicItems = deduped.filter((it) => it.kind !== "feed");
+  const feedItems = balanced.filter((it) => it.kind === "feed");
+  const topicItems = balanced.filter((it) => it.kind !== "feed");
   const capped = [...feedItems, ...topicItems].slice(0, env.maxArticles);
   capped.sort(byDate);
 
   console.log(
-    `  ingested ${items.length} raw -> ${fresh.length} fresh -> ${deduped.length} unique -> ${capped.length} kept (${
+    `  ingested ${items.length} fresh -> ${deduped.length} unique -> ${balanced.length} after per-source cap -> ${capped.length} kept (${
       feedItems.length
     } curated)`
   );

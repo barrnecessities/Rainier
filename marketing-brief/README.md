@@ -16,7 +16,9 @@ Every section of the news brief includes a **"PO lens"** — one sentence of so-
 
 There is also a **bookmarks-only digest** (`node src/index.js --bookmarks-dump`): a weekly Sunday cron sends everything you saved in the last 7 days as its own Kindle EPUB, and running the workflow manually with scope `all` does a one-off full send of your entire Reader library (`.github/workflows/weekly-bookmarks.yml`).
 
-Topics tracked out of the box: Accenture Song, Deloitte Digital, Adobe (agentic), Salesforce Agentforce / Marketing Cloud, SIP, Braze, Writer, Jasper, Anthropic/Claude, OpenAI/Codex/GPT, Google/Gemini, and "agentic marketing" generally. Edit [`config/sources.json`](config/sources.json) to change them — no code changes needed.
+Topics tracked out of the box: Accenture Song, Deloitte Digital, Adobe (agentic), Salesforce Agentforce / Marketing Cloud, Braze, Writer, Jasper, Anthropic/Claude, OpenAI/Codex/GPT, Google/Gemini, "agentic marketing" generally, agentic AI in the enterprise, MCP / agent tooling, and practical Claude how-tos (Anthropic News + Engineering, Simon Willison, Latent Space, One Useful Thing, Ben's Bites, top Hacker News threads).
+
+The brief is deliberately selective: up to 60 candidates go to Claude, which keeps only the best `MAX_SELECTED` (default 12), drops press releases, funding/IPO chatter, listicles and duplicates, and puts practical how-tos under a "Using Claude & agents" section. Only kept articles become Kindle chapters. Edit [`config/sources.json`](config/sources.json) to change them — no code changes needed.
 
 ---
 
@@ -119,4 +121,4 @@ The custom pipeline here exists because none of those do the **Claude clustering
 - **Editorial (full text via RSS):** MarTech.org, Salesforce Ben, Marketing AI Institute, Adobe Blog.
 - **Company/topic tracking (Google News queries):** the rest, defined in `config/sources.json`. Tune a query by editing its `query` string; mute one with `"enabled": false`.
 - **Vendor primary sources** worth adding if you want first-party announcements: Salesforce Newsroom, Adobe Newsroom, Anthropic News, OpenAI Blog, Google "The Keyword", Braze/Writer/Jasper blogs. (Some lack RSS; the Google News queries already capture their news coverage.)
-- **⚠️ `SIP`:** you said this is a Salesforce/Adobe product — please confirm the exact product name so I can target the query precisely (right now it's a broad `Salesforce OR Adobe "SIP"` search, which may be noisy).
+- **Agentic AI + Claude how-tos (RSS):** Anthropic News and Engineering (official posts via a community RSS mirror, since anthropic.com has no feed), Simon Willison's Claude tag, Latent Space / AINews, One Useful Thing, Ben's Bites, and Hacker News Claude/Anthropic threads with 150+ points.

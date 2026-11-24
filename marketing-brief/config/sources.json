@@ -1,12 +1,19 @@
 {
-  "_comment": "Two kinds of sources. 'feeds' are curated editorial RSS feeds (full or near-full text). 'topics' are turned into Google News RSS search queries automatically so you don't have to hand-create Google Alerts. Edit freely. Set 'enabled' false to mute a source without deleting it.",
+  "_comment": "Two kinds of sources. 'feeds' are curated editorial RSS feeds (full or near-full text). 'topics' are turned into Google News RSS search queries automatically so you don't have to hand-create Google Alerts. Edit freely. Set 'enabled' false to mute a source without deleting it. Optional 'lookbackHours' on a feed widens its freshness window (for blogs that post date-only timestamps or publish weekly).",
 
   "feeds": [
     { "name": "MarTech", "url": "https://martech.org/feed/", "enabled": true },
     { "name": "Salesforce Ben", "url": "https://www.salesforceben.com/feed/", "enabled": true },
     { "name": "Marketing AI Institute", "url": "https://www.marketingaiinstitute.com/blog/rss.xml", "enabled": true },
     { "name": "Adobe News", "url": "https://news.google.com/rss/search?q=Adobe+(marketing+OR+GenStudio+OR+Firefly+OR+%22Experience+Platform%22)+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": true },
-    { "name": "Anthropic News", "url": "https://news.google.com/rss/search?q=Anthropic+Claude+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": true },
+    { "name": "Anthropic News (Google News search, replaced by the official feed below)", "url": "https://news.google.com/rss/search?q=Anthropic+Claude+when:2d&hl=en-US&gl=US&ceid=US:en", "enabled": false },
+    { "name": "Anthropic News (official, via community RSS mirror)", "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml", "enabled": true, "lookbackHours": 48 },
+    { "name": "Anthropic Engineering (official, via community RSS mirror)", "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_engineering.xml", "enabled": true, "lookbackHours": 48 },
+    { "name": "Simon Willison - Claude", "url": "https://simonwillison.net/tags/claude.atom", "enabled": true },
+    { "name": "Latent Space / AINews", "url": "https://www.latent.space/feed", "enabled": true },
+    { "name": "One Useful Thing (Ethan Mollick)", "url": "https://www.oneusefulthing.org/feed", "enabled": true, "lookbackHours": 48 },
+    { "name": "Ben's Bites", "url": "https://www.bensbites.com/feed", "enabled": true, "lookbackHours": 48 },
+    { "name": "Hacker News - Claude/Anthropic (150+ points)", "url": "https://hnrss.org/newest?q=Claude+OR+Anthropic&points=150", "enabled": true },
     { "name": "Economist - Business (headlines only, paywalled full text)", "url": "https://www.economist.com/business/rss.xml", "enabled": true },
     { "name": "Economist - The World This Week (headlines only)", "url": "https://www.economist.com/the-world-this-week/rss.xml", "enabled": true }
   ],
@@ -14,7 +21,6 @@
   "topics": [
     { "name": "Accenture Song", "query": "\"Accenture Song\" marketing OR AI OR agentic", "enabled": true },
     { "name": "Deloitte Digital", "query": "\"Deloitte Digital\" marketing OR AI OR agentic", "enabled": true },
-    { "name": "SIP (Salesforce/Adobe product - CONFIRM exact name)", "query": "Salesforce OR Adobe \"SIP\" marketing", "enabled": true },
     { "name": "Adobe (agentic marketing)", "query": "Adobe (Agent Orchestrator OR \"Experience Platform\" OR Firefly OR GenStudio) marketing agentic", "enabled": true },
     { "name": "Salesforce Agentforce Marketing", "query": "Salesforce (Agentforce OR \"Marketing Cloud\") agent", "enabled": true },
     { "name": "Braze", "query": "Braze (AI OR agent OR \"Project Catalyst\") marketing", "enabled": true },
@@ -23,6 +29,9 @@
     { "name": "Anthropic / Claude (marketing)", "query": "Anthropic OR Claude marketing OR advertising OR agent", "enabled": true },
     { "name": "OpenAI Codex / GPT (marketing)", "query": "OpenAI (Codex OR GPT) marketing OR agent OR advertising", "enabled": true },
     { "name": "Google Gemini (marketing)", "query": "Google Gemini marketing OR advertising OR agent", "enabled": true },
-    { "name": "Agentic marketing (general)", "query": "\"agentic marketing\" OR \"AI agents\" martech", "enabled": true }
+    { "name": "Agentic marketing (general)", "query": "\"agentic marketing\" OR \"AI agents\" martech", "enabled": true },
+    { "name": "Claude how-tos & workflows", "query": "Claude (\"how to\" OR tutorial OR workflow OR tips OR \"Claude Code\" OR \"Claude Skills\")", "enabled": true },
+    { "name": "Agentic AI in the enterprise", "query": "(\"AI agents\" OR \"agentic AI\") (enterprise OR deployment OR production OR \"case study\")", "enabled": true },
+    { "name": "MCP / agent tooling", "query": "\"Model Context Protocol\" OR \"MCP server\" OR \"agent SDK\"", "enabled": true }
   ]
 }
